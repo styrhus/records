@@ -6,8 +6,8 @@
 # on the runner host's daemon.
 #
 # Required repo Actions secrets (Settings → Actions → Secrets):
-#   FORGEJO_REGISTRY_TOKEN   git.euh.no token for tb4, scope write:package
-#   CODEBERG_REGISTRY_TOKEN  codeberg.org token for tb4, scope write:package
+#   REGISTRY_TOKEN_FORGEJO   git.euh.no token for tb4, scope write:package
+#   REGISTRY_TOKEN_CODEBERG  codeberg.org token for tb4, scope write:package
 name: Build and push hugo-runner
 
 on:
@@ -45,14 +45,14 @@ jobs:
 
       - name: Push to ${{ env.FORGEJO_REGISTRY }}
         run: |
-          echo "${{ secrets.FORGEJO_REGISTRY_TOKEN }}" \
+          echo "${{ secrets.REGISTRY_TOKEN_FORGEJO }}" \
             | docker login "${FORGEJO_REGISTRY}" -u "${REGISTRY_USER}" --password-stdin
           docker push "${FORGEJO_REGISTRY}/${IMAGE_NAME}:${HUGO_VERSION}"
           docker push "${FORGEJO_REGISTRY}/${IMAGE_NAME}:latest"
 
       - name: Push to ${{ env.CODEBERG_REGISTRY }}
         run: |
-          echo "${{ secrets.CODEBERG_REGISTRY_TOKEN }}" \
+          echo "${{ secrets.REGISTRY_TOKEN_CODEBERG }}" \
             | docker login "${CODEBERG_REGISTRY}" -u "${REGISTRY_USER}" --password-stdin
           docker push "${CODEBERG_REGISTRY}/${IMAGE_NAME}:${HUGO_VERSION}"
           docker push "${CODEBERG_REGISTRY}/${IMAGE_NAME}:latest"

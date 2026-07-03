@@ -34,8 +34,8 @@ the runner only permits because `container.valid_volumes` whitelists
 the git.euh.no runner only — never enable this on the Codeberg runners).
 
 [`build.sh`](build.sh) is the manual fallback: same build/tag/push sequence
-on any docker host, tokens supplied via `FORGEJO_REGISTRY_TOKEN` /
-`CODEBERG_REGISTRY_TOKEN` env vars.
+on any docker host, tokens supplied via `REGISTRY_TOKEN_FORGEJO` /
+`REGISTRY_TOKEN_CODEBERG` env vars.
 
 ## One-time setup
 
@@ -54,7 +54,7 @@ on any docker host, tokens supplied via `FORGEJO_REGISTRY_TOKEN` /
    ```
 
 4. On the new repo: Settings → Actions → Secrets → add
-   `FORGEJO_REGISTRY_TOKEN` and `CODEBERG_REGISTRY_TOKEN` with the tokens
+   `REGISTRY_TOKEN_FORGEJO` and `REGISTRY_TOKEN_CODEBERG` with the tokens
    from steps 1–2.
 5. Re-run the workflow (it will have failed on the first push without the
    secrets): Actions → Build and push hugo-runner → Re-run, or push again.

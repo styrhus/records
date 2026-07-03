@@ -3,7 +3,7 @@
 # runnable on any host with docker (bootstrap, or when CI is down).
 #
 # Usage:
-#   FORGEJO_REGISTRY_TOKEN=... CODEBERG_REGISTRY_TOKEN=... ./build.sh
+#   REGISTRY_TOKEN_FORGEJO=... REGISTRY_TOKEN_CODEBERG=... ./build.sh
 #
 # Tokens need scope write:package for user tb4 on the respective forge.
 # Omit a token to skip pushing to that registry (build + tag still happen).
@@ -36,5 +36,5 @@ push_to() {
   docker logout "$registry"
 }
 
-push_to "$FORGEJO_REGISTRY" "${FORGEJO_REGISTRY_TOKEN:-}"
-push_to "$CODEBERG_REGISTRY" "${CODEBERG_REGISTRY_TOKEN:-}"
+push_to "$FORGEJO_REGISTRY" "${REGISTRY_TOKEN_FORGEJO:-}"
+push_to "$CODEBERG_REGISTRY" "${REGISTRY_TOKEN_CODEBERG:-}"
