@@ -1,0 +1,64 @@
+# Build hugo-runner and push it to both registries.
+#
+# Runs on the local runner (runs-on: docker). The job container mounts the
+# host docker socket — allowed by container.valid_volumes in the runner's
+# config (see forgejo-1 config/services.yaml) — so `docker build` executes
+# on the runner host's daemon.
+#
+# Required repo Actions secrets (Settings → Actions → Secrets):
+#   FORGEJO_REGISTRY_TOKEN   git.euh.no token for tb4, scope write:package
+#   CODEBERG_REGISTRY_TOKEN  codeberg.org token for tb4, scope write:package
+name: Build and push hugo-runner
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: tb4/hugo-runner
+  FORGEJO_REGISTRY: git.euh.no
+  CODEBERG_REGISTRY: codeberg.org
+  REGISTRY_USER: tb4
+
+jobs:
+  build-push:
+    runs-on: docker
+    container:
+      image: ghcr.io/catthehacker/ubuntu:act-latest
+      options: -v /var/run/docker.sock:/var/run/docker.sock
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read Hugo version
+        run: echo "HUGO_VERSION=$(tr -d '[:space:]' < VERSION)" >> "$GITHUB_ENV"
+
+      - name: Build image
+        run: |
+          docker build \
+            --build-arg "HUGO_VERSION=${HUGO_VERSION}" \
+            -t "${FORGEJO_REGISTRY}/${IMAGE_NAME}:${HUGO_VERSION}" \
+            -t "${FORGEJO_REGISTRY}/${IMAGE_NAME}:latest" \
+            -t "${CODEBERG_REGISTRY}/${IMAGE_NAME}:${HUGO_VERSION}" \
+            -t "${CODEBERG_REGISTRY}/${IMAGE_NAME}:latest" \
+            .
+
+      - name: Push to ${{ env.FORGEJO_REGISTRY }}
+        run: |
+          echo "${{ secrets.FORGEJO_REGISTRY_TOKEN }}" \
+            | docker login "${FORGEJO_REGISTRY}" -u "${REGISTRY_USER}" --password-stdin
+          docker push "${FORGEJO_REGISTRY}/${IMAGE_NAME}:${HUGO_VERSION}"
+          docker push "${FORGEJO_REGISTRY}/${IMAGE_NAME}:latest"
+
+      - name: Push to ${{ env.CODEBERG_REGISTRY }}
+        run: |
+          echo "${{ secrets.CODEBERG_REGISTRY_TOKEN }}" \
+            | docker login "${CODEBERG_REGISTRY}" -u "${REGISTRY_USER}" --password-stdin
+          docker push "${CODEBERG_REGISTRY}/${IMAGE_NAME}:${HUGO_VERSION}"
+          docker push "${CODEBERG_REGISTRY}/${IMAGE_NAME}:latest"
+
+      - name: Log out of registries
+        if: always()
+        run: |
+          docker logout "${FORGEJO_REGISTRY}" || true
+          docker logout "${CODEBERG_REGISTRY}" || true
