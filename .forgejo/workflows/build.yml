@@ -10,6 +10,12 @@ name: Build and push hugo-runner
 on:
   push:
     branches: [main]
+    # Site/record pushes are handled by pages.yml; no image rebuild needed.
+    paths:
+      - Dockerfile
+      - VERSION
+      - build.sh
+      - .forgejo/workflows/build.yml
   workflow_dispatch:
 
 env:

@@ -1,0 +1,18 @@
+{{ define "main" }}
+  {{ $items := slice }}
+  {{ range where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" }}
+    {{ $key := .File.ContentBaseName }}
+    {{ if not (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $key) }}
+      {{ $key = .Date.Format "2006-01-02_15-04" }}
+    {{ end }}
+    {{ $items = $items | append (dict "key" $key "page" .) }}
+  {{ end }}
+  <ul class="records">
+    {{ range sort $items "key" "desc" }}
+      {{ $p := .page }}
+      <li>
+        <a href="{{ $p.RelPermalink }}"><time datetime="{{ substr .key 0 10 }}">{{ substr .key 0 10 }} {{ replace (substr .key 11) "-" ":" }}</time>{{ if and $p.Title (ne $p.Title .key) }} — {{ $p.Title }}{{ end }}</a>
+      </li>
+    {{ end }}
+  </ul>
+{{ end }}

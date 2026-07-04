@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="{{ site.Language.Locale }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title | default .File.ContentBaseName }} · {{ site.Title }}{{ end }}</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      /* Tokyo Night Light */
+      --bg: #d5d6db;
+      --fg: #343b58;
+      --dim: #9699a3;
+      --accent: #34548a;
+      --surface: #cbccd1;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        /* Dracula */
+        --bg: #282a36;
+        --fg: #f8f8f2;
+        --dim: #6272a4;
+        --accent: #bd93f9;
+        --surface: #44475a;
+      }
+    }
+    body {
+      max-width: 40rem;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 4rem;
+      font-family: system-ui, sans-serif;
+      line-height: 1.6;
+      background: var(--bg);
+      color: var(--fg);
+    }
+    header { margin-bottom: 2.5rem; }
+    header a { font-weight: 600; text-decoration: none; color: inherit; }
+    h1, h2 { line-height: 1.25; }
+    h2 { margin-top: 2.5rem; }
+    a { color: var(--accent); }
+    section:empty { display: none; }
+    section.user { border-left: 3px solid var(--accent); padding-left: 1rem; }
+    section.user h2, section.assistant h2 { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); margin: 2.5rem 0 0.25rem; }
+    section.assistant { opacity: 0.75; }
+    code, pre { font-size: 0.9em; background: var(--surface); }
+    code { padding: 0.1em 0.3em; border-radius: 3px; }
+    pre { overflow-x: auto; padding: 0.75rem; border-radius: 6px; }
+    pre code { padding: 0; background: none; }
+    ul.records { list-style: none; padding: 0; }
+    ul.records li { margin: 0.5rem 0; }
+    footer { margin-top: 4rem; font-size: 0.85em; color: var(--dim); }
+  </style>
+</head>
+<body>
+  <header><a href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a></header>
+  <main>
+    {{ block "main" . }}{{ end }}
+  </main>
+  <footer>
+    {{ with site.GetPage "/license" }}<a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}
+  </footer>
+</body>
+</html>

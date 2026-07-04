@@ -1,0 +1,27 @@
+baseURL: https://tb4.codeberg.page/hugo-runner-image/
+locale: en-no
+title: Records
+
+# records/ is the single source of truth for content.
+contentDir: ../records
+
+# Timestamp-named records (YYYY-MM-DD_HH-MM.md) get their date from the
+# filename; named records (her-er-jeg.md) carry date: in frontmatter.
+frontmatter:
+  date: [':filename', ':default']
+
+# Filename date extraction strips the date prefix from the slug
+# (/18-41/ would collide across days); use the full filename as URL.
+permalinks:
+  page:
+    /: /:contentbasename/
+
+# Records are trusted first-party transcripts.
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+
+# No taxonomies; no RSS — the embedded RSS template would leak the
+# assistant signature lines through page summaries.
+disableKinds: [taxonomy, term, rss]
