@@ -1,13 +1,10 @@
-# Build hugo-runner and push it to both registries.
+# Build hugo-runner and push to both registries. The job container mounts
+# the host docker socket (allowed by container.valid_volumes in the runner
+# config, see forgejo-1 config/services.yaml).
 #
-# Runs on the local runner (runs-on: docker). The job container mounts the
-# host docker socket — allowed by container.valid_volumes in the runner's
-# config (see forgejo-1 config/services.yaml) — so `docker build` executes
-# on the runner host's daemon.
-#
-# Required repo Actions secrets (Settings → Actions → Secrets):
-#   REGISTRY_TOKEN_FORGEJO   git.euh.no token for tb4, scope write:package
-#   REGISTRY_TOKEN_CODEBERG  codeberg.org token for tb4, scope write:package
+# Repo Actions secrets (user tb4, scope write:package):
+#   REGISTRY_TOKEN_FORGEJO   git.euh.no
+#   REGISTRY_TOKEN_CODEBERG  codeberg.org
 name: Build and push hugo-runner
 
 on:

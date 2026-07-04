@@ -1,0 +1,58 @@
+# Weekly: if a newer Hugo release exists, bump VERSION and push to main,
+# which triggers build.yml.
+name: Check for new Hugo release
+
+on:
+  schedule:
+    # Mondays 06:15 UTC
+    - cron: '15 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  check-release:
+    # Only run on the local Forgejo instance
+    if: github.server_url == 'https://git.euh.no'
+    runs-on: docker
+    container:
+      image: ghcr.io/catthehacker/ubuntu:act-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch latest Hugo release tag
+        run: |
+          latest=$(curl -fsSL https://api.github.com/repos/gohugoio/hugo/releases/latest \
+            | jq -r '.tag_name // empty')
+          latest="${latest#v}"
+          if [ -z "$latest" ]; then
+            echo "::error::Could not determine latest Hugo release from GitHub API"
+            exit 1
+          fi
+          echo "LATEST_VERSION=${latest}" >> "$GITHUB_ENV"
+          echo "CURRENT_VERSION=$(tr -d '[:space:]' < VERSION)" >> "$GITHUB_ENV"
+
+      - name: Compare versions
+        run: |
+          echo "Current: ${CURRENT_VERSION}  Latest: ${LATEST_VERSION}"
+          if [ "${LATEST_VERSION}" = "${CURRENT_VERSION}" ]; then
+            echo "Already on the latest Hugo release."
+            echo "UPDATE_NEEDED=false" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          # sort -V guards against ever "updating" to an older tag
+          newest=$(printf '%s\n%s\n' "${CURRENT_VERSION}" "${LATEST_VERSION}" | sort -V | tail -n1)
+          if [ "${newest}" != "${LATEST_VERSION}" ]; then
+            echo "Latest release (${LATEST_VERSION}) is older than current (${CURRENT_VERSION}); skipping."
+            echo "UPDATE_NEEDED=false" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          echo "UPDATE_NEEDED=true" >> "$GITHUB_ENV"
+
+      - name: Update VERSION and push (triggers build)
+        if: env.UPDATE_NEEDED == 'true'
+        run: |
+          echo "${LATEST_VERSION}" > VERSION
+          git config user.name "forgejo-actions"
+          git config user.email "forgejo-actions@noreply.${GITHUB_SERVER_URL#https://}"
+          git add VERSION
+          git commit -m "chore: bump Hugo to ${LATEST_VERSION}"
+          git push origin HEAD:main

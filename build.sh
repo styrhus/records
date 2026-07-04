@@ -1,12 +1,7 @@
 #!/usr/bin/env bash
-# Manual build/push fallback — same sequence as .forgejo/workflows/build.yml,
-# runnable on any host with docker (bootstrap, or when CI is down).
-#
-# Usage:
-#   REGISTRY_TOKEN_FORGEJO=... REGISTRY_TOKEN_CODEBERG=... ./build.sh
-#
-# Tokens need scope write:package for user tb4 on the respective forge.
-# Omit a token to skip pushing to that registry (build + tag still happen).
+# Manual fallback for .forgejo/workflows/build.yml, runs on any docker host.
+# Usage: REGISTRY_TOKEN_FORGEJO=... REGISTRY_TOKEN_CODEBERG=... ./build.sh
+# Tokens: scope write:package, user tb4. Omit a token to skip that push.
 set -euo pipefail
 cd "$(dirname "$0")"
 

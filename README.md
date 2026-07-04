@@ -37,8 +37,14 @@ on any docker host, tokens supplied via `REGISTRY_TOKEN_FORGEJO` /
 
 ## Bumping Hugo
 
-Edit [`VERSION`](VERSION), commit, push. The workflow rebuilds and pushes
-`:<new version>` and moves `:latest`.
+Automatic: [`.forgejo/workflows/check-hugo-release.yml`](.forgejo/workflows/check-hugo-release.yml)
+runs every Monday (06:15 UTC, also via `workflow_dispatch`), compares
+[`VERSION`](VERSION) against the latest [gohugoio/hugo](https://github.com/gohugoio/hugo/releases)
+release, and if a newer one exists commits the bump to `main` — which
+triggers the build workflow above.
+
+Manual: edit [`VERSION`](VERSION), commit, push. The workflow rebuilds and
+pushes `:<new version>` and moves `:latest`.
 
 ## Verify a published image
 
