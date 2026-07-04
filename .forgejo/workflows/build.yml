@@ -17,7 +17,7 @@ on:
 
 env:
   IMAGE_NAME: tb4/hugo-runner
-  FORGEJO_REGISTRY: git
+  FORGEJO_REGISTRY: git.euh.no
   CODEBERG_REGISTRY: codeberg.org
   REGISTRY_USER: tb4
 
