@@ -11,7 +11,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 IMAGE_NAME="tb4/hugo-runner"
-FORGEJO_REGISTRY="git.euh.no"
+FORGEJO_REGISTRY="git"
 CODEBERG_REGISTRY="codeberg.org"
 REGISTRY_USER="tb4"
 HUGO_VERSION="$(tr -d '[:space:]' < VERSION)"
