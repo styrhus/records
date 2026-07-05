@@ -1,8 +1,8 @@
 # Build the Hugo site (hugo/ config, records/ as content) and deploy to
 # Codeberg Pages at https://<owner>.codeberg.page/<repo>/ — owner, repo
 # and repo URL are derived from the push, so forks publish their own
-# site with zero edits. Dogfoods the hugo-runner image this repo builds;
-# :latest on purpose, so every image rebuild is exercised by the next deploy.
+# site with zero edits. hugo-runner (node + git + Hugo) is maintained in
+# its own repo; :latest so deploys pick up runner updates without edits here.
 name: Deploy to Codeberg Pages
 
 on:

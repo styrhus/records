@@ -30,7 +30,5 @@ disableKinds: [taxonomy, term, rss]
 # per-fork via HUGO_PARAMS_REPOURL. This value is the local-dev default.
 params:
   repoURL: https://codeberg.org/tb4/records
-  # Updated by build.yml on every image push; shown tiny in the footer.
-  imageRef: codeberg.org/tb4/records:latest
   # Loud hand-written greeting atop the home page; set your own word or remove.
   greeting: Velkommen

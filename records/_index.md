@@ -26,8 +26,8 @@ Nine AI skills live in `.ai/skills/`:
 `main`. Your site will be on `https://<your-user>.codeberg.page/<your-repo>/` — nothing to configure; the
 owner and repository name are derived from the push itself.
 
-The tiny footer links come from `hugo/hugo.yaml` params: `repoURL` is the
-codeberg door, `imageRef` the container, so all know which build is current.
+The tiny footer link comes from `hugo/hugo.yaml` params: `repoURL` is the
+codeberg door.
 
 > If you want a license link in the footer, add your own`records/LICENSE.md` with `title: License`.
 
