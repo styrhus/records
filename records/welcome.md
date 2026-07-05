@@ -23,12 +23,14 @@ Nine Claude Code skills live in `.ai/skills/` (`.claude/skills` points there):
 
 ## Publishing
 
-If you forked the whole repository, make this branch your `main` first:
-`git push origin +ready-to-fork:main`. Enable Actions in your repository
-settings, then push to `main`.
-`.forgejo/workflows/pages.yml` builds the site and publishes it at
+Fork this repository, enable Actions in your fork's settings, then push to
+`main`. `.forgejo/workflows/pages.yml` builds the site and publishes it at
 `https://<your-user>.codeberg.page/<your-repo>/` — nothing to configure; the
 owner and repository name are derived from the push itself.
+
+The tiny footer link comes from `insidesBranch` in `hugo/hugo.yaml` — it
+points at this repository's building-process records; remove the param
+unless you keep such a branch yourself.
 
 The upstream CC BY-SA license record was not carried over: these records are
 yours. If you want a license link in the footer, add your own

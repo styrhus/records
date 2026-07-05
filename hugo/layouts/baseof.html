@@ -49,6 +49,7 @@
     ul.records { list-style: none; padding: 0; }
     ul.records li { margin: 0.5rem 0; }
     footer { margin-top: 4rem; font-size: 0.85em; color: var(--dim); }
+    footer sup { font-size: 0.7em; }
   </style>
 </head>
 <body>
@@ -58,6 +59,7 @@
   </main>
   <footer>
     {{ with site.GetPage "/license" }}<a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}
+    {{ with site.Params.insidesBranch }}<sup><a href="{{ site.Params.repoURL }}/src/branch/{{ . }}">{{ . }}</a></sup>{{ end }}
   </footer>
 </body>
 </html>
