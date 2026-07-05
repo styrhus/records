@@ -67,7 +67,7 @@
   <footer>
     {{ with site.GetPage "/license" }}<a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}
     {{ with site.Params.insidesBranch }}<sup><a href="{{ site.Params.repoURL }}/src/branch/{{ . }}">{{ . }}</a></sup>{{ end }}
-    {{ with site.Params.repoURL }}<sup><a href="{{ . }}">codeberg</a></sup>{{ end }}
+    {{ with site.Params.repoURL }}<sup><a href="{{ . }}">{{ . }}</a></sup>{{ end }}
   </footer>
 </body>
 </html>
