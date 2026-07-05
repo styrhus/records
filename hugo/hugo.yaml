@@ -1,4 +1,4 @@
-baseURL: https://tb4.codeberg.page/hugo-runner-image/
+baseURL: https://tb4.codeberg.page/records/
 locale: en-no
 title: Records
 
@@ -28,10 +28,9 @@ disableKinds: [taxonomy, term, rss]
 
 # Repo URL for raw-link rewrites in page.html; pages.yml overrides this
 # per-fork via HUGO_PARAMS_REPOURL. This value is the local-dev default.
-# insidesBranch adds a tiny footer link to the branch holding the
-# building-process records; remove it if you keep no such branch.
 params:
-  repoURL: https://codeberg.org/tb4/hugo-runner-image
-  insidesBranch: hugo-runner-image-building-process-information-insides-records
+  repoURL: https://codeberg.org/tb4/records
+  # Updated by build.yml on every image push; shown tiny in the footer.
+  imageRef: codeberg.org/tb4/records:0.0.1
   # Loud hand-written greeting atop the home page; set your own word or remove.
   greeting: Velkommen

@@ -27,9 +27,9 @@ Fork this repository, enable Actions in your fork's settings, then push to
 `https://<your-user>.codeberg.page/<your-repo>/` — nothing to configure; the
 owner and repository name are derived from the push itself.
 
-The tiny footer link comes from `insidesBranch` in `hugo/hugo.yaml` — it
-points at this repository's building-process records; remove the param
-unless you keep such a branch yourself.
+The tiny footer links come from `hugo/hugo.yaml` params: `repoURL` is the
+codeberg door, `imageRef` the container — its `tag@sha` is refreshed by the
+build workflow on every image push, so all know which build is current.
 
 The upstream CC BY-SA license record was not carried over: these records are
 yours. If you want a license link in the footer, add your own

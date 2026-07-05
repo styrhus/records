@@ -1,33 +1,28 @@
-# Build hugo-runner and push to both registries. The job container mounts
-# the host docker socket (allowed by container.valid_volumes in the runner
-# config, see forgejo-1 config/services.yaml).
-#
-# Repo Actions secrets (user tb4, scope write:package):
-#   REGISTRY_TOKEN_FORGEJO   git.euh.no
-#   REGISTRY_TOKEN_CODEBERG  codeberg.org
-name: Build and push hugo-runner
+# Build the records product image, push it to the Codeberg registry, and
+# write the pushed tag@sha into hugo/hugo.yaml (params.imageRef) so the
+# published page always names the current build. That ref commit touches
+# hugo/** only, so it triggers the pages deploy and never re-triggers this
+# workflow. Needs a docker-socket runner (git.euh.no); mirror the ref
+# commit to Codeberg for the page to update there.
+name: Build and push records image
 
 on:
   push:
     branches: [main]
-    # Site/record pushes are handled by pages.yml; no image rebuild needed.
     paths:
       - Dockerfile
       - VERSION
-      - build.sh
       - .forgejo/workflows/build.yml
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: tb4/hugo-runner
-  FORGEJO_REGISTRY: git.euh.no
+  IMAGE_NAME: tb4/records
   CODEBERG_REGISTRY: codeberg.org
   REGISTRY_USER: tb4
 
 jobs:
   build-push:
-    # Canonical repo on git.euh.no only: forks and the Codeberg mirror
-    # must never attempt registry pushes with tb4's image name and secrets.
+    # Docker-socket runner only; Codeberg runners cannot build images.
     if: github.server_url == 'https://git.euh.no'
     runs-on: docker
     container:
@@ -36,35 +31,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Read Hugo version
-        run: echo "HUGO_VERSION=$(tr -d '[:space:]' < VERSION)" >> "$GITHUB_ENV"
+      - name: Read version
+        run: echo "VERSION=$(tr -d '[:space:]' < VERSION)" >> "$GITHUB_ENV"
 
-      - name: Build image
+      - name: Build and push
         run: |
-          docker build \
-            --build-arg "HUGO_VERSION=${HUGO_VERSION}" \
-            -t "${FORGEJO_REGISTRY}/${IMAGE_NAME}:${HUGO_VERSION}" \
-            -t "${FORGEJO_REGISTRY}/${IMAGE_NAME}:latest" \
-            -t "${CODEBERG_REGISTRY}/${IMAGE_NAME}:${HUGO_VERSION}" \
-            -t "${CODEBERG_REGISTRY}/${IMAGE_NAME}:latest" \
-            .
-
-      - name: Push to ${{ env.FORGEJO_REGISTRY }}
-        run: |
-          echo "${{ secrets.REGISTRY_TOKEN_FORGEJO }}" \
-            | docker login "${FORGEJO_REGISTRY}" -u "${REGISTRY_USER}" --password-stdin
-          docker push "${FORGEJO_REGISTRY}/${IMAGE_NAME}:${HUGO_VERSION}"
-          docker push "${FORGEJO_REGISTRY}/${IMAGE_NAME}:latest"
-
-      - name: Push to ${{ env.CODEBERG_REGISTRY }}
-        run: |
+          IMAGE="${CODEBERG_REGISTRY}/${IMAGE_NAME}"
+          docker build -t "${IMAGE}:${VERSION}" -t "${IMAGE}:latest" .
           echo "${{ secrets.REGISTRY_TOKEN_CODEBERG }}" \
             | docker login "${CODEBERG_REGISTRY}" -u "${REGISTRY_USER}" --password-stdin
-          docker push "${CODEBERG_REGISTRY}/${IMAGE_NAME}:${HUGO_VERSION}"
-          docker push "${CODEBERG_REGISTRY}/${IMAGE_NAME}:latest"
+          docker push "${IMAGE}:${VERSION}"
+          docker push "${IMAGE}:latest"
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "${IMAGE}:${VERSION}" | cut -d@ -f2)
+          echo "IMAGE_REF=${IMAGE}:${VERSION}@${DIGEST}" >> "$GITHUB_ENV"
 
-      - name: Log out of registries
-        if: always()
+      - name: Record image ref on the page
         run: |
-          docker logout "${FORGEJO_REGISTRY}" || true
-          docker logout "${CODEBERG_REGISTRY}" || true
+          sed -i "s|^  imageRef:.*|  imageRef: ${IMAGE_REF}|" hugo/hugo.yaml
+          git config user.name "forgejo-actions"
+          git config user.email "forgejo-actions@noreply.${GITHUB_SERVER_URL#https://}"
+          git add hugo/hugo.yaml
+          git commit -m "chore: image ${IMAGE_REF#*/}" || exit 0
+          git push origin HEAD:main
+
+      - name: Log out of registry
+        if: always()
+        run: docker logout "${CODEBERG_REGISTRY}" || true
