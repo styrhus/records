@@ -1,7 +1,8 @@
 # Build the Hugo site (hugo/ config, records/ as content) and deploy to
-# Codeberg Pages at https://tb4.codeberg.page/hugo-runner-image.
-# Dogfoods the hugo-runner image this repo builds; :latest on purpose,
-# so every image rebuild is exercised by the next site deploy.
+# Codeberg Pages at https://<owner>.codeberg.page/<repo>/ — owner, repo
+# and repo URL are derived from the push, so forks publish their own
+# site with zero edits. Dogfoods the hugo-runner image this repo builds;
+# :latest on purpose, so every image rebuild is exercised by the next deploy.
 name: Deploy to Codeberg Pages
 
 on:
@@ -27,13 +28,18 @@ jobs:
 
       - name: Build
         run: |
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          NAME="${GITHUB_REPOSITORY#*/}"
+          PAGES_URL="https://${OWNER}.codeberg.page/${NAME}/"
+          echo "PAGES_URL=${PAGES_URL}" >> "$GITHUB_ENV"
           cd hugo
-          hugo --minify --destination "$GITHUB_WORKSPACE/public"
+          HUGO_PARAMS_REPOURL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+            hugo --minify --baseURL "${PAGES_URL}" --destination "$GITHUB_WORKSPACE/public"
 
       - name: Deploy to Codeberg Pages
         uses: https://codeberg.org/git-pages/action@v2
         with:
-          site: 'https://tb4.codeberg.page/hugo-runner-image'
+          site: ${{ env.PAGES_URL }}
           server: codeberg.page
           token: ${{ forge.token }}
           source: public/

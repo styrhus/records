@@ -26,6 +26,9 @@ env:
 
 jobs:
   build-push:
+    # Canonical repo on git.euh.no only: forks and the Codeberg mirror
+    # must never attempt registry pushes with tb4's image name and secrets.
+    if: github.server_url == 'https://git.euh.no'
     runs-on: docker
     container:
       image: ghcr.io/catthehacker/ubuntu:act-latest
