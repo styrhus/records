@@ -57,8 +57,6 @@ On **each** of your turns while recording:
    ```bash
    cat >> <file> <<'RECORD_XEOF_7'
 
-   ## User
-
    <user message, verbatim, unmodified>
    RECORD_XEOF_7
    ```
@@ -68,7 +66,7 @@ On **each** of your turns while recording:
 Rules:
 
 - **Verbatim means verbatim**: no paraphrasing, no trimming, no fixing typos, no omitting parts of the message.
-- **No Assistant sections, no signature** — the file contains only `## User` entries.
+- **No headings, no Assistant sections, no signature** — no `## User` marker; the file contains only the verbatim user messages, each separated by a blank line.
 - If the text contains the heredoc delimiter, pick a different delimiter.
 - Never skip a turn "because it was short" or "just a tool run" — every user message gets appended.
 - Recording stops ONLY when the user invokes /esc. Do not stop on your own, and do not record the /esc invocation.
