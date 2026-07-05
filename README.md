@@ -1,54 +1,11 @@
 # hugo-runner-image
 
-Builds the `hugo-runner` OCI image used as the job container for e.g., the miniMe
-Hugo workflows (the >50-fork fan-out). The image bakes in everything those
-jobs need so they start instantly:
+Builds the `hugo-runner` OCI image for the miniMe Hugo workflows (the >50-fork
+fan-out): node 22, git, and Hugo extended — pinned in [`VERSION`](VERSION) —
+on base `code.forgejo.org/oci/node:22-bookworm`.
 
-- **node 22** — required by `actions/checkout` and the git-pages action
-- **git, wget, tar** — from the base image
-- **Hugo extended** — pinned in [`VERSION`](VERSION).
-
-Base image: `code.forgejo.org/oci/node:22-bookworm` (Forgejo's Docker Hub
-mirror — no Hub rate limits).
-
-## Published to
-
-| Registry | Image |
-|----------|-------|
-| codeberg.org | `codeberg.org/tb4/hugo-runner:<version>` and `:latest` |
-
-The Codeberg copy is what the menneske sibling forks' runner labels should reference
-(e.g. `minime:docker://codeberg.org/tb4/hugo-runner:0.162.1`), so the package
-must be **publicly pullable** — check its visibility in
-<https://codeberg.org/tb4/-/packages> after the first push.
-
-## How it builds
-
-[`.forgejo/workflows/build.yml`](.forgejo/workflows/build.yml) runs on the
-local runner (`runs-on: docker`) on every push to `main` (and via
-`workflow_dispatch`). The job container mounts the host docker socket, which
-the runner only permits because `container.valid_volumes` whitelists
-`/var/run/docker.sock` (configured in forgejo-1 `config/services.yaml` for
-the git.euh.no runner only — never enable this on the Codeberg runners).
-
-[`build.sh`](build.sh) is the manual fallback: same build/tag/push sequence
-on any docker host, tokens supplied via `REGISTRY_TOKEN_FORGEJO` /
-`REGISTRY_TOKEN_CODEBERG` env vars.
-
-## Bumping Hugo
-
-Automatic: [`.forgejo/workflows/check-hugo-release.yml`](.forgejo/workflows/check-hugo-release.yml)
-runs every Monday (06:15 UTC, also via `workflow_dispatch`), compares
-[`VERSION`](VERSION) against the latest [gohugoio/hugo](https://github.com/gohugoio/hugo/releases)
-release, and if a newer one exists commits the bump to `main` — which
-triggers the build workflow above.
-
-Manual: edit [`VERSION`](VERSION), commit, push. The workflow rebuilds and
-pushes `:<new version>` and moves `:latest`.
-
-## Verify a published image
-
-```sh
-docker run --rm codeberg.org/tb4/hugo-runner:$(cat VERSION) \
-  bash -c 'hugo version && node --version && git --version'
-```
+- Published to `codeberg.org/tb4/hugo-runner:<version>` and `:latest`; keep it publicly pullable — the menneske sibling forks pull it by runner label.
+- Built by [`.forgejo/workflows/build.yml`](.forgejo/workflows/build.yml) on push to `main` (host docker socket; whitelisted only on the git.euh.no runner). Manual fallback: [`build.sh`](build.sh).
+- Hugo bumps itself weekly via [`check-hugo-release.yml`](.forgejo/workflows/check-hugo-release.yml); manual: edit [`VERSION`](VERSION), commit, push.
+- [`pages.yml`](.forgejo/workflows/pages.yml) dogfoods the image: builds `records/` into the site at <https://tb4.codeberg.page/hugo-runner-image/>.
+- Verify: `docker run --rm codeberg.org/tb4/hugo-runner:$(cat VERSION) bash -c 'hugo version && node --version && git --version'`
