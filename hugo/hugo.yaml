@@ -31,6 +31,6 @@ disableKinds: [taxonomy, term, rss]
 params:
   repoURL: https://codeberg.org/tb4/records
   # Updated by build.yml on every image push; shown tiny in the footer.
-  imageRef: codeberg.org/tb4/records:0.0.1
+  imageRef: codeberg.org/tb4/records:latest
   # Loud hand-written greeting atop the home page; set your own word or remove.
   greeting: Velkommen
