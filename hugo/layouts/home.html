@@ -1,5 +1,6 @@
 {{ define "main" }}
   {{ with site.Params.greeting }}<h1 class="greeting">{{ . }}</h1>{{ end }}
+  {{ .Content }}
   {{ $featured := slice }}
   {{ $rest := slice }}
   {{ range where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" }}
@@ -14,6 +15,7 @@
       {{ $rest = $rest | append $item }}
     {{ end }}
   {{ end }}
+  {{ if or $featured $rest }}
   <ul class="records">
     {{ range sort $featured "key" "desc" | append (sort $rest "key" "desc") }}
       {{ $p := .page }}
@@ -22,4 +24,5 @@
       </li>
     {{ end }}
   </ul>
+  {{ end }}
 {{ end }}

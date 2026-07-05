@@ -1,7 +1,6 @@
 ---
 title: Velkommen
 date: 2026-07-05T01:30:00+02:00
-featured: true
 ---
 
 This is your records site. Every Markdown file in `records/` becomes a page;
@@ -36,4 +35,5 @@ The upstream CC BY-SA license record was not carried over: these records are
 yours. If you want a license link in the footer, add your own
 `records/LICENSE.md` with `title: License`.
 
-When you have found your footing, delete this record.
+When you have found your footing, rewrite this page — it is
+`records/_index.md`, the front page itself.
