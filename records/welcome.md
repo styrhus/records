@@ -1,5 +1,5 @@
 ---
-title: Welcome
+title: Velkommen
 date: 2026-07-05T01:30:00+02:00
 featured: true
 ---

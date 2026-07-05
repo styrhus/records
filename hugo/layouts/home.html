@@ -1,4 +1,5 @@
 {{ define "main" }}
+  {{ with site.Params.greeting }}<h1 class="greeting">{{ . }}</h1>{{ end }}
   {{ $featured := slice }}
   {{ $rest := slice }}
   {{ range where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" }}

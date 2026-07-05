@@ -50,6 +50,13 @@
     ul.records li { margin: 0.5rem 0; }
     footer { margin-top: 4rem; font-size: 0.85em; color: var(--dim); }
     footer sup { font-size: 0.7em; }
+    /* Architects Daughter by Kimberly Geswein — SIL OFL 1.1, see fonts/OFL.txt. */
+    @font-face {
+      font-family: "Architects Daughter";
+      src: url("{{ "fonts/architects-daughter.woff2" | relURL }}") format("woff2");
+      font-display: swap;
+    }
+    .greeting { font-family: "Architects Daughter", cursive; font-size: 3.5rem; line-height: 1.2; margin: 0 0 1.5rem; }
   </style>
 </head>
 <body>

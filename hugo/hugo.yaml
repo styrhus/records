@@ -33,3 +33,5 @@ disableKinds: [taxonomy, term, rss]
 params:
   repoURL: https://codeberg.org/tb4/hugo-runner-image
   insidesBranch: hugo-runner-image-building-process-information-insides-records
+  # Loud hand-written greeting atop the home page; set your own word or remove.
+  greeting: Velkommen
