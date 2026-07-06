@@ -1,3 +1,4 @@
 public/
 hugo/resources/
 *.local.md
+.hugo_build.lock
