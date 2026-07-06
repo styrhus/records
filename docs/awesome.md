@@ -1,10 +1,12 @@
 # Make it awesome
 
-Want the site to look like *you*? The whole design lives in three small
-files in `hugo/layouts/`. No theme, no framework — what you see is all
-there is.
+Want the site to look like *you*? The quickest changes are in
+`hugo/hugo.yaml`; the full design lives in the **Fuglekasse** theme under
+`hugo/themes/Fuglekasse/`.
 
 ## The three layouts
+
+They live in `hugo/themes/Fuglekasse/layouts/`:
 
 - `baseof.html` — the frame: head, all the CSS, header, footer
 - `home.html` — the front page: greeting, intro, the list of records
@@ -13,23 +15,26 @@ there is.
 
 ## Colors
 
-All CSS sits at the top of `baseof.html`. Two palettes are built in:
-Tokyo Night Light for light mode, Dracula for dark mode. Change the
-variables and everything follows:
+Set the palette from `hugo/hugo.yaml` — no need to open the theme.
+Fuglekasse ships Tokyo Night Light (light mode) and Dracula (dark); override
+any key under `params.style`:
 
-```css
---bg       /* background */
---fg       /* text */
---dim      /* quiet text: footer, labels */
---accent   /* links, the user border */
---surface  /* code blocks */
+```yaml
+params:
+  style:
+    light: { bg: "#d5d6db", fg: "#343b58", dim: "#9699a3", accent: "#34548a", surface: "#cbccd1" }
+    dark:  { bg: "#282a36", fg: "#f8f8f2", dim: "#8b96c9", accent: "#bd93f9", surface: "#44475a" }
 ```
+
+`bg` background · `fg` text · `dim` quiet text (footer, labels) · `accent`
+links and the user border · `surface` code blocks. The raw CSS still sits at
+the top of `baseof.html` if you want to go deeper.
 
 ## Fonts
 
-The greeting uses Architects Daughter, loaded from
-`hugo/static/fonts/`. Drop your own `.woff2` file there and update the
-`@font-face` rule in `baseof.html`.
+The greeting uses Architects Daughter. Point `params.style.font` at another
+family, or drop a `.woff2` into `hugo/themes/Fuglekasse/static/fonts/` and set
+`params.style.fontfile` to it.
 
 ## The footer
 

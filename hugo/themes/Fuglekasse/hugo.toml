@@ -1,0 +1,21 @@
+# Fuglekasse ships its brand defaults here. A site's hugo.yaml deep-merges over
+# these (site params win), so a forker overrides any subset from that one file.
+[params.style]
+font = "Architects Daughter"
+fontfile = "fonts/architects-daughter.woff2"
+
+# Tokyo Night Light
+[params.style.light]
+bg = "#d5d6db"
+fg = "#343b58"
+dim = "#9699a3"
+accent = "#34548a"
+surface = "#cbccd1"
+
+# Dracula — dim lifted from #6272a4 so small footer/label text stays legible.
+[params.style.dark]
+bg = "#282a36"
+fg = "#f8f8f2"
+dim = "#8b96c9"
+accent = "#bd93f9"
+surface = "#44475a"

@@ -2,6 +2,9 @@ baseURL: https://tb4.codeberg.page/records/
 locale: en-no
 title: Records
 
+# The default branding theme; all design lives in hugo/themes/Fuglekasse/.
+theme: Fuglekasse
+
 # records/ is the single source of truth for content.
 contentDir: ../records
 
@@ -32,3 +35,9 @@ params:
   repoURL: https://codeberg.org/tb4/records
   # Loud hand-written greeting atop the home page; set your own word or remove.
   greeting: Velkommen
+
+  # Look & feel — Fuglekasse ships these defaults; uncomment a line to override.
+  # style:
+  #   font: Architects Daughter
+  #   light: { bg: "#d5d6db", fg: "#343b58", dim: "#9699a3", accent: "#34548a", surface: "#cbccd1" }
+  #   dark:  { bg: "#282a36", fg: "#f8f8f2", dim: "#8b96c9", accent: "#bd93f9", surface: "#44475a" }

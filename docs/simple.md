@@ -24,6 +24,11 @@ Change it to your own word, or remove the line for no greeting at all.
 Also in `hugo/hugo.yaml`: `title: Records`. It shows in the header and
 in the browser tab.
 
+## A different color
+
+The theme's colors and greeting font also live in `hugo/hugo.yaml`, under
+`params.style`. Change one and rebuild — see [make it awesome](awesome.md).
+
 ## Writing records
 
 Every Markdown file in `records/` becomes a page. Name them one of two ways:

@@ -27,7 +27,8 @@ Nine AI skills live in `.ai/skills/`:
 owner and repository name are derived from the push itself.
 
 The tiny footer link comes from `hugo/hugo.yaml` params: `repoURL` is the
-codeberg door.
+codeberg door. The look is the **Fuglekasse** theme; its colors and greeting
+font live in that same `hugo/hugo.yaml`.
 
 > If you want a license link in the footer, add your own`records/LICENSE.md` with `title: License`.
 

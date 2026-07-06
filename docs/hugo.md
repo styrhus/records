@@ -1,12 +1,15 @@
 # Hugo has it all
 
-This site is plain [Hugo](https://gohugo.io/) — no theme standing in the
-way. Anything Hugo can do, your records home can do.
+This site is plain [Hugo](https://gohugo.io/). Its whole look is one small
+default theme — **Fuglekasse** — that you restyle from `hugo/hugo.yaml`, edit,
+or replace. Anything Hugo can do, your records home can do.
 
 ## How it is wired
 
-- `hugo/hugo.yaml` — the configuration; content comes from `../records`
-- `hugo/layouts/` — three templates, and that is the entire design
+- `hugo/hugo.yaml` — the configuration and the brand knobs; content comes from
+  `../records`
+- `hugo/themes/Fuglekasse/` — the default theme: three templates and one font,
+  the entire design
 - `.forgejo/workflows/pages.yml` — builds and publishes on every push to
   `main`; forks publish to their own address with zero edits
 
@@ -31,5 +34,5 @@ hugo server
 
 Menus, shortcodes, image processing, multilingual sites — the
 [Hugo documentation](https://gohugo.io/documentation/) covers it all.
-Any template you add under `hugo/layouts/` takes over from Hugo's
-defaults.
+Any template you add under `hugo/layouts/` takes over from Fuglekasse
+and Hugo's defaults.

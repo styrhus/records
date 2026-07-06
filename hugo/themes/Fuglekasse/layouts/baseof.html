@@ -1,27 +1,28 @@
+{{- $s := site.Params.style -}}
 <!DOCTYPE html>
 <html lang="{{ site.Language.Locale }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/svg+xml" href="{{ "data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2032%2032%27%3E%3Crect%20width=%2732%27%20height=%2732%27%20rx=%277%27%20fill=%27%2334548a%27/%3E%3Cpath%20d=%27M16%206%20L25%2014%20V25%20H7%20V14%20Z%27%20fill=%27%23f8f8f2%27/%3E%3Ccircle%20cx=%2716%27%20cy=%2717%27%20r=%273.2%27%20fill=%27%2334548a%27/%3E%3Crect%20x=%2715%27%20y=%2719%27%20width=%272%27%20height=%276%27%20fill=%27%2334548a%27/%3E%3C/svg%3E" | safeURL }}">
   <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title | default .File.ContentBaseName }} · {{ site.Title }}{{ end }}</title>
   <style>
+    /* Palette + display font come from hugo.yaml params.style (see the theme README). */
     :root {
       color-scheme: light dark;
-      /* Tokyo Night Light */
-      --bg: #d5d6db;
-      --fg: #343b58;
-      --dim: #9699a3;
-      --accent: #34548a;
-      --surface: #cbccd1;
+      --bg: {{ $s.light.bg | safeCSS }};
+      --fg: {{ $s.light.fg | safeCSS }};
+      --dim: {{ $s.light.dim | safeCSS }};
+      --accent: {{ $s.light.accent | safeCSS }};
+      --surface: {{ $s.light.surface | safeCSS }};
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        /* Dracula */
-        --bg: #282a36;
-        --fg: #f8f8f2;
-        --dim: #6272a4;
-        --accent: #bd93f9;
-        --surface: #44475a;
+        --bg: {{ $s.dark.bg | safeCSS }};
+        --fg: {{ $s.dark.fg | safeCSS }};
+        --dim: {{ $s.dark.dim | safeCSS }};
+        --accent: {{ $s.dark.accent | safeCSS }};
+        --surface: {{ $s.dark.surface | safeCSS }};
       }
     }
     body {
@@ -29,15 +30,18 @@
       margin: 0 auto;
       padding: 2.5rem 1.25rem 4rem;
       font-family: system-ui, sans-serif;
-      line-height: 1.6;
+      line-height: 1.65;
       background: var(--bg);
       color: var(--fg);
     }
     header { margin-bottom: 2.5rem; }
     header a { font-weight: 600; text-decoration: none; color: inherit; }
     h1, h2 { line-height: 1.25; }
-    h2 { margin-top: 2.5rem; }
+    h2 { margin: 2.75rem 0 0.4rem; }
     a { color: var(--accent); }
+    a:hover { text-decoration: underline; }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+    ::selection { background: var(--accent); color: var(--bg); }
     section:empty { display: none; }
     section.user { border-left: 3px solid var(--accent); padding-left: 1rem; }
     section.user h2, section.assistant h2 { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); margin: 2.5rem 0 0.25rem; }
@@ -47,16 +51,16 @@
     pre { overflow-x: auto; padding: 0.75rem; border-radius: 6px; }
     pre code { padding: 0; background: none; }
     ul.records { list-style: none; padding: 0; }
-    ul.records li { margin: 0.5rem 0; }
+    ul.records li { margin: 0.6rem 0; }
     footer { margin-top: 4rem; font-size: 0.85em; color: var(--dim); }
     footer sup { font-size: 0.7em; }
     /* Architects Daughter by Kimberly Geswein — SIL OFL 1.1, see fonts/OFL.txt. */
     @font-face {
-      font-family: "Architects Daughter";
-      src: url("{{ "fonts/architects-daughter.woff2" | relURL }}") format("woff2");
+      font-family: "{{ $s.font | safeCSS }}";
+      src: url("{{ $s.fontfile | relURL }}") format("woff2");
       font-display: swap;
     }
-    .greeting { font-family: "Architects Daughter", cursive; font-size: 3.5rem; line-height: 1.2; margin: 0 0 1.5rem; }
+    .greeting { font-family: "{{ $s.font | safeCSS }}", cursive; font-size: 3.5rem; line-height: 1.15; margin: 0 0 1.75rem; }
   </style>
 </head>
 <body>
