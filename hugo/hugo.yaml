@@ -7,6 +7,8 @@ theme: Fuglekasse
 
 # records/ is the single source of truth for content.
 contentDir: ../records
+# OR
+# contentDir: ../docs/records
 
 # The explicit date: field is authoritative (ordering follows it, not the
 # filename); timestamp-named records without a date: fall back to the filename.
