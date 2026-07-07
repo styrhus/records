@@ -6,7 +6,10 @@ date: 2026-07-05T01:30:00+02:00
 This is your **records** site. Every Markdown file in `records/` becomes a page;
 this repository carries the machinery to write and publish them.
 
-**records** primary focus is enabling publishing websites directly from a Editor (i.e. Codium) with useful AI helpers.
+**records** primary focus is enabling publishing websites directly from an Editor (e.g., Codium) with useful AI helpers.
+
+No AI required, though: write or drop `.md` files into `records/` by hand and they
+publish just the same. The helpers below are optional conveniences.
 
 ## The helpers
 
