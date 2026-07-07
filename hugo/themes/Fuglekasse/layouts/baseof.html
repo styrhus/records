@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/svg+xml" href="{{ "data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2032%2032%27%3E%3Crect%20width=%2732%27%20height=%2732%27%20rx=%277%27%20fill=%27%2334548a%27/%3E%3Cpath%20d=%27M16%206%20L25%2014%20V25%20H7%20V14%20Z%27%20fill=%27%23f8f8f2%27/%3E%3Ccircle%20cx=%2716%27%20cy=%2717%27%20r=%273.2%27%20fill=%27%2334548a%27/%3E%3Crect%20x=%2715%27%20y=%2719%27%20width=%272%27%20height=%276%27%20fill=%27%2334548a%27/%3E%3C/svg%3E" | safeURL }}">
+  <link rel="icon" type="image/svg+xml" href="{{ "fuglekasse.svg" | relURL }}">
   <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ $t := .Title }}{{ if not $t }}{{ $t = .File.ContentBaseName }}{{ end }}{{ with site.Params.dateTitleFormat }}{{ if findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $t }}{{ $t = time.Format . $.Date }}{{ end }}{{ end }}{{ $t }} · {{ site.Title }}{{ end }}</title>
   <style>
     /* Palette + display font come from hugo.yaml params.style (see the theme README). */

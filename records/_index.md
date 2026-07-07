@@ -6,7 +6,9 @@ date: 2026-07-05T01:30:00+02:00
 This is your **records** site. Every Markdown file in `records/` becomes a page;
 this repository carries the machinery to write and publish them.
 
-## The skills
+**records** primary focus is enabling publishing websites directly from a Editor (i.e. Codium) with useful AI helpers.
+
+## The helpers
 
 Nine AI skills live in `.ai/skills/`:
 
@@ -27,7 +29,7 @@ Nine AI skills live in `.ai/skills/`:
 owner and repository name are derived from the push itself.
 
 The tiny footer link comes from `hugo/hugo.yaml` params: `repoURL` is the
-codeberg door. The look is the **Fuglekasse** theme; its colors and greeting
+codeberg door. The look is the <img src="fuglekasse.svg" width="20" height="20" alt="" style="vertical-align:-4px"> **Fuglekasse** theme; its colors and greeting
 font live in that same `hugo/hugo.yaml`.
 
 > If you want a license link in the footer, add your own`records/LICENSE.md` with `title: License`.
