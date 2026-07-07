@@ -46,6 +46,10 @@ Records without a hand-written `title:` show their timestamp slug
 to render those as formatted dates ("06. July 2026") everywhere titles appear.
 Explicit titles are never reformatted; unset keeps the raw slug.
 
+Set `params.datePostFormat` (same layout syntax) to also show the record's date
+bottom-right in each post — on record pages and in the posts/single home modes.
+Unset, no post date is shown.
+
 ## License
 
 MIT for the theme code. The bundled *Architects Daughter* font is SIL OFL 1.1 — see

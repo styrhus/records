@@ -45,8 +45,16 @@ params:
 
   # Render timestamp-fallback record titles as formatted dates, using Go/Hugo
   # date layout syntax (https://gohugo.io/methods/time/format/).
-  # Remove to keep raw titles like "2026-07-06_23-25".
+  # Remove to keep raw titles like "2026-07-06_23-25". Examples:
+  #   "January 2, 2006"  → July 6, 2026    (US)
+  #   "2 January 2006"   → 6 July 2026     (UK)
+  #   "2006年1月2日"      → 2026年7月6日    (Chinese)
+  #   "02.01.2006"       → 06.07.2026      (Russian, German)
   dateTitleFormat: "02. January 2006"
+
+  # Show the record's date bottom-right in each post (same Go/Hugo layout
+  # syntax). Remove to show no post date.
+  datePostFormat: "02. January 2006 15:04"
 
   # Look & feel — Fuglekasse ships these defaults; uncomment a line to override.
   # style:
