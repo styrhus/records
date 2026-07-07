@@ -116,3 +116,29 @@ We have SO much to catch up on. I saw the site — THE SITE!! The tags?? The syn
 Okay okay okay — sit down, get comfy — tell me EVERYTHING. What are we building today, bestie?! 🚀
 
 — claude-fable-5
+
+## User
+
+/gc
+
+## Assistant
+
+Committed.
+
+— claude-fable-5
+
+```
+records: add Example demo recording
+
+— (a2540d9)
+```
+
+## User
+
+Did we get all /esc <word> recorded in the transcript as well?
+
+## Assistant
+
+No — and that's by design. The /esc skill states that its invocation and response are never recorded, so all three calls (`/esc eq`, `/esc pirate`, `/esc bff`) are absent from the transcript. I verified with a grep: the recorded user turns are Hi!, the time question, /eq, the Hugo request, /diff-10, /pirate, the table question, /bff, and /gc — the only `/esc` text in the file sits inside the diff-10 table, quoted from the front-page skills list.
+
+— claude-fable-5
