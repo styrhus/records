@@ -1,12 +1,6 @@
 {{ define "main" }}
   <article>
     {{ with .Title }}<h1>{{ . }}</h1>{{ end }}
-    {{/* Strip signature paragraphs, then wrap each speaker turn in a styleable section. */}}
-    {{ $c := .Content | replaceRE `<p>— [\w.-]+</p>` "" }}
-    {{/* Rewrite relative records/ links to forge raw URLs so they resolve correctly. */}}
-    {{ $c = replaceRE `href="[^"]*records/([^"]+)"` (printf `href="%s/raw/branch/main/records/$1"` site.Params.repoURL) $c }}
-    {{ $c = replaceRE `<h2 id="user(?:-\d+)?">` `</section><section class="user"><h2>` $c }}
-    {{ $c = replaceRE `<h2 id="assistant(?:-\d+)?">` `</section><section class="assistant"><h2>` $c }}
-    {{ printf "<section>%s</section>" $c | safeHTML }}
+    {{ partial "record.html" .Content }}
   </article>
 {{ end }}

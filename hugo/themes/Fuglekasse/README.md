@@ -26,6 +26,18 @@ params:
 To go further, the three templates live in `layouts/`, and all the CSS is at the top of
 `layouts/baseof.html`.
 
+## Page mode
+
+`params.pageMode` picks how the home page presents your records:
+
+- `basic` *(default)* — a reverse-chronological link index, one line per record.
+- `posts` — a feed of the latest records, each with an excerpt and a *Read more*
+  link. `params.postsCount` (default `3`) sets how many appear.
+- `single` — a one-page site: no auto-generated record links; instead every
+  record is rendered inline as a "document" card, oldest first, with `_index.md`
+  on top. Records are still reachable by direct URL, so links you write inside
+  `records/*.md` keep working.
+
 ## License
 
 MIT for the theme code. The bundled *Architects Daughter* font is SIL OFL 1.1 — see

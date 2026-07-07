@@ -52,6 +52,21 @@
     pre code { padding: 0; background: none; }
     ul.records { list-style: none; padding: 0; }
     ul.records li { margin: 0.6rem 0; }
+    /* posts mode: excerpt feed */
+    .mode-posts .post { margin: 2.5rem 0; }
+    .mode-posts .post h2 { margin-bottom: 0.4rem; }
+    .mode-posts .post .more { font-size: 0.9em; }
+    /* single mode: each record is a flowing "document" card, gap between them */
+    .mode-single .record-page {
+      background: var(--bg);
+      border: 1px solid var(--surface);
+      border-radius: 8px;
+      padding: 2rem 1.75rem;
+      margin-bottom: 3.5rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,.14);
+    }
+    .mode-single .record-page:last-child { margin-bottom: 0; }
+    .mode-single .record-head { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); margin: 0 0 1rem; }
     footer { margin-top: 4rem; font-size: 0.85em; color: var(--dim); }
     footer sup { font-size: 0.7em; }
     /* Architects Daughter by Kimberly Geswein — SIL OFL 1.1, see fonts/OFL.txt. */
@@ -65,7 +80,7 @@
 </head>
 <body>
   <header><a href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a></header>
-  <main>
+  <main{{ with site.Params.pageMode }} class="mode-{{ . }}"{{ end }}>
     {{ block "main" . }}{{ end }}
   </main>
   <footer>

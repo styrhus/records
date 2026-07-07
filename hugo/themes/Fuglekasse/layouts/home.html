@@ -1,28 +1,64 @@
 {{ define "main" }}
-  {{ with site.Params.greeting }}<h1 class="greeting">{{ . }}</h1>{{ end }}
-  {{ .Content }}
-  {{ $featured := slice }}
-  {{ $rest := slice }}
-  {{ range where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" }}
-    {{ $key := .File.ContentBaseName }}
-    {{ if not (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $key) }}
-      {{ $key = .Date.Format "2006-01-02_15-04" }}
-    {{ end }}
-    {{ $item := dict "key" $key "page" . }}
-    {{ if .Params.featured }}
-      {{ $featured = $featured | append $item }}
-    {{ else }}
-      {{ $rest = $rest | append $item }}
-    {{ end }}
+  {{ $mode := site.Params.pageMode | default "basic" }}
+  {{ if not (in (slice "basic" "posts" "single") $mode) }}
+    {{ warnf "Fuglekasse: unknown pageMode %q, falling back to \"basic\"" $mode }}
   {{ end }}
-  {{ if or $featured $rest }}
-  <ul class="records">
-    {{ range sort $featured "key" "desc" | append (sort $rest "key" "desc") }}
-      {{ $p := .page }}
-      <li>
-        <a href="{{ $p.RelPermalink }}"><time datetime="{{ substr .key 0 10 }}">{{ substr .key 0 10 }} {{ replace (substr .key 11) "-" ":" }}</time>{{ if and $p.Title (ne $p.Title .key) }} — {{ $p.Title }}{{ end }}</a>
-      </li>
+  {{ with site.Params.greeting }}<h1 class="greeting">{{ . }}</h1>{{ end }}
+
+  {{ if eq $mode "single" }}
+    {{/* One-page document stack: _index first, then every record ascending (oldest→newest). */}}
+    <article class="record-page">{{ .Content }}</article>
+    {{ range sort (where site.RegularPages "File.ContentBaseName" "ne" "LICENSE") "File.ContentBaseName" "asc" }}
+      {{ $key := .File.ContentBaseName }}
+      {{ if not (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $key) }}
+        {{ $key = .Date.Format "2006-01-02_15-04" }}
+      {{ end }}
+      <article class="record-page">
+        <h2 class="record-head"><time datetime="{{ substr $key 0 10 }}">{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}</time>{{ if and .Title (ne .Title $key) }} — {{ .Title }}{{ end }}</h2>
+        {{ partial "record.html" .Content }}
+      </article>
     {{ end }}
-  </ul>
+  {{ else }}
+    {{ .Content }}
+    {{/* Index of all records: featured pinned to top, both groups newest-first. */}}
+    {{ $featured := slice }}
+    {{ $rest := slice }}
+    {{ range where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" }}
+      {{ $key := .File.ContentBaseName }}
+      {{ if not (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $key) }}
+        {{ $key = .Date.Format "2006-01-02_15-04" }}
+      {{ end }}
+      {{ $item := dict "key" $key "page" . }}
+      {{ if .Params.featured }}
+        {{ $featured = $featured | append $item }}
+      {{ else }}
+        {{ $rest = $rest | append $item }}
+      {{ end }}
+    {{ end }}
+    {{ $records := sort $featured "key" "desc" | append (sort $rest "key" "desc") }}
+
+    {{ if eq $mode "posts" }}
+      {{/* Excerpt feed of the latest N records. */}}
+      {{ range first (site.Params.postsCount | default 3) $records }}
+        {{ $p := .page }}
+        <article class="post">
+          <h2><a href="{{ $p.RelPermalink }}"><time datetime="{{ substr .key 0 10 }}">{{ substr .key 0 10 }} {{ replace (substr .key 11) "-" ":" }}</time>{{ if and $p.Title (ne $p.Title .key) }} — {{ $p.Title }}{{ end }}</a></h2>
+          {{ partial "record.html" $p.Summary }}
+          {{ if $p.Truncated }}<p class="more"><a href="{{ $p.RelPermalink }}">Read more →</a></p>{{ end }}
+        </article>
+      {{ end }}
+    {{ else }}
+      {{/* basic: link index. */}}
+      {{ if $records }}
+      <ul class="records">
+        {{ range $records }}
+          {{ $p := .page }}
+          <li>
+            <a href="{{ $p.RelPermalink }}"><time datetime="{{ substr .key 0 10 }}">{{ substr .key 0 10 }} {{ replace (substr .key 11) "-" ":" }}</time>{{ if and $p.Title (ne $p.Title .key) }} — {{ $p.Title }}{{ end }}</a>
+          </li>
+        {{ end }}
+      </ul>
+      {{ end }}
+    {{ end }}
   {{ end }}
 {{ end }}

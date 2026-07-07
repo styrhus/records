@@ -36,6 +36,13 @@ params:
   # Loud hand-written greeting atop the home page; set your own word or remove.
   greeting: Velkommen
 
+  # Home page layout — Fuglekasse defaults to "basic"; uncomment to change.
+  #   basic  — link index (default)
+  #   posts  — latest N records as an excerpt feed (postsCount sets N, default 3)
+  #   single — one-page document stack, oldest first, _index.md on top
+  pageMode: posts
+  postsCount: 3
+
   # Look & feel — Fuglekasse ships these defaults; uncomment a line to override.
   # style:
   #   font: Architects Daughter
