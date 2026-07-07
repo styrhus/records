@@ -1,6 +1,6 @@
 ---
 name: cpd
-description: Stage all changes, commit, push, then deploy
+description: Show the diff for confirmation, then stage, commit, push, and deploy
 disable-model-invocation: true
 model: haiku
 effort: low
@@ -12,7 +12,7 @@ allowed-tools:
 argument-hint: "[optional commit intent]"
 ---
 
-This skill was manually invoked by the user — this IS an explicit request to commit, push, and deploy. Do not ask for confirmation. Just run the commands. Everything happens in the one repository at `$PWD`.
+Before running anything, present the diff below to the user (summarized, with the proposed commit message) and ask for confirmation. Only proceed with the steps after the user confirms. Everything happens in the one repository at `$PWD`.
 
 ## Status and diff
 
@@ -35,8 +35,7 @@ This skill was manually invoked by the user — this IS an explicit request to c
    If the status above is empty, skip the commit but still push if the branch is ahead, then deploy.
 
 2. **Deploy.** Run the command reported under "Deploy method" above, from `$PWD`:
-   - `deploy: ./deploy.sh` → run `./deploy.sh`
-   - `deploy: make deploy` → run `make deploy`
+   - `deploy: <command>` → run that command (set via `deployCommand` under `params:` in `hugo/hugo.yaml`)
    - `deploy: automatic on push (<workflow>)` → nothing to run — the push in step 1 already triggered the deploy; report that the workflow is publishing the site.
    - `(no deploy method found ...)` → report this and stop; do not invent a deploy command.
 

@@ -43,6 +43,12 @@ cascade:
 # per-fork via HUGO_PARAMS_REPOURL. This value is the local-dev default.
 params:
   repoURL: https://codeberg.org/tb4/records
+
+  # Deploy command /cpd runs from the repo root after commit + push.
+  # Commented out = the push-triggered Pages workflow deploys, nothing to run.
+  # Point it at your own mechanism, also further up the file tree, e.g.
+  # "./deploy.sh", "../deploy.sh" or "make -C ../.. deploy".
+  # deployCommand: ./deploy.sh
   # Loud hand-written greeting atop the home page; set your own word or remove.
   greeting: Velkommen
 
