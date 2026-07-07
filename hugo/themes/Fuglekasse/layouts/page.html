@@ -9,6 +9,6 @@
     {{- end }}
     {{- end }}
     {{ partial "record.html" .Content }}
-    {{ with site.Params.datePostFormat }}<p class="post-date"><time datetime="{{ $.Date.Format "2006-01-02" }}">{{ time.Format . $.Date }}</time></p>{{ end }}
+    {{ if and site.Params.datePostFormat (ne .Params.showDate false) }}<p class="post-date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format site.Params.datePostFormat .Date }}</time></p>{{ end }}
   </article>
 {{ end }}

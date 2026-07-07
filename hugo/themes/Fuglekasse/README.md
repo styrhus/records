@@ -2,7 +2,7 @@
 
 The default theme for [records](https://codeberg.org/tb4/records) — Norwegian for
 *nesting box*. A deliberately small, config-driven Hugo theme for publishing
-conversation transcripts: three templates, one web font, no build step.
+conversation transcripts: four templates, one web font, no build step.
 
 ## Customising
 
@@ -23,7 +23,7 @@ params:
 - To swap the greeting font file, drop a `.woff2` into `static/fonts/` and point
   `style.fontfile` at it.
 
-To go further, the three templates live in `layouts/`, and all the CSS is at the top of
+To go further, the templates live in `layouts/`, and all the CSS is at the top of
 `layouts/baseof.html`.
 
 ## Page mode
@@ -48,7 +48,29 @@ Explicit titles are never reformatted; unset keeps the raw slug.
 
 Set `params.datePostFormat` (same layout syntax) to also show the record's date
 bottom-right in each post — on record pages and in the posts/single home modes.
-Unset, no post date is shown.
+Unset, no post date is shown. A single page can opt out with `showDate: false`
+in its front matter.
+
+## 404 page
+
+Fuglekasse ships a default error page (`content/404.md`), built to `/404.html`
+so the host serves it for missing URLs. To write your own, shadow it with a
+`404.md` in your content directory, keeping this front matter:
+
+```yaml
+---
+title: Page not found
+url: /404.html
+layout: "404"
+showDate: false
+build:
+  list: never
+---
+```
+
+Below the front matter, the body is plain Markdown. (`url` and `layout` make
+the page render as `/404.html`; `showDate: false` hides the post date;
+`build.list: never` keeps it out of record lists.)
 
 ## License
 

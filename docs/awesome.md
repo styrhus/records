@@ -4,7 +4,7 @@ Want the site to look like *you*? The quickest changes are in
 `hugo/hugo.yaml`; the full design lives in the **Fuglekasse** theme under
 `hugo/themes/Fuglekasse/`.
 
-## The three layouts
+## The layouts
 
 They live in `hugo/themes/Fuglekasse/layouts/`:
 
@@ -12,6 +12,7 @@ They live in `hugo/themes/Fuglekasse/layouts/`:
 - `home.html` — the front page: greeting, intro, the list of records
 - `page.html` — a single record: wraps the user and assistant turns in
   styleable sections
+- `404.html` — the error page for missing URLs
 
 ## Colors
 
@@ -41,6 +42,23 @@ family, or drop a `.woff2` into `hugo/themes/Fuglekasse/static/fonts/` and set
 The small links at the bottom come from `repoURL` in `hugo/hugo.yaml`.
 Add a `records/LICENSE.md` with `title: License` and a license link
 appears too.
+
+## The error page
+
+Broken links land on the theme's default 404 page. To write your own, add a
+`records/404.md` — it shadows the theme's — keeping this front matter above
+your Markdown:
+
+```yaml
+---
+title: Page not found
+url: /404.html
+layout: "404"
+showDate: false
+build:
+  list: never
+---
+```
 
 ## See it while you work
 
