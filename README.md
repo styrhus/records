@@ -25,3 +25,13 @@ echo records/ >> .gitignore   # or track it as a submodule
 
 Nothing to configure: `contentDir` is the one source of truth, shared by Hugo
 and the skills.
+
+## Record together
+
+Teams, friends and lovers can share one **records** instance. Add them as
+collaborators on your fork, and they clone, they write, they commit — commit
+to it. Every push publishes to the same site.
+
+Who is who? It's all in git. Each record carries its author in the history —
+`git log records/` never forgets. One site, many voices, and git is init
+together.
