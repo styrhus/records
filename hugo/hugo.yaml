@@ -40,7 +40,7 @@ params:
   #   basic  — link index (default)
   #   posts  — latest N records as an excerpt feed (postsCount sets N, default 3)
   #   single — one-page document stack, oldest first, _index.md on top
-  pageMode: posts
+  # pageMode: posts
   postsCount: 3
 
   # Render timestamp-fallback record titles as formatted dates, using Go/Hugo
