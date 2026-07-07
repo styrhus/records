@@ -3,7 +3,17 @@
   {{ if not (in (slice "basic" "posts" "single") $mode) }}
     {{ warnf "Fuglekasse: unknown pageMode %q, falling back to \"basic\"" $mode }}
   {{ end }}
-  {{ with site.Params.greeting }}<h1 class="greeting">{{ . }}</h1>{{ end }}
+
+  {{/* posts mode paginates; greeting + intro render on page 1 only. */}}
+  {{ $paginator := false }}
+  {{ if eq $mode "posts" }}
+    {{ $all := where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" }}
+    {{ $sorted := sort (where $all "Params.featured" true) "Date" "desc" | append (sort (where $all "Params.featured" "!=" true) "Date" "desc") }}
+    {{ $paginator = .Paginate $sorted (site.Params.postsCount | default 3) }}
+  {{ end }}
+  {{ $firstPage := or (not $paginator) (eq $paginator.PageNumber 1) }}
+
+  {{ if $firstPage }}{{ with site.Params.greeting }}<h1 class="greeting">{{ . }}</h1>{{ end }}{{ end }}
 
   {{ if eq $mode "single" }}
     {{/* One-page document stack: _index first, then every record ascending (oldest→newest). */}}
@@ -18,9 +28,30 @@
         {{ partial "record.html" .Content }}
       </article>
     {{ end }}
+  {{ else if eq $mode "posts" }}
+    {{ if $firstPage }}{{ .Content }}{{ end }}
+    {{/* Excerpt feed, paginated postsCount at a time (newest first, featured pinned). */}}
+    {{ range $paginator.Pages }}
+      {{ $key := .File.ContentBaseName }}
+      {{ if not (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $key) }}
+        {{ $key = .Date.Format "2006-01-02_15-04" }}
+      {{ end }}
+      <article class="post">
+        <h2><a href="{{ .RelPermalink }}"><time datetime="{{ substr $key 0 10 }}">{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}</time>{{ if and .Title (ne .Title $key) }} — {{ .Title }}{{ end }}</a></h2>
+        {{ partial "record.html" .Summary }}
+        {{ if .Truncated }}<p class="more"><a href="{{ .RelPermalink }}">Read more →</a></p>{{ end }}
+      </article>
+    {{ end }}
+    {{ if or $paginator.HasPrev $paginator.HasNext }}
+      {{/* Newer → previous 3 (or front page); Previous → next 3 older. */}}
+      <nav class="pager">
+        {{ if $paginator.HasPrev }}<a class="newer" href="{{ $paginator.Prev.URL }}">← Newer</a>{{ end }}
+        {{ if $paginator.HasNext }}<a class="previous" href="{{ $paginator.Next.URL }}">Previous →</a>{{ end }}
+      </nav>
+    {{ end }}
   {{ else }}
     {{ .Content }}
-    {{/* Index of all records: featured pinned to top, both groups newest-first. */}}
+    {{/* basic: link index, featured pinned to top, both groups newest-first. */}}
     {{ $featured := slice }}
     {{ $rest := slice }}
     {{ range where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" }}
@@ -36,29 +67,15 @@
       {{ end }}
     {{ end }}
     {{ $records := sort $featured "key" "desc" | append (sort $rest "key" "desc") }}
-
-    {{ if eq $mode "posts" }}
-      {{/* Excerpt feed of the latest N records. */}}
-      {{ range first (site.Params.postsCount | default 3) $records }}
+    {{ if $records }}
+    <ul class="records">
+      {{ range $records }}
         {{ $p := .page }}
-        <article class="post">
-          <h2><a href="{{ $p.RelPermalink }}"><time datetime="{{ substr .key 0 10 }}">{{ substr .key 0 10 }} {{ replace (substr .key 11) "-" ":" }}</time>{{ if and $p.Title (ne $p.Title .key) }} — {{ $p.Title }}{{ end }}</a></h2>
-          {{ partial "record.html" $p.Summary }}
-          {{ if $p.Truncated }}<p class="more"><a href="{{ $p.RelPermalink }}">Read more →</a></p>{{ end }}
-        </article>
+        <li>
+          <a href="{{ $p.RelPermalink }}"><time datetime="{{ substr .key 0 10 }}">{{ substr .key 0 10 }} {{ replace (substr .key 11) "-" ":" }}</time>{{ if and $p.Title (ne $p.Title .key) }} — {{ $p.Title }}{{ end }}</a>
+        </li>
       {{ end }}
-    {{ else }}
-      {{/* basic: link index. */}}
-      {{ if $records }}
-      <ul class="records">
-        {{ range $records }}
-          {{ $p := .page }}
-          <li>
-            <a href="{{ $p.RelPermalink }}"><time datetime="{{ substr .key 0 10 }}">{{ substr .key 0 10 }} {{ replace (substr .key 11) "-" ":" }}</time>{{ if and $p.Title (ne $p.Title .key) }} — {{ $p.Title }}{{ end }}</a>
-          </li>
-        {{ end }}
-      </ul>
-      {{ end }}
+    </ul>
     {{ end }}
   {{ end }}
 {{ end }}
