@@ -51,6 +51,16 @@ bottom-right in each post — on record pages and in the posts/single home modes
 Unset, no post date is shown. A single page can opt out with `showDate: false`
 in its front matter.
 
+## Tags
+
+Give a record `tags: [linux, hardware]` in its front matter and dim `#linux
+#hardware` labels appear under the post — on the record page and in the
+posts/single home modes. They are display only: no tag pages, no links.
+On by default (`params.showTags: true`); set it to `false` to hide them
+site-wide, or opt a single record out with `showTags: false` in its front
+matter. Records may live in subfolders (`records/linux/…`); the folders are
+organisation only and render no index page of their own.
+
 ## 404 page
 
 Fuglekasse ships a default error page (`content/404.md`), built to `/404.html`

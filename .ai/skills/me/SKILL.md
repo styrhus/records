@@ -4,7 +4,7 @@ description: Use when the user invokes /me to start transcribing the user's mess
 disable-model-invocation: true
 model: haiku
 effort: low
-argument-hint: "[optional filename]"
+argument-hint: "[#tags] [optional filename]"
 allowed-tools:
   - Bash(mkdir *)
   - Bash(ls *)
@@ -31,21 +31,30 @@ The user invoked /me: create the transcript file, then stay silent. **Do not res
    - a docs-like dir exists one level down (e.g. `packages/docs/`) → use `<that>/records/`; prefer a `docs` match over the other names, and if several match equally, pick the first shown above
    - none exist → use `records/` at the project root
 2. **Create the directory** if it does not exist: `mkdir -p <parent>/records`.
-3. **Pick the filename**:
-   - If `$ARGUMENTS` is provided, use it as the filename (slugify: lowercase, spaces → hyphens; append `.md` if missing).
-   - Otherwise use the date+time shown above, e.g. `2026-07-03_14-35.md`.
-   - Never overwrite an existing file — append a numeric suffix (`-1`, `-2`, …) if the name is taken.
-4. **Create the file** with the Write tool, containing only this frontmatter (`draft: true` keeps it off the published site):
+3. **Extract tags** from `$ARGUMENTS`: tags are the *leading* `#word` tokens only.
+   Strip the `#`; lowercase; drop any character that is not a letter, digit or hyphen.
+   Stop at the first token that does not start with `#` — a `#` later in the text
+   belongs to the title. Whatever remains after the tags is the title text. Examples:
+   - `#linux #hardware How to do it right` → tags `linux, hardware`; title `How to do it right`
+   - `#linux` → tags `linux`; no title text
+   - `How to do it right` → no tags; title `How to do it right`
+4. **Pick the file path**:
+   - Tags given → the file goes in `<parent>/records/<first-tag>/` (`mkdir -p` it first); no tags → directly in `<parent>/records/`.
+   - Title text given → filename is the slugified title (lowercase, spaces → hyphens; append `.md` if missing).
+   - No title text → filename is the date+time shown above, e.g. `2026-07-03_14-35.md`.
+   - Never overwrite an existing file — append a numeric suffix (`-1`, `-2`, …) if the name is taken in that directory.
+5. **Create the file** with the Write tool, containing only this frontmatter (`draft: true` keeps it off the published site; omit the `tags:` line entirely when no tags were given):
 
    ```markdown
    ---
-   title: <date+time or user given argument verbatim>
+   title: <title text or date+time, verbatim>
    date: <ISO timestamp from Context, verbatim>
    draft: true
+   tags: [<tag1>, <tag2>]
    ---
    ```
 
-5. Output nothing and end the turn.
+6. Output nothing and end the turn.
 
 ## Recording (every following turn, until /esc)
 

@@ -29,6 +29,16 @@ markup:
 # assistant signature lines through page summaries.
 disableKinds: [taxonomy, term, rss]
 
+# Tag folders (records/<tag>/) organise files only — never render their
+# auto-generated section pages, so /linux/ stays a 404 and stays out of the
+# sitemap. The records inside keep their /linux/<slug>/ URLs.
+cascade:
+  - target:
+      kind: section
+    build:
+      render: never
+      list: never
+
 # Repo URL for raw-link rewrites in page.html; pages.yml overrides this
 # per-fork via HUGO_PARAMS_REPOURL. This value is the local-dev default.
 params:
@@ -56,6 +66,12 @@ params:
   # syntax). Remove to show no post date; a single record can opt out with
   # `showDate: false` in its front matter.
   datePostFormat: "02. January 2006 15:04"
+
+  # Records tagged in front matter (tags: [linux, hardware]) show dim
+  # "#linux #hardware" labels under the post — display only, no tag pages.
+  # On by default; uncomment to hide site-wide. A single record can opt out
+  # with `showTags: false` in its front matter.
+  # showTags: false
 
   # Look & feel — Fuglekasse ships these defaults; uncomment a line to override.
   # style:

@@ -15,7 +15,7 @@ publish just the same. The helpers below are optional conveniences.
 
 Nine AI skills live in `.ai/skills/`:
 
-- `/record` — transcribe the whole conversation into a record until `/esc`
+- `/record` — transcribe the whole conversation into a record until `/esc`; start with `#tags` (`/record #linux How to do it right`) to file it under `records/linux/` with tag labels
 - `/all` — like `/record`, but keeps only your (the human's) messages
 - `/me` — like `/all`, but as a draft, kept out of the published site
 - `/stick` — feature a record: pin it to the top and clear its draft flag

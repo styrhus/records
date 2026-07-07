@@ -2,6 +2,7 @@
   {{ $mode := site.Params.pageMode | default "basic" }}
   {{ $fmt := site.Params.dateTitleFormat }}
   {{ $dfmt := site.Params.datePostFormat }}
+  {{ $showTags := site.Params.showTags }}
   {{ if not (in (slice "basic" "posts" "single") $mode) }}
     {{ warnf "Fuglekasse: unknown pageMode %q, falling back to \"basic\"" $mode }}
   {{ end }}
@@ -28,6 +29,7 @@
       <article class="record-page">
         <h2 class="record-head">{{ if and .Title (ne .Title $key) }}{{ .Title }}{{ else }}<time datetime="{{ substr $key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .Date }}{{ else }}{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}{{ end }}</time>{{ end }}</h2>
         {{ partial "record.html" .Content }}
+        {{ if and $showTags (ne .Params.showTags false) .Params.tags }}<p class="post-tags">{{ range .Params.tags }}<span>#{{ . }}</span> {{ end }}</p>{{ end }}
         {{ if and $dfmt (ne .Params.showDate false) }}<p class="post-date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format $dfmt .Date }}</time></p>{{ end }}
       </article>
     {{ end }}
@@ -43,6 +45,7 @@
         <h2><a href="{{ .RelPermalink }}">{{ if and .Title (ne .Title $key) }}{{ .Title }}{{ else }}<time datetime="{{ substr $key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .Date }}{{ else }}{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}{{ end }}</time>{{ end }}</a></h2>
         {{ partial "record.html" .Summary }}
         {{ if .Truncated }}<p class="more"><a href="{{ .RelPermalink }}">Read more →</a></p>{{ end }}
+        {{ if and $showTags (ne .Params.showTags false) .Params.tags }}<p class="post-tags">{{ range .Params.tags }}<span>#{{ . }}</span> {{ end }}</p>{{ end }}
         {{ if and $dfmt (ne .Params.showDate false) }}<p class="post-date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format $dfmt .Date }}</time></p>{{ end }}
       </article>
     {{ end }}
