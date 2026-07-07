@@ -20,17 +20,19 @@ The user invoked /all: create the transcript file, then stay silent. **Do not re
 
 - Current date+time: !`date +%Y-%m-%d_%H-%M`
 - ISO timestamp (for frontmatter): !`date -Iseconds`
+- Records-site configs with their contentDir, cwd and below (empty = none): !`find . -maxdepth 4 \( -path '*/.*' -o -path '*/node_modules' \) -prune -o -path '*/hugo/hugo.yaml' -print -exec grep -m1 '^contentDir:' {} \; 2>/dev/null; true`
 - Existing docs-like dirs, cwd and one level down (empty = none): !`find . -mindepth 1 -maxdepth 2 -type d \( -name docs -o -name doc -o -name documentation -o -name notes -o -name records \) -not -path '*/.*' -not -path '*/node_modules/*' 2>/dev/null; true`
 
 ## Setup (this turn)
 
-1. **Pick the parent directory** for `records/`, in this priority order:
-   - `records/` already exists at the root → use it (highest priority; skip the rest)
+1. **Pick the records directory**, in this priority order:
+   - a records-site config was found above → resolve its `contentDir` against the `hugo/` dir holding the config and use that path (e.g. `./notes/site/hugo/hugo.yaml` + `contentDir: ../records` → `notes/site/records/`); a match with no `contentDir:` line means `../records`; several matches → the shallowest path wins. Skip the rest.
+   - `records/` already exists at the root → use it (skip the rest)
    - `docs/` exists at the root → use `docs/records/`
    - another docs-like dir exists at the root (`doc/`, `documentation/`, `notes/`) → use `<that>/records/`
    - a docs-like dir exists one level down (e.g. `packages/docs/`) → use `<that>/records/`; prefer a `docs` match over the other names, and if several match equally, pick the first shown above
    - none exist → use `records/` at the project root
-2. **Create the directory** if it does not exist: `mkdir -p <parent>/records`.
+2. **Create the directory** if it does not exist: `mkdir -p <records-dir>`.
 3. **Extract tags** from `$ARGUMENTS`: tags are the *leading* `#word` tokens only.
    Strip the `#`; lowercase; drop any character that is not a letter, digit or hyphen.
    Stop at the first token that does not start with `#` — a `#` later in the text
@@ -39,7 +41,7 @@ The user invoked /all: create the transcript file, then stay silent. **Do not re
    - `#linux` → tags `linux`; no title text
    - `How to do it right` → no tags; title `How to do it right`
 4. **Pick the file path**:
-   - Tags given → the file goes in `<parent>/records/<first-tag>/` (`mkdir -p` it first); no tags → directly in `<parent>/records/`.
+   - Tags given → the file goes in `<records-dir>/<first-tag>/` (`mkdir -p` it first); no tags → directly in `<records-dir>/`.
    - Title text given → filename is the slugified title (lowercase, spaces → hyphens; append `.md` if missing).
    - No title text → filename is the date+time shown above, e.g. `2026-07-03_14-35.md`.
    - Never overwrite an existing file — append a numeric suffix (`-1`, `-2`, …) if the name is taken in that directory.
