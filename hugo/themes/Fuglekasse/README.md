@@ -38,6 +38,14 @@ To go further, the three templates live in `layouts/`, and all the CSS is at the
   on top. Records are still reachable by direct URL, so links you write inside
   `records/*.md` keep working.
 
+## Record titles
+
+Records without a hand-written `title:` show their timestamp slug
+(`2026-07-06_23-25`). Set `params.dateTitleFormat` to a Go/Hugo
+[date layout](https://gohugo.io/methods/time/format/) — e.g. `"02. January 2006"` —
+to render those as formatted dates ("06. July 2026") everywhere titles appear.
+Explicit titles are never reformatted; unset keeps the raw slug.
+
 ## License
 
 MIT for the theme code. The bundled *Architects Daughter* font is SIL OFL 1.1 — see

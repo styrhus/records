@@ -3,6 +3,7 @@
 [params]
 pageMode = "basic"   # "basic" (link index) | "posts" (excerpt feed) | "single" (one-page document stack)
 postsCount = 3       # posts mode: how many latest records to show
+# dateTitleFormat = "02. January 2006"  # Go date layout for timestamp-fallback titles; unset keeps the raw slug
 
 [params.style]
 font = "Architects Daughter"

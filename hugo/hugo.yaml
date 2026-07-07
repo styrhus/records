@@ -8,10 +8,10 @@ theme: Fuglekasse
 # records/ is the single source of truth for content.
 contentDir: ../records
 
-# Timestamp-named records (YYYY-MM-DD_HH-MM.md) get their date from the
-# filename; named records (her-er-jeg.md) carry date: in frontmatter.
+# The explicit date: field is authoritative (ordering follows it, not the
+# filename); timestamp-named records without a date: fall back to the filename.
 frontmatter:
-  date: [':filename', ':default']
+  date: [':default', ':filename']
 
 # Filename date extraction strips the date prefix from the slug
 # (/18-41/ would collide across days); use the full filename as URL.
@@ -42,6 +42,11 @@ params:
   #   single — one-page document stack, oldest first, _index.md on top
   pageMode: posts
   postsCount: 3
+
+  # Render timestamp-fallback record titles as formatted dates, using Go/Hugo
+  # date layout syntax (https://gohugo.io/methods/time/format/).
+  # Remove to keep raw titles like "2026-07-06_23-25".
+  dateTitleFormat: "02. January 2006"
 
   # Look & feel — Fuglekasse ships these defaults; uncomment a line to override.
   # style:

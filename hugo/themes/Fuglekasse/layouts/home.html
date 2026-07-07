@@ -1,5 +1,6 @@
 {{ define "main" }}
   {{ $mode := site.Params.pageMode | default "basic" }}
+  {{ $fmt := site.Params.dateTitleFormat }}
   {{ if not (in (slice "basic" "posts" "single") $mode) }}
     {{ warnf "Fuglekasse: unknown pageMode %q, falling back to \"basic\"" $mode }}
   {{ end }}
@@ -18,13 +19,13 @@
   {{ if eq $mode "single" }}
     {{/* One-page document stack: _index first, then every record ascending (oldest→newest). */}}
     <article class="record-page">{{ .Content }}</article>
-    {{ range sort (where site.RegularPages "File.ContentBaseName" "ne" "LICENSE") "File.ContentBaseName" "asc" }}
+    {{ range sort (where site.RegularPages "File.ContentBaseName" "ne" "LICENSE") "Date" "asc" }}
       {{ $key := .File.ContentBaseName }}
       {{ if not (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $key) }}
         {{ $key = .Date.Format "2006-01-02_15-04" }}
       {{ end }}
       <article class="record-page">
-        <h2 class="record-head"><time datetime="{{ substr $key 0 10 }}">{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}</time>{{ if and .Title (ne .Title $key) }} — {{ .Title }}{{ end }}</h2>
+        <h2 class="record-head">{{ if and .Title (ne .Title $key) }}{{ .Title }}{{ else }}<time datetime="{{ substr $key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .Date }}{{ else }}{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}{{ end }}</time>{{ end }}</h2>
         {{ partial "record.html" .Content }}
       </article>
     {{ end }}
@@ -37,7 +38,7 @@
         {{ $key = .Date.Format "2006-01-02_15-04" }}
       {{ end }}
       <article class="post">
-        <h2><a href="{{ .RelPermalink }}"><time datetime="{{ substr $key 0 10 }}">{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}</time>{{ if and .Title (ne .Title $key) }} — {{ .Title }}{{ end }}</a></h2>
+        <h2><a href="{{ .RelPermalink }}">{{ if and .Title (ne .Title $key) }}{{ .Title }}{{ else }}<time datetime="{{ substr $key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .Date }}{{ else }}{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}{{ end }}</time>{{ end }}</a></h2>
         {{ partial "record.html" .Summary }}
         {{ if .Truncated }}<p class="more"><a href="{{ .RelPermalink }}">Read more →</a></p>{{ end }}
       </article>
@@ -59,20 +60,20 @@
       {{ if not (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $key) }}
         {{ $key = .Date.Format "2006-01-02_15-04" }}
       {{ end }}
-      {{ $item := dict "key" $key "page" . }}
+      {{ $item := dict "key" $key "date" .Date "page" . }}
       {{ if .Params.featured }}
         {{ $featured = $featured | append $item }}
       {{ else }}
         {{ $rest = $rest | append $item }}
       {{ end }}
     {{ end }}
-    {{ $records := sort $featured "key" "desc" | append (sort $rest "key" "desc") }}
+    {{ $records := sort $featured "date" "desc" | append (sort $rest "date" "desc") }}
     {{ if $records }}
     <ul class="records">
       {{ range $records }}
         {{ $p := .page }}
         <li>
-          <a href="{{ $p.RelPermalink }}"><time datetime="{{ substr .key 0 10 }}">{{ substr .key 0 10 }} {{ replace (substr .key 11) "-" ":" }}</time>{{ if and $p.Title (ne $p.Title .key) }} — {{ $p.Title }}{{ end }}</a>
+          <a href="{{ $p.RelPermalink }}">{{ if and $p.Title (ne $p.Title .key) }}{{ $p.Title }}{{ else }}<time datetime="{{ substr .key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .date }}{{ else }}{{ substr .key 0 10 }} {{ replace (substr .key 11) "-" ":" }}{{ end }}</time>{{ end }}</a>
         </li>
       {{ end }}
     </ul>
