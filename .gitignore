@@ -3,3 +3,6 @@ hugo/resources/
 *.local.md
 .hugo_build.lock
 2026-07-06_23-2*.md
+records/assembler-for-the-people.md
+records/programmers-in-10-years-from-now.md
+records/scalar-at-it-s-best.md

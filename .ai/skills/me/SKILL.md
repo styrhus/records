@@ -25,6 +25,7 @@ The user invoked /me: create the transcript file, then stay silent. **Do not res
 ## Setup (this turn)
 
 1. **Pick the parent directory** for `records/`, in this priority order:
+   - `records/` already exists at the root → use it (highest priority; skip the rest)
    - `docs/` exists at the root → use `docs/records/`
    - another docs-like dir exists at the root (`doc/`, `documentation/`, `notes/`) → use `<that>/records/`
    - a docs-like dir exists one level down (e.g. `packages/docs/`) → use `<that>/records/`; prefer a `docs` match over the other names, and if several match equally, pick the first shown above
