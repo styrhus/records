@@ -24,6 +24,10 @@ markup:
   goldmark:
     renderer:
       unsafe: true
+  # Emit Chroma token classes (not inline colours) so the theme's syntax
+  # CSS can switch with light/dark like the rest of the palette.
+  highlight:
+    noClasses: false
 
 # No taxonomies; no RSS — the embedded RSS template would leak the
 # assistant signature lines through page summaries.

@@ -50,6 +50,28 @@
     code { padding: 0.1em 0.3em; border-radius: 3px; }
     pre { overflow-x: auto; padding: 0.75rem; border-radius: 6px; }
     pre code { padding: 0; background: none; }
+    .highlight { margin: 1rem 0; }
+    .highlight pre { margin: 0; }
+    /* Syntax colours track light/dark. Light = Tokyo Night Light, dark = Dracula — matching params.style. */
+    :root {
+      --hl-comment: #9699a3; --hl-keyword: #5a3e8e; --hl-string: #385f0d;
+      --hl-number: #965027; --hl-func: #2959aa; --hl-builtin: #0f4b6e; --hl-var: #8c4351;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --hl-comment: #6272a4; --hl-keyword: #ff79c6; --hl-string: #f1fa8c;
+        --hl-number: #bd93f9; --hl-func: #50fa7b; --hl-builtin: #8be9fd; --hl-var: #ffb86c;
+      }
+    }
+    .chroma .c, .chroma .ch, .chroma .cm, .chroma .c1, .chroma .cs, .chroma .cp, .chroma .cpf { color: var(--hl-comment); font-style: italic; }
+    .chroma .k, .chroma .kc, .chroma .kd, .chroma .kn, .chroma .kp, .chroma .kr, .chroma .o, .chroma .ow { color: var(--hl-keyword); }
+    .chroma .s, .chroma .sa, .chroma .sb, .chroma .sc, .chroma .dl, .chroma .sd, .chroma .s2, .chroma .se, .chroma .sh, .chroma .si, .chroma .sx, .chroma .sr, .chroma .s1, .chroma .ss { color: var(--hl-string); }
+    .chroma .m, .chroma .mb, .chroma .mf, .chroma .mh, .chroma .mi, .chroma .il, .chroma .mo { color: var(--hl-number); }
+    .chroma .nf, .chroma .fm { color: var(--hl-func); }
+    .chroma .nb, .chroma .bp, .chroma .nt, .chroma .kt { color: var(--hl-builtin); }
+    .chroma .nv, .chroma .vc, .chroma .vg, .chroma .vi, .chroma .na, .chroma .gd { color: var(--hl-var); }
+    .chroma .gi { color: var(--hl-string); }
+    .chroma .err { color: var(--hl-var); }
     .post-date { text-align: right; font-size: 0.85em; color: var(--dim); margin: 0.5rem 0 0; }
     .post-tags { font-size: 0.85em; color: var(--dim); margin: 0.5rem 0 0; }
     ul.records { list-style: none; padding: 0; }
