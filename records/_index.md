@@ -13,24 +13,17 @@ publish just the same. The helpers below are optional conveniences.
 
 ## The helpers
 
-Twenty AI skills live in `.ai/skills/`:
+The essentials:
 
-- `/record` — transcribe the whole conversation into a record until `/esc`; start with `#tags` (`/record #linux How to do it right`) to file it under `records/linux/` with tag labels
-- `/all` — like `/record`, but keeps only your (the human's) messages
-- `/me` — like `/all`, but as a draft, kept out of the published site
+- `/record` — transcribe the conversation into a record until `/esc`; start with `#tags` (`/record #linux How to do it right`) to file it under `records/linux/`
 - `/stick` — feature a record: pin it to the top and clear its draft flag
-- `/esc` — stop active modes (record / all / me / poet / eq / pirate / spellcorrect); name one to stop only it
-- `/gc` — stage everything and commit
-- `/gcp` — stage everything, commit, and push
-- `/phil-gc` — like `/gc`, but the commit message is a real philosopher quote
-- `/cpd` — stage everything, commit, push, and deploy (here: the push itself publishes the site)
-- `/diff-1` `/diff-3` `/diff-5` `/diff-10` `/diff-20` — summarize the last N commits as a table
-- `/review` — review uncommitted changes and flag risks
-- `/poet` — every reply becomes short poetic prose until `/esc`
-- `/pirate` — every reply in a warm, helpful pirate voice until `/esc`
-- `/eq` — every reply capped at the token length of your own message until `/esc`
-- `/bff` — a wildly enthusiastic long-lost best friend greets you
-- `/spellcorrect` — replies end with a P.S. correcting spelling slips in your messages until `/esc`
+- `/cpd` — stage everything, commit, push — and the push publishes the site
+- `/esc` — stop active modes; name one to stop only it
+
+Twenty skills live in [`.ai/skills/`](https://codeberg.org/tb4/records/src/branch/main/.ai/skills) —
+drafts-only recording, commit variants, diff summaries, spelling corrections, and a few voices.
+
+
 
 ## Publishing
 
