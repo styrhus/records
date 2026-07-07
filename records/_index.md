@@ -35,7 +35,7 @@ The tiny footer link comes from `hugo/hugo.yaml` params: `repoURL` is the
 codeberg door. The look is the <img src="fuglekasse.svg" width="20" height="20" alt="" style="vertical-align:-4px"> **Fuglekasse** theme; its colors and greeting
 font live in that same `hugo/hugo.yaml`.
 
-> If you want a license link in the footer, add your own`records/LICENSE.md` with `title: License`.
+> If you want a license link in the footer, add your own `records/LICENSE.md`. Its `title:` becomes the link text (defaults to "License").
 
 When you have found your footing, rewrite this page — it is
 `records/_index.md`, the front page itself.

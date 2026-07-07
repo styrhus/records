@@ -40,8 +40,8 @@ family, or drop a `.woff2` into `hugo/themes/Fuglekasse/static/fonts/` and set
 ## The footer
 
 The small links at the bottom come from `repoURL` in `hugo/hugo.yaml`.
-Add a `records/LICENSE.md` with `title: License` and a license link
-appears too.
+Add a `records/LICENSE.md` and a license link appears too. Its `title:` becomes
+the link text — any language works (`title: Lizenz`); without one it reads "License".
 
 ## The error page
 
