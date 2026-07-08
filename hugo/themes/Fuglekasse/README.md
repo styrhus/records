@@ -34,9 +34,10 @@ To go further, the templates live in `layouts/`, and all the CSS is at the top o
 - `posts` — a feed of the latest records, each with an excerpt and a *Read more*
   link. `params.postsCount` (default `3`) sets how many appear.
 - `single` — a one-page site: no auto-generated record links; instead every
-  record is rendered inline as a "document" card, oldest first, with `_index.md`
-  on top. Records are still reachable by direct URL, so links you write inside
-  `records/*.md` keep working.
+  record is rendered inline as a "document" card, with `_index.md` on top.
+  `params.singleOrder` sets the record order — `"asc"` *(default)* runs
+  oldest→newest (top→bottom), `"desc"` puts the newest at top. Records are still
+  reachable by direct URL, so links you write inside `records/*.md` keep working.
 
 ## Record titles
 

@@ -6,6 +6,11 @@
   {{ if not (in (slice "basic" "posts" "single") $mode) }}
     {{ warnf "Fuglekasse: unknown pageMode %q, falling back to \"basic\"" $mode }}
   {{ end }}
+  {{ $order := site.Params.singleOrder | default "asc" }}
+  {{ if not (in (slice "asc" "desc") $order) }}
+    {{ warnf "Fuglekasse: unknown singleOrder %q, falling back to \"asc\"" $order }}
+    {{ $order = "asc" }}
+  {{ end }}
 
   {{/* posts mode paginates; greeting + intro render on page 1 only. */}}
   {{ $paginator := false }}
@@ -19,9 +24,9 @@
   {{ if $firstPage }}{{ with site.Params.greeting }}<h1 class="greeting">{{ . }}</h1>{{ end }}{{ end }}
 
   {{ if eq $mode "single" }}
-    {{/* One-page document stack: _index first, then every record ascending (oldest→newest). */}}
+    {{/* One-page document stack: _index first, then every record ordered by singleOrder (default oldest→newest). */}}
     <article class="record-page">{{ .Content }}</article>
-    {{ range sort (where site.RegularPages "File.ContentBaseName" "ne" "LICENSE") "Date" "asc" }}
+    {{ range sort (where site.RegularPages "File.ContentBaseName" "ne" "LICENSE") "Date" $order }}
       {{ $key := .File.ContentBaseName }}
       {{ if not (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $key) }}
         {{ $key = .Date.Format "2006-01-02_15-04" }}

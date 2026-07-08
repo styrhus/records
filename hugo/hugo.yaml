@@ -61,9 +61,13 @@ params:
   # Home page layout — Fuglekasse defaults to "basic"; uncomment to change.
   #   basic  — link index (default)
   #   posts  — latest N records as an excerpt feed (postsCount sets N, default 3)
-  #   single — one-page document stack, oldest first, _index.md on top
+  #   single — one-page document stack, _index.md on top, records per singleOrder
   # pageMode: single
   postsCount: 3
+
+  # single mode record order: "asc" (oldest→newest, top→bottom, default) or
+  # "desc" (newest at top). No effect in basic/posts modes.
+  # singleOrder: asc
 
   # Render timestamp-fallback record titles as formatted dates, using Go/Hugo
   # date layout syntax (https://gohugo.io/methods/time/format/).
