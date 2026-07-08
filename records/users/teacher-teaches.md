@@ -37,3 +37,22 @@ It walks through the fork-sync routine in small steps: adding `upstream` (`ssh:/
 One note: in your actual clone at `~/Prosjekter/nettsider/tb4-rot`, the Codeberg fork remote is named `codeberg` (not `origin`, which points to your local git server). The doc teaches the conventional origin/upstream naming since it's a generic guide — for your own clone, substitute `codeberg` for `origin` and everything else applies unchanged.
 
 — claude-fable-5
+
+## User
+
+/phil-gc
+
+## Assistant
+
+Done. Teaching materials and transcript recorded.
+
+— claude-fable-5
+
+```
+It is good to rub and polish our brain against another.
+
+— Michel de Montaigne
+
+— (20caa74)
+```
+
