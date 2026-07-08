@@ -93,6 +93,11 @@ params:
   # file in the theme's static/ (or your own static/); remove to show none.
   logo: fuglekasse.svg
 
+  # Browser-tab icon (<link rel="icon">). Point it at a file in static/;
+  # unset falls back to the shipped fuglekasse.svg. Kept separate from logo
+  # since favicons are square and logos are often not.
+  # favicon: fuglekasse.svg
+
   # Look & feel — Fuglekasse ships these defaults; uncomment a line to override.
   # style:
   #   font: Architects Daughter

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/svg+xml" href="{{ "fuglekasse.svg" | relURL }}">
+  <link rel="icon" href="{{ or site.Params.favicon "fuglekasse.svg" | relURL }}">
   <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ $t := .Title }}{{ if not $t }}{{ $t = .File.ContentBaseName }}{{ end }}{{ with site.Params.dateTitleFormat }}{{ if findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $t }}{{ $t = time.Format . $.Date }}{{ end }}{{ end }}{{ $t }} · {{ site.Title }}{{ end }}</title>
   <style>
     /* Palette + display font come from hugo.yaml params.style (see the theme README). */

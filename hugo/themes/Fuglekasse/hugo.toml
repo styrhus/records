@@ -8,6 +8,7 @@ singleOrder = "asc"  # single mode record order: "asc" (oldest→newest, top→b
 # datePostFormat = "02. January 2006 15:04"  # show the record date bottom-right in each post; unset shows none
 showTags = true      # show front-matter tags as dim #labels under each post; a page opts out with showTags: false
 # logo = "fuglekasse.svg"  # brand mark fixed to the bottom-right corner; unset shows none
+# favicon = "fuglekasse.svg"  # <link rel="icon"> file in static/; unset falls back to the shipped fuglekasse.svg
 
 [params.style]
 font = "Architects Daughter"

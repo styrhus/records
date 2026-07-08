@@ -69,6 +69,13 @@ drop your own into your site's `static/`) to pin a brand mark to the bottom-righ
 corner of every page. It is a fixed, non-clickable image that stays put while you
 scroll. Unset, no logo is shown.
 
+## Favicon
+
+Set `params.favicon` to a file in `static/` to use as the browser-tab icon
+(`<link rel="icon">`). Unset, it falls back to the shipped `fuglekasse.svg`. It is
+kept separate from `params.logo` because favicons are square while logos are often
+rectangular.
+
 ## 404 page
 
 Fuglekasse ships a default error page (`content/404.md`), built to `/404.html`
