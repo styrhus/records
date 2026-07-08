@@ -30,7 +30,7 @@ When refering to the repos, use ssh://git@codeberg.org/tb4/pages.git and ssh://g
 
 ## Assistant
 
-[docs/pulls.md](../../docs/pulls.md) is done — a teacher/student dialogue in the same `## User` / `## Assistant` format the /record skill produces.
+[docs/pulls.md](../../../docs/pulls.md) is done — a teacher/student dialogue in the same `## User` / `## Assistant` format the /record skill produces.
 
 It walks through the fork-sync routine in small steps: adding `upstream` (`ssh://git@codeberg.org/tb4/records.git`) as a second remote next to `origin` (`ssh://git@codeberg.org/tb4/pages.git`), then fetch, merge, and push, ending with the `git pull upstream main` shortcut. Each concept gets an analogy for the short-attention-span reader: upstream/downstream river for the repos, phone contacts for remotes, a delivery truck for fetch, streams joining for merge, two cooks on one recipe line for conflicts, and a warehouse shelf for the fork on Codeberg.
 
