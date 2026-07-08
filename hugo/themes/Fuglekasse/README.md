@@ -61,6 +61,13 @@ site-wide, or opt a single record out with `showTags: false` in its front
 matter. Records may live in subfolders (`records/linux/…`); the folders are
 organisation only and render no index page of their own.
 
+## Logo
+
+Set `params.logo` to a file in `static/` (the theme ships `fuglekasse.svg`, or
+drop your own into your site's `static/`) to pin a brand mark to the bottom-right
+corner of every page. It is a fixed, non-clickable image that stays put while you
+scroll. Unset, no logo is shown.
+
 ## 404 page
 
 Fuglekasse ships a default error page (`content/404.md`), built to `/404.html`

@@ -85,6 +85,10 @@ params:
   # with `showTags: false` in its front matter.
   # showTags: false
 
+  # Brand mark pinned to the bottom-right corner of every page. Point it at a
+  # file in the theme's static/ (or your own static/); remove to show none.
+  logo: fuglekasse.svg
+
   # Look & feel — Fuglekasse ships these defaults; uncomment a line to override.
   # style:
   #   font: Architects Daughter

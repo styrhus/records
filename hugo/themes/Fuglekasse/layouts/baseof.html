@@ -98,6 +98,8 @@
     .mode-single .record-head { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); margin: 0 0 1rem; }
     footer { margin-top: 4rem; font-size: 0.85em; color: var(--dim); }
     footer sup { font-size: 0.7em; }
+    /* Optional brand mark, pinned to the viewport corner (params.logo). */
+    .site-logo { position: fixed; right: 1rem; bottom: 1rem; width: 48px; height: auto; }
     /* Architects Daughter by Kimberly Geswein — SIL OFL 1.1, see fonts/OFL.txt. */
     @font-face {
       font-family: "{{ $s.font | safeCSS }}";
@@ -117,5 +119,6 @@
     {{ with site.Params.insidesBranch }}<sup><a href="{{ site.Params.repoURL }}/src/branch/{{ . }}">{{ . }}</a></sup>{{ end }}
     {{ with site.Params.repoURL }}<sup><a href="{{ . }}">{{ replaceRE `^https?://` "" . }}</a></sup>{{ end }}
   </footer>
+  {{ with site.Params.logo }}<img class="site-logo" src="{{ . | relURL }}" alt="">{{ end }}
 </body>
 </html>

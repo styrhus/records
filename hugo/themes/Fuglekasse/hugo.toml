@@ -6,6 +6,7 @@ postsCount = 3       # posts mode: how many latest records to show
 # dateTitleFormat = "02. January 2006"  # Go date layout for timestamp-fallback titles; unset keeps the raw slug
 # datePostFormat = "02. January 2006 15:04"  # show the record date bottom-right in each post; unset shows none
 showTags = true      # show front-matter tags as dim #labels under each post; a page opts out with showTags: false
+# logo = "fuglekasse.svg"  # brand mark fixed to the bottom-right corner; unset shows none
 
 [params.style]
 font = "Architects Daughter"
