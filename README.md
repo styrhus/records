@@ -35,3 +35,10 @@ to it. Every push publishes to the same site.
 Who is who? It's all in git. Each record carries its author in the history —
 `git log records/` never forgets. One site, many voices, and git is init
 together.
+
+## Github stars <span style="font-size:1.6em">⭐</span>
+
+```yaml
+recordsValue:
+    github-stars: null      # 
+```
