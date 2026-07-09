@@ -37,6 +37,24 @@ The greeting uses Architects Daughter. Point `params.style.font` at another
 family, or drop a `.woff2` into `hugo/themes/Fuglekasse/static/fonts/` and set
 `params.style.fontfile` to it.
 
+## Chapters
+
+Put records in a folder named after a number — `records/1/`, `records/2/`
+(or roman: `records/i/`, `records/ii/`) — and the front page groups them into
+a **chapter**: a titled block that folds open and shut. Loose records show
+first; chapters follow in order.
+
+To name a chapter, add a file `records/1/_index.md` with a title:
+
+```yaml
+---
+title: This is Chapter 1
+---
+```
+
+The heading then reads `1 — This is Chapter 1`. Skip the file (or the title)
+and the chapter just shows its number.
+
 ## The footer
 
 The small links at the bottom come from `repoURL` in `hugo/hugo.yaml`.
