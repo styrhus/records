@@ -45,6 +45,24 @@ Useful frontmatter:
 The AI skills listed on the front page (`/record`, `/stick`, and friends)
 handle most of this for you.
 
+## Chapters
+
+Put records in a folder named after a number — `records/1/`, `records/2/`
+(or roman: `records/i/`, `records/ii/`) — and the front page groups them into
+a **chapter**: a titled block that folds open and shut. Loose records show
+first; chapters follow in order.
+
+To name a chapter, add a file `records/1/_index.md` with a title:
+
+```yaml
+---
+title: This is Chapter 1
+---
+```
+
+The heading then reads `1 — This is Chapter 1`. Skip the file (or the title)
+and the chapter just shows its number.
+
 ## Publish
 
 Push to `main`. The workflow builds and publishes the site — nothing

@@ -32,8 +32,14 @@
   {{ if ne $mode "posts" }}
     {{ range $all.GroupBy "Section" }}
       {{ $name := .Key }}
+      {{/* Optional chapter title from records/<n>/_index.md; .File guards that
+           the section page exists, the compare drops Hugo's humanised default. */}}
+      {{ $title := "" }}
+      {{ with site.GetPage $name }}
+        {{ if and .File (ne (lower .Title) (lower $name)) }}{{ $title = .Title }}{{ end }}
+      {{ end }}
       {{ if findRE `^-?\d+$` $name }}
-        {{ $arabic = $arabic | append (dict "name" $name "num" (int $name) "pages" .Pages) }}
+        {{ $arabic = $arabic | append (dict "name" $name "num" (int $name) "title" $title "pages" .Pages) }}
         {{ $chapterNames = $chapterNames | append $name }}
       {{ else if and $name (findRE `^m{0,3}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3})$` (lower $name)) }}
         {{/* Roman → int: subtract a numeral standing before a larger one, else add. */}}
@@ -48,7 +54,7 @@
             {{ $num = add $num $v }}
           {{ end }}
         {{ end }}
-        {{ $roman = $roman | append (dict "name" $name "num" $num "pages" .Pages) }}
+        {{ $roman = $roman | append (dict "name" $name "num" $num "title" $title "pages" .Pages) }}
         {{ $chapterNames = $chapterNames | append $name }}
       {{ end }}
     {{ end }}
@@ -65,7 +71,7 @@
     {{ end }}
     {{ range $chapters }}
       <details class="chapter" open>
-        <summary>{{ .name }}</summary>
+        <summary>{{ .name }}{{ with .title }} — {{ . }}{{ end }}</summary>
         {{ range sort .pages "Date" $order }}
           {{ partial "inline/record-card.html" . }}
         {{ end }}
@@ -100,7 +106,7 @@
     {{ partial "inline/record-list.html" $loose }}
     {{ range $chapters }}
       <details class="chapter" open>
-        <summary>{{ .name }}</summary>
+        <summary>{{ .name }}{{ with .title }} — {{ . }}{{ end }}</summary>
         {{ partial "inline/record-list.html" .pages }}
       </details>
     {{ end }}

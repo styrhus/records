@@ -57,6 +57,12 @@ Note that a folder whose name happens to be a valid roman numeral (`cd`,
 `mix`, `ml`) is treated as a chapter too — pick a different tag name if that
 is not what you mean.
 
+Give a chapter a title by dropping an `_index.md` in its folder with a `title:`
+— `records/1/_index.md` with `title: This is Chapter 1` renders the heading as
+`1 — This is Chapter 1`. It is optional and needs an explicit `title:` (a bare
+`_index.md` shows just the number); the `_index.md` never becomes a record of
+its own.
+
 ## Record titles
 
 Records without a hand-written `title:` show their timestamp slug
