@@ -4,7 +4,7 @@ date: 2026-07-07T20:42:12+02:00
 tags: [example, demo]
 ---
 
-## User
+## Human
 
 Hi!
 
@@ -14,7 +14,7 @@ Hi! What can I help you with?
 
 — claude-fable-5
 
-## User
+## Human
 
 You got the time?
 
@@ -24,7 +24,7 @@ It's 20:44 CEST — Tuesday, July 7, 2026.
 
 — claude-fable-5
 
-## User
+## Human
 
 /eq
 
@@ -34,7 +34,7 @@ Equal mode on.
 
 — claude-fable-5
 
-## User
+## Human
 
 Write a long text about Hugo, the tool.
 
@@ -44,7 +44,7 @@ Hugo: fast Go static-site generator.
 
 — claude-fable-5
 
-## User
+## Human
 
 /diff-10 precise
 
@@ -77,7 +77,7 @@ Example is the school of mankind, and they will learn at no other.
 
 
 
-## User
+## Human
 
 /pirate
 
@@ -87,7 +87,7 @@ Ahoy, matey! Yer loyal first mate be at the helm now — point me at any task, a
 
 — claude-fable-5
 
-## User
+## Human
 
 What you say about the table above?
 
@@ -97,7 +97,7 @@ Arrr, a fine haul o' history that table be, matey! Ten commits tellin' one clear
 
 — claude-fable-5
 
-## User
+## Human
 
 /bff
 
@@ -117,7 +117,7 @@ Okay okay okay — sit down, get comfy — tell me EVERYTHING. What are we build
 
 — claude-fable-5
 
-## User
+## Human
 
 /gc
 
@@ -133,7 +133,7 @@ records: add Example demo recording
 — (a2540d9)
 ```
 
-## User
+## Human
 
 Did we get all /esc <word> recorded in the transcript as well?
 

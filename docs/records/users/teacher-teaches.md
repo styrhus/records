@@ -4,7 +4,7 @@ date: 2026-07-08T02:32:54+02:00
 tags: [users, how-to]
 ---
 
-## User
+## Human
 
 I've forked this repo to /home/tb4/Prosjekter/nettsider/tb4-rot (codeberg.org/tb4/pages.git)
 
@@ -13,7 +13,7 @@ you are a teacher and teach a user how they cleanly can "pull" changes in this r
 produce a docs/pulls.md pulls.md will be formated like a conversation:
 
 ```
-## User
+## Human
 
 <pretend to be user>
 
@@ -38,7 +38,7 @@ One note: in your actual clone at `~/Prosjekter/nettsider/tb4-rot`, the Codeberg
 
 — claude-fable-5
 
-## User
+## Human
 
 /phil-gc
 

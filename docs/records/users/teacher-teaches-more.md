@@ -4,7 +4,7 @@ date: 2026-07-08
 tags: ["user", "how-to", "git"]
 ---
 
-## User
+## Human
 
 I just merged from upstream. Magic.
 

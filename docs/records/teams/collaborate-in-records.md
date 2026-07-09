@@ -4,7 +4,7 @@ date: 2026-07-08T00:40:06+02:00
 tags: [teams, friends, all]
 ---
 
-## User
+## Human
 
 add section about collaborators working with the same **records** instance/repo. 
 

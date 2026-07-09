@@ -69,7 +69,7 @@ On **each** of your turns while recording:
    ```bash
    cat >> <file> <<'RECORD_XEOF_7'
 
-   ## User
+   ## Human
 
    <user message, verbatim, unmodified>
 

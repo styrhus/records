@@ -1,6 +1,6 @@
 # Pulling changes from the original repo into your fork
 
-## User
+## Human
 
 I forked `ssh://git@codeberg.org/tb4/records.git` into my own repo `ssh://git@codeberg.org/tb4/pages.git`. Now the original repo has new commits. How do I get them into my fork?
 
@@ -14,7 +14,7 @@ Three steps, always the same:
 2. Fetch what's new.
 3. Merge it into your branch.
 
-## User
+## Human
 
 Okay, step 1?
 
@@ -34,7 +34,7 @@ Check your contact list with:
 git remote -v
 ```
 
-## User
+## Human
 
 Done. Step 2?
 
@@ -48,7 +48,7 @@ Fetch is the delivery truck: it drops the new commits at your door, but **nothin
 
 That's the safe part — you can fetch as often as you like, it never breaks anything.
 
-## User
+## Human
 
 And step 3 opens the package?
 
@@ -65,7 +65,7 @@ Merge is two streams joining into one river: your commits and their commits flow
 
 If you haven't changed the same lines they did, git does this silently ("fast-forward" — like a zipper closing).
 
-## User
+## Human
 
 What if we *did* change the same lines?
 
@@ -92,7 +92,7 @@ git commit
 
 No panic needed: git never throws anything away during a conflict. It just waits for you to decide.
 
-## User
+## Human
 
 Is my fork on Codeberg updated now too?
 
@@ -106,7 +106,7 @@ git push origin main
 
 Now all three are in sync: upstream, your clone, and your fork.
 
-## User
+## Human
 
 Can I shorten fetch + merge?
 
