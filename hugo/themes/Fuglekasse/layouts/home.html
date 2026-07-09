@@ -1,6 +1,5 @@
 {{ define "main" }}
   {{ $mode := site.Params.pageMode | default "basic" }}
-  {{ $fmt := site.Params.dateTitleFormat }}
   {{ $dfmt := site.Params.datePostFormat }}
   {{ $showTags := site.Params.showTags }}
   {{ if not (in (slice "basic" "posts" "single") $mode) }}
@@ -79,6 +78,34 @@
   {{ $chapters := sort $arabic "num" | append (sort $roman "num") }}
   {{ $loose := where $all "Section" "not in" $chapterNames }}
 
+  {{/* Floating table of contents (params.showToc): top-right, collapsed; home page, single/basic modes. */}}
+  {{ if and site.Params.showToc (ne $mode "posts") (or $loose $chapters) }}
+    {{ $isSingle := eq $mode "single" }}
+    {{ $dir := cond $isSingle $order "desc" }}
+    <details class="toc">
+      <summary aria-label="Table of contents"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></summary>
+      <nav class="toc-body">
+        {{ with $loose }}
+          <ul class="toc-loose">
+            {{ range sort . "Date" $dir }}
+              <li><a href="{{ cond $isSingle (printf "#%s" (path.Base .RelPermalink)) .RelPermalink }}">{{ partial "inline/record-title.html" . }}</a></li>
+            {{ end }}
+          </ul>
+        {{ end }}
+        {{ range $chapters }}
+          <details class="toc-chapter">
+            <summary>{{ .name }}{{ with .title }} — {{ . }}{{ end }}</summary>
+            <ul>
+              {{ range sort .pages "Date" $dir }}
+                <li><a href="{{ cond $isSingle (printf "#%s" (path.Base .RelPermalink)) .RelPermalink }}">{{ partial "inline/record-title.html" . }}</a></li>
+              {{ end }}
+            </ul>
+          </details>
+        {{ end }}
+      </nav>
+    </details>
+  {{ end }}
+
   {{ if eq $mode "single" }}
     {{/* One-page document stack: _index first, loose records per singleOrder, then chapters. */}}
     <article class="record-page">{{ .Content }}</article>
@@ -97,12 +124,8 @@
     {{ if $firstPage }}{{ .Content }}{{ end }}
     {{/* Excerpt feed, paginated postsCount at a time (newest first, featured pinned). */}}
     {{ range $paginator.Pages }}
-      {{ $key := .File.ContentBaseName }}
-      {{ if not (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $key) }}
-        {{ $key = .Date.Format "2006-01-02_15-04" }}
-      {{ end }}
       <article class="post">
-        <h2><a href="{{ .RelPermalink }}">{{ if and .Title (ne .Title $key) }}{{ .Title }}{{ else }}<time datetime="{{ substr $key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .Date }}{{ else }}{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}{{ end }}</time>{{ end }}</a></h2>
+        <h2><a href="{{ .RelPermalink }}">{{ partial "inline/record-title.html" . }}</a></h2>
         {{ partial "record.html" (dict "content" .Summary "prefix" (path.Base .RelPermalink)) }}
         {{ if .Truncated }}<p class="more"><a href="{{ .RelPermalink }}">Read more →</a></p>{{ end }}
         {{ if and $showTags (ne .Params.showTags false) .Params.tags }}<p class="post-tags">{{ range .Params.tags }}<span>#{{ . }}</span> {{ end }}</p>{{ end }}
@@ -131,14 +154,9 @@
 
 {{/* One record as a single-mode document card. */}}
 {{ define "_partials/inline/record-card.html" }}
-  {{ $fmt := site.Params.dateTitleFormat }}
-  {{ $key := .File.ContentBaseName }}
-  {{ if not (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $key) }}
-    {{ $key = .Date.Format "2006-01-02_15-04" }}
-  {{ end }}
   {{ $id := path.Base .RelPermalink }}
   <article class="record-page">
-    <h2 class="record-head" id="{{ $id }}">{{ if and .Title (ne .Title $key) }}{{ .Title }}{{ else }}<time datetime="{{ substr $key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .Date }}{{ else }}{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}{{ end }}</time>{{ end }}<a class="anchor" href="#{{ $id }}" aria-label="Link to this record">#</a></h2>
+    <h2 class="record-head" id="{{ $id }}">{{ partial "inline/record-title.html" . }}<a class="anchor" href="#{{ $id }}" aria-label="Link to this record">#</a></h2>
     {{ partial "record.html" (dict "content" .Content "prefix" $id) }}
     {{ if and site.Params.showTags (ne .Params.showTags false) .Params.tags }}<p class="post-tags">{{ range .Params.tags }}<span>#{{ . }}</span> {{ end }}</p>{{ end }}
     {{ if and site.Params.datePostFormat (ne .Params.showDate false) }}<p class="post-date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format site.Params.datePostFormat .Date }}</time></p>{{ end }}
@@ -147,19 +165,22 @@
 
 {{/* A set of records as the basic-mode link list, featured pinned, newest first. */}}
 {{ define "_partials/inline/record-list.html" }}
-  {{ $fmt := site.Params.dateTitleFormat }}
   {{ $sorted := sort (where . "Params.featured" true) "Date" "desc" | append (sort (where . "Params.featured" "!=" true) "Date" "desc") }}
   {{ with $sorted }}
   <ul class="records">
     {{ range . }}
-      {{ $key := .File.ContentBaseName }}
-      {{ if not (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $key) }}
-        {{ $key = .Date.Format "2006-01-02_15-04" }}
-      {{ end }}
       <li>
-        <a href="{{ .RelPermalink }}">{{ if and .Title (ne .Title $key) }}{{ .Title }}{{ else }}<time datetime="{{ substr $key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .Date }}{{ else }}{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}{{ end }}</time>{{ end }}</a>
+        <a href="{{ .RelPermalink }}">{{ partial "inline/record-title.html" . }}</a>
       </li>
     {{ end }}
   </ul>
   {{ end }}
+{{ end }}
+
+{{/* A record's display title: hand-written .Title, else the timestamp slug via dateTitleFormat. */}}
+{{ define "_partials/inline/record-title.html" }}
+  {{- $fmt := site.Params.dateTitleFormat -}}
+  {{- $key := .File.ContentBaseName -}}
+  {{- if not (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $key) }}{{ $key = .Date.Format "2006-01-02_15-04" }}{{ end -}}
+  {{- if and .Title (ne .Title $key) }}{{ .Title }}{{ else }}<time datetime="{{ substr $key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .Date }}{{ else }}{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}{{ end }}</time>{{ end -}}
 {{ end }}

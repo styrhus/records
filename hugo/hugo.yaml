@@ -77,6 +77,11 @@ params:
   # or `chapterOpen: false`.
   # chapterState: latest
 
+  # Floating table of contents: a collapsed button pinned top-right on the home
+  # page (single/basic modes) that opens to the chapters and their records.
+  # Off by default; uncomment to enable.
+  # showToc: true
+
   # Render timestamp-fallback record titles as formatted dates, using Go/Hugo
   # date layout syntax (https://gohugo.io/methods/time/format/).
   # Remove to keep raw titles like "2026-07-06_23-25". Examples:

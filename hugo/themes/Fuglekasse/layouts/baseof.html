@@ -118,6 +118,22 @@
     .scroll-to-top.visible { opacity: 1; visibility: visible; }
     .scroll-to-top:hover { transform: translateX(-50%) scale(1.12); background: var(--fg); }
     .scroll-to-top svg { width: 22px; height: 22px; fill: none; stroke: var(--bg); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+    /* Floating table of contents (params.showToc): collapsed button top-right, panel drops below. */
+    .toc { position: fixed; top: 1rem; right: 1rem; z-index: 1000; }
+    .toc > summary { list-style: none; cursor: pointer; width: 44px; height: 44px; margin-left: auto; border-radius: 8px; background: var(--surface); color: var(--fg); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,.14); }
+    .toc > summary::-webkit-details-marker { display: none; }
+    .toc > summary::marker { content: ""; }
+    .toc > summary:hover, .toc[open] > summary { background: var(--accent); color: var(--bg); }
+    .toc > summary svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .toc-body { margin-top: 0.5rem; padding: 0.75rem 1rem; max-width: min(18rem, calc(100vw - 2rem)); max-height: calc(100vh - 5rem); overflow-y: auto; background: var(--surface); border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,.14); font-size: 0.9em; line-height: 1.5; }
+    .toc-body ul { list-style: none; margin: 0; padding: 0; }
+    .toc-body li { margin: 0.25rem 0; }
+    .toc-body a { text-decoration: none; color: var(--fg); }
+    .toc-body a:hover { color: var(--accent); text-decoration: underline; }
+    .toc-loose { margin-bottom: 0.5rem; }
+    .toc-chapter > summary { cursor: pointer; font-weight: 600; margin: 0.4rem 0 0.2rem; }
+    .toc-chapter > summary::marker { color: var(--dim); }
+    .toc-chapter > ul { padding-left: 0.9rem; }
     /* Architects Daughter by Kimberly Geswein — SIL OFL 1.1, see fonts/OFL.txt. */
     @font-face {
       font-family: "{{ $s.font | safeCSS }}";
@@ -188,6 +204,21 @@
       for (var j = 0; j < chapterAnchors.length; j++) {
         chapterAnchors[j].addEventListener('click', function (e) { e.stopPropagation(); });
       }
+
+      // Open any collapsed <details> that holds the hash target so TOC/anchor links reveal it.
+      function revealHashTarget() {
+        if (!location.hash) return;
+        var t = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+        if (!t) return;
+        var el = t.parentElement, opened = false;
+        while (el) {
+          if (el.tagName === 'DETAILS' && !el.open) { el.open = true; opened = true; }
+          el = el.parentElement;
+        }
+        if (opened) t.scrollIntoView();
+      }
+      window.addEventListener('hashchange', revealHashTarget);
+      if (location.hash) revealHashTarget();
     })();
   </script>
 </body>

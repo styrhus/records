@@ -73,6 +73,18 @@ Give a chapter a title by dropping an `_index.md` in its folder with a `title:`
 `_index.md` shows just the number); the `_index.md` never becomes a record of
 its own.
 
+## Table of contents
+
+Set `params.showToc: true` to add a floating table of contents — a small button
+pinned to the top-right corner of the **home page** (it stays put as you scroll)
+in the `single` and `basic` page modes. It is **off by default** and does
+nothing in `posts` mode.
+
+Clicking the button opens a panel: loose (non-chapter) records first, then each
+chapter as a row you click to reveal its records. In `single` mode the links
+jump to the record on the same page (opening its chapter if it was collapsed);
+in `basic` mode they open the record's own page.
+
 ## Record titles
 
 Records without a hand-written `title:` show their timestamp slug
