@@ -57,6 +57,9 @@
     table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
     th, td { border: 1px solid var(--dim); padding: 0.4em 0.7em; text-align: left; }
     tbody tr:nth-child(even) { background: var(--surface); }
+    blockquote { margin: 1rem 0; padding: 0.6rem 1rem; border-left: 4px solid var(--accent); background: var(--surface); border-radius: 4px; }
+    blockquote > :first-child { margin-top: 0; }
+    blockquote > :last-child { margin-bottom: 0; }
     /* Syntax colours track light/dark. Light = Tokyo Night Light, dark = Dracula — matching params.style. */
     :root {
       --hl-comment: #9699a3; --hl-keyword: #5a3e8e; --hl-string: #385f0d;
