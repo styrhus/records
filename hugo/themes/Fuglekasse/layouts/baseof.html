@@ -219,6 +219,14 @@
       }
       window.addEventListener('hashchange', revealHashTarget);
       if (location.hash) revealHashTarget();
+
+      // Close the open TOC when clicking outside it.
+      var toc = document.querySelector('details.toc');
+      if (toc) {
+        document.addEventListener('click', function (e) {
+          if (toc.open && !toc.contains(e.target)) toc.open = false;
+        });
+      }
     })();
   </script>
 </body>
