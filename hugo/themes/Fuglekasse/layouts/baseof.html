@@ -111,6 +111,11 @@
     footer sup { font-size: 0.7em; }
     /* Optional brand mark, pinned to the viewport corner (params.logo). */
     .site-logo { position: fixed; right: 1rem; bottom: 1rem; width: 48px; height: auto; }
+    /* Scroll-to-top button: centre-bottom, shown once the opening viewport scrolls away. */
+    .scroll-to-top { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); width: 48px; height: 48px; padding: 0; border: none; border-radius: 50%; background: var(--accent); cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.2s, transform 0.2s, background 0.2s; z-index: 1000; }
+    .scroll-to-top.visible { opacity: 1; visibility: visible; }
+    .scroll-to-top:hover { transform: translateX(-50%) scale(1.12); background: var(--fg); }
+    .scroll-to-top svg { width: 22px; height: 22px; fill: none; stroke: var(--bg); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
     /* Architects Daughter by Kimberly Geswein — SIL OFL 1.1, see fonts/OFL.txt. */
     @font-face {
       font-family: "{{ $s.font | safeCSS }}";
@@ -131,5 +136,51 @@
     {{ with site.Params.repoURL }}<sup><a href="{{ . }}">{{ replaceRE `^https?://` "" . }}</a></sup>{{ end }}
   </footer>
   {{ with site.Params.logo }}<img class="site-logo" src="{{ . | relURL }}" alt="">{{ end }}
+  <script>
+    (function () {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'scroll-to-top';
+      btn.setAttribute('aria-label', 'Scroll to top');
+      btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+      document.body.appendChild(btn);
+
+      var isSingle = !!document.querySelector('main.mode-single');
+
+      // Reveal the button once the opening viewport has scrolled out of sight.
+      var ticking = false;
+      window.addEventListener('scroll', function () {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(function () {
+          btn.classList.toggle('visible', window.scrollY > window.innerHeight);
+          ticking = false;
+        });
+      });
+
+      // The last chapter summary at or above the viewport top is the one we're inside.
+      function currentChapterSummary() {
+        var summaries = document.querySelectorAll('details.chapter > summary');
+        var found = null;
+        for (var i = 0; i < summaries.length; i++) {
+          if (summaries[i].getBoundingClientRect().top < 2) found = summaries[i];
+          else break;
+        }
+        return found;
+      }
+
+      btn.addEventListener('click', function () {
+        // Single mode: first click lands on the current chapter, next click goes to the top.
+        if (isSingle) {
+          var summary = currentChapterSummary();
+          if (summary && summary.getBoundingClientRect().top < -2) {
+            summary.scrollIntoView({ behavior: 'smooth' });
+            return;
+          }
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    })();
+  </script>
 </body>
 </html>
