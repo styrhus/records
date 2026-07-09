@@ -54,6 +54,10 @@ every chapter, `"collapsed"` closes every one. A single chapter overrides the
 global setting with `chapterOpen: true` or `chapterOpen: false` in its
 `_index.md` front matter (unset inherits `chapterState`).
 
+Hovering a chapter title reveals a `#` link (as on record titles) that anchors
+to `#chapter-<folder-name>`; clicking it links to the chapter without toggling
+the fold.
+
 Records outside numbered folders render first, exactly as without chapters;
 the chapters follow in ascending order, arabic before roman (`-1, 0, 2, i, iv`),
 regardless of `singleOrder` — that setting only orders the records *inside*

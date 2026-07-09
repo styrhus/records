@@ -98,10 +98,10 @@
     }
     .mode-single .record-page:last-child { margin-bottom: 0; }
     .mode-single .record-head { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); margin: 0 0 1rem; }
-    /* Hover "#" anchors on single-mode record titles and every Human turn heading. */
-    .record-head, section.user h2 { scroll-margin-top: 1rem; }
+    /* Hover "#" anchors on single-mode record titles, every Human turn heading, and chapter summaries. */
+    .record-head, section.user h2, details.chapter > summary { scroll-margin-top: 1rem; }
     .anchor { margin-left: 0.4em; color: var(--dim); text-decoration: none; opacity: 0; transition: opacity 0.15s; }
-    .record-head:hover .anchor, section.user h2:hover .anchor, .anchor:focus { opacity: 1; }
+    .record-head:hover .anchor, section.user h2:hover .anchor, details.chapter > summary:hover .anchor, .anchor:focus { opacity: 1; }
     .anchor:hover { text-decoration: none; }
     /* Chapters: numbered records/ folders fold under a clickable title. */
     details.chapter { margin: 2.5rem 0; }
@@ -182,6 +182,12 @@
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
+
+      // A "#" click on a chapter summary links to it without toggling the fold.
+      var chapterAnchors = document.querySelectorAll('details.chapter > summary .anchor');
+      for (var j = 0; j < chapterAnchors.length; j++) {
+        chapterAnchors[j].addEventListener('click', function (e) { e.stopPropagation(); });
+      }
     })();
   </script>
 </body>

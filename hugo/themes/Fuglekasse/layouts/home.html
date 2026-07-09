@@ -87,7 +87,7 @@
     {{ end }}
     {{ range $chapters }}
       <details class="chapter"{{ if .open }} open{{ end }}>
-        <summary>{{ .name }}{{ with .title }} — {{ . }}{{ end }}</summary>
+        <summary id="chapter-{{ .name }}">{{ .name }}{{ with .title }} — {{ . }}{{ end }}<a class="anchor" href="#chapter-{{ .name }}" aria-label="Link to this chapter">#</a></summary>
         {{ range sort .pages "Date" $order }}
           {{ partial "inline/record-card.html" . }}
         {{ end }}
@@ -122,7 +122,7 @@
     {{ partial "inline/record-list.html" $loose }}
     {{ range $chapters }}
       <details class="chapter"{{ if .open }} open{{ end }}>
-        <summary>{{ .name }}{{ with .title }} — {{ . }}{{ end }}</summary>
+        <summary id="chapter-{{ .name }}">{{ .name }}{{ with .title }} — {{ . }}{{ end }}<a class="anchor" href="#chapter-{{ .name }}" aria-label="Link to this chapter">#</a></summary>
         {{ partial "inline/record-list.html" .pages }}
       </details>
     {{ end }}
