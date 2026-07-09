@@ -44,7 +44,9 @@
     ::selection { background: var(--accent); color: var(--bg); }
     section:empty { display: none; }
     section.user { border-left: 3px solid var(--accent); padding-left: 1rem; }
-    section.user h2, section.assistant h2 { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); margin: 2.5rem 0 0.25rem; }
+    section.user h2, section.assistant h2 { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; margin: 2.5rem 0 0.25rem; }
+    section.user h2 { color: var(--accent); }
+    section.assistant h2 { color: var(--fg); }
     section.assistant { opacity: 0.75; }
     code, pre { font-size: 0.9em; background: var(--surface); }
     code { padding: 0.1em 0.3em; border-radius: 3px; }
