@@ -11,8 +11,16 @@
     {{ warnf "Fuglekasse: unknown singleOrder %q, falling back to \"asc\"" $order }}
     {{ $order = "asc" }}
   {{ end }}
+  {{ $chapterState := site.Params.chapterState | default "latest" }}
+  {{ if not (in (slice "latest" "expanded" "collapsed") $chapterState) }}
+    {{ warnf "Fuglekasse: unknown chapterState %q, falling back to \"latest\"" $chapterState }}
+    {{ $chapterState = "latest" }}
+  {{ end }}
 
   {{ $all := where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" }}
+  {{/* chapterState "latest": the chapter holding the newest record stays open. */}}
+  {{ $latestSection := "" }}
+  {{ if $all }}{{ $latestSection = (index (sort $all "Date" "desc") 0).Section }}{{ end }}
 
   {{/* posts mode paginates; greeting + intro render on page 1 only. */}}
   {{ $paginator := false }}
@@ -35,11 +43,19 @@
       {{/* Optional chapter title from records/<n>/_index.md; .File guards that
            the section page exists, the compare drops Hugo's humanised default. */}}
       {{ $title := "" }}
+      {{/* override "open"/"closed" from _index.md chapterOpen; isset keeps false ≠ unset. */}}
+      {{ $override := "" }}
       {{ with site.GetPage $name }}
         {{ if and .File (ne (lower .Title) (lower $name)) }}{{ $title = .Title }}{{ end }}
+        {{ if isset .Params "chapteropen" }}{{ $override = cond .Params.chapteropen "open" "closed" }}{{ end }}
       {{ end }}
+      {{/* Global chapterState, then the per-chapter override wins. */}}
+      {{ $open := false }}
+      {{ if eq $chapterState "expanded" }}{{ $open = true }}
+      {{ else if eq $chapterState "latest" }}{{ $open = eq $name $latestSection }}{{ end }}
+      {{ if eq $override "open" }}{{ $open = true }}{{ else if eq $override "closed" }}{{ $open = false }}{{ end }}
       {{ if findRE `^-?\d+$` $name }}
-        {{ $arabic = $arabic | append (dict "name" $name "num" (int $name) "title" $title "pages" .Pages) }}
+        {{ $arabic = $arabic | append (dict "name" $name "num" (int $name) "title" $title "open" $open "pages" .Pages) }}
         {{ $chapterNames = $chapterNames | append $name }}
       {{ else if and $name (findRE `^m{0,3}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3})$` (lower $name)) }}
         {{/* Roman → int: subtract a numeral standing before a larger one, else add. */}}
@@ -54,7 +70,7 @@
             {{ $num = add $num $v }}
           {{ end }}
         {{ end }}
-        {{ $roman = $roman | append (dict "name" $name "num" $num "title" $title "pages" .Pages) }}
+        {{ $roman = $roman | append (dict "name" $name "num" $num "title" $title "open" $open "pages" .Pages) }}
         {{ $chapterNames = $chapterNames | append $name }}
       {{ end }}
     {{ end }}
@@ -70,7 +86,7 @@
       {{ partial "inline/record-card.html" . }}
     {{ end }}
     {{ range $chapters }}
-      <details class="chapter" open>
+      <details class="chapter"{{ if .open }} open{{ end }}>
         <summary>{{ .name }}{{ with .title }} — {{ . }}{{ end }}</summary>
         {{ range sort .pages "Date" $order }}
           {{ partial "inline/record-card.html" . }}
@@ -105,7 +121,7 @@
     {{/* basic: link index (featured pinned, newest-first); loose records first, then chapters. */}}
     {{ partial "inline/record-list.html" $loose }}
     {{ range $chapters }}
-      <details class="chapter" open>
+      <details class="chapter"{{ if .open }} open{{ end }}>
         <summary>{{ .name }}{{ with .title }} — {{ . }}{{ end }}</summary>
         {{ partial "inline/record-list.html" .pages }}
       </details>

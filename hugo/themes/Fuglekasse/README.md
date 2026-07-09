@@ -46,7 +46,13 @@ Name a first-level folder in your content directory after a number — arabic
 case-insensitive) — and the home page groups its records into a **chapter**: a
 block titled with the folder name that folds and unfolds when its title is
 clicked. Chapters appear in the `single` and `basic` page modes (the `posts`
-feed stays flat) and start expanded.
+feed stays flat).
+
+`params.chapterState` sets the fold state: `"latest"` *(default)* opens the
+chapter holding the newest record and collapses the rest, `"expanded"` opens
+every chapter, `"collapsed"` closes every one. A single chapter overrides the
+global setting with `chapterOpen: true` or `chapterOpen: false` in its
+`_index.md` front matter (unset inherits `chapterState`).
 
 Records outside numbered folders render first, exactly as without chapters;
 the chapters follow in ascending order, arabic before roman (`-1, 0, 2, i, iv`),

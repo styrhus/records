@@ -69,6 +69,14 @@ params:
   # "desc" (newest at top). No effect in basic/posts modes.
   # singleOrder: asc
 
+  # Chapter fold state in basic/single modes (numbered records/<n>/ folders):
+  #   latest    — open the chapter holding the newest record, collapse the rest (default)
+  #   expanded  — every chapter open
+  #   collapsed — every chapter closed
+  # A chapter's records/<n>/_index.md can override this with `chapterOpen: true`
+  # or `chapterOpen: false`.
+  # chapterState: latest
+
   # Render timestamp-fallback record titles as formatted dates, using Go/Hugo
   # date layout syntax (https://gohugo.io/methods/time/format/).
   # Remove to keep raw titles like "2026-07-06_23-25". Examples:
