@@ -1,6 +1,10 @@
-{{/* Takes rendered record HTML (.Content or .Summary): strip signatures, rewrite records/ links, wrap speaker turns. */}}
-{{ $c := . | replaceRE `<p>— [\w.-]+</p>` "" }}
+{{/* Takes {content, prefix?}: content is rendered record HTML (.Content/.Summary). Strip signatures,
+     rewrite records/ links, wrap speaker turns. Each Human turn keeps its heading id (namespaced by
+     prefix, so ids stay unique when many records share one page) and gets a hover "#" anchor. */}}
+{{ $c := .content | replaceRE `<p>— [\w.-]+</p>` "" }}
 {{ $c = replaceRE `href="[^"]*records/([^"]+)"` (printf `href="%s/raw/branch/main/records/$1"` site.Params.repoURL) $c }}
-{{ $c = replaceRE `<h2 id="(?:human|user)(?:-\d+)?">` `</section><section class="user"><h2>` $c }}
+{{ $p := "" }}
+{{ with .prefix }}{{ $p = printf "%s-" . }}{{ end }}
+{{ $c = replaceRE `<h2 id="((?:human|user)(?:-\d+)?)">([^<]*)</h2>` (printf `</section><section class="user"><h2 id="%s$1">$2<a class="anchor" href="#%s$1">#</a></h2>` $p $p) $c }}
 {{ $c = replaceRE `<h2 id="assistant(?:-\d+)?">` `</section><section class="assistant"><h2>` $c }}
 {{ printf "<section>%s</section>" $c | safeHTML }}

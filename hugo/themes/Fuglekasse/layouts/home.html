@@ -81,7 +81,7 @@
       {{ end }}
       <article class="post">
         <h2><a href="{{ .RelPermalink }}">{{ if and .Title (ne .Title $key) }}{{ .Title }}{{ else }}<time datetime="{{ substr $key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .Date }}{{ else }}{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}{{ end }}</time>{{ end }}</a></h2>
-        {{ partial "record.html" .Summary }}
+        {{ partial "record.html" (dict "content" .Summary "prefix" (path.Base .RelPermalink)) }}
         {{ if .Truncated }}<p class="more"><a href="{{ .RelPermalink }}">Read more →</a></p>{{ end }}
         {{ if and $showTags (ne .Params.showTags false) .Params.tags }}<p class="post-tags">{{ range .Params.tags }}<span>#{{ . }}</span> {{ end }}</p>{{ end }}
         {{ if and $dfmt (ne .Params.showDate false) }}<p class="post-date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format $dfmt .Date }}</time></p>{{ end }}
@@ -117,7 +117,7 @@
   {{ $id := path.Base .RelPermalink }}
   <article class="record-page">
     <h2 class="record-head" id="{{ $id }}">{{ if and .Title (ne .Title $key) }}{{ .Title }}{{ else }}<time datetime="{{ substr $key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .Date }}{{ else }}{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}{{ end }}</time>{{ end }}<a class="anchor" href="#{{ $id }}" aria-label="Link to this record">#</a></h2>
-    {{ partial "record.html" .Content }}
+    {{ partial "record.html" (dict "content" .Content "prefix" $id) }}
     {{ if and site.Params.showTags (ne .Params.showTags false) .Params.tags }}<p class="post-tags">{{ range .Params.tags }}<span>#{{ . }}</span> {{ end }}</p>{{ end }}
     {{ if and site.Params.datePostFormat (ne .Params.showDate false) }}<p class="post-date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format site.Params.datePostFormat .Date }}</time></p>{{ end }}
   </article>
