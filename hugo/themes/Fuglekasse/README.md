@@ -39,6 +39,24 @@ To go further, the templates live in `layouts/`, and all the CSS is at the top o
   oldest→newest (top→bottom), `"desc"` puts the newest at top. Records are still
   reachable by direct URL, so links you write inside `records/*.md` keep working.
 
+## Chapters
+
+Name a first-level folder in your content directory after a number — arabic
+(`records/-1/`, `records/0/`, `records/2/`) or roman (`records/i/`, `records/iv/`,
+case-insensitive) — and the home page groups its records into a **chapter**: a
+block titled with the folder name that folds and unfolds when its title is
+clicked. Chapters appear in the `single` and `basic` page modes (the `posts`
+feed stays flat) and start expanded.
+
+Records outside numbered folders render first, exactly as without chapters;
+the chapters follow in ascending order, arabic before roman (`-1, 0, 2, i, iv`),
+regardless of `singleOrder` — that setting only orders the records *inside*
+each chapter. An empty chapter folder shows nothing (git does not even track
+empty directories); the chapter appears once its first record lands there.
+Note that a folder whose name happens to be a valid roman numeral (`cd`,
+`mix`, `ml`) is treated as a chapter too — pick a different tag name if that
+is not what you mean.
+
 ## Record titles
 
 Records without a hand-written `title:` show their timestamp slug

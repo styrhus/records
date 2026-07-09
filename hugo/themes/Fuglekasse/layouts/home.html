@@ -12,10 +12,11 @@
     {{ $order = "asc" }}
   {{ end }}
 
+  {{ $all := where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" }}
+
   {{/* posts mode paginates; greeting + intro render on page 1 only. */}}
   {{ $paginator := false }}
   {{ if eq $mode "posts" }}
-    {{ $all := where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" }}
     {{ $sorted := sort (where $all "Params.featured" true) "Date" "desc" | append (sort (where $all "Params.featured" "!=" true) "Date" "desc") }}
     {{ $paginator = .Paginate $sorted (site.Params.postsCount | default 3) }}
   {{ end }}
@@ -23,20 +24,52 @@
 
   {{ if $firstPage }}{{ with site.Params.greeting }}<h1 class="greeting">{{ . }}</h1>{{ end }}{{ end }}
 
-  {{ if eq $mode "single" }}
-    {{/* One-page document stack: _index first, then every record ordered by singleOrder (default oldest→newest). */}}
-    <article class="record-page">{{ .Content }}</article>
-    {{ range sort (where site.RegularPages "File.ContentBaseName" "ne" "LICENSE") "Date" $order }}
-      {{ $key := .File.ContentBaseName }}
-      {{ if not (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $key) }}
-        {{ $key = .Date.Format "2006-01-02_15-04" }}
+  {{/* Chapters: first-level folders named as numbers — arabic or roman — group
+       their records under a collapsible title in single/basic modes. */}}
+  {{ $arabic := slice }}
+  {{ $roman := slice }}
+  {{ $chapterNames := slice }}
+  {{ if ne $mode "posts" }}
+    {{ range $all.GroupBy "Section" }}
+      {{ $name := .Key }}
+      {{ if findRE `^-?\d+$` $name }}
+        {{ $arabic = $arabic | append (dict "name" $name "num" (int $name) "pages" .Pages) }}
+        {{ $chapterNames = $chapterNames | append $name }}
+      {{ else if and $name (findRE `^m{0,3}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3})$` (lower $name)) }}
+        {{/* Roman → int: subtract a numeral standing before a larger one, else add. */}}
+        {{ $vals := dict "i" 1 "v" 5 "x" 10 "l" 50 "c" 100 "d" 500 "m" 1000 }}
+        {{ $chars := split (lower $name) "" }}
+        {{ $num := 0 }}
+        {{ range $i, $ch := $chars }}
+          {{ $v := index $vals $ch }}
+          {{ if and (lt (add $i 1) (len $chars)) (lt $v (index $vals (index $chars (add $i 1)))) }}
+            {{ $num = sub $num $v }}
+          {{ else }}
+            {{ $num = add $num $v }}
+          {{ end }}
+        {{ end }}
+        {{ $roman = $roman | append (dict "name" $name "num" $num "pages" .Pages) }}
+        {{ $chapterNames = $chapterNames | append $name }}
       {{ end }}
-      <article class="record-page">
-        <h2 class="record-head">{{ if and .Title (ne .Title $key) }}{{ .Title }}{{ else }}<time datetime="{{ substr $key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .Date }}{{ else }}{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}{{ end }}</time>{{ end }}</h2>
-        {{ partial "record.html" .Content }}
-        {{ if and $showTags (ne .Params.showTags false) .Params.tags }}<p class="post-tags">{{ range .Params.tags }}<span>#{{ . }}</span> {{ end }}</p>{{ end }}
-        {{ if and $dfmt (ne .Params.showDate false) }}<p class="post-date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format $dfmt .Date }}</time></p>{{ end }}
-      </article>
+    {{ end }}
+  {{ end }}
+  {{/* Chapter sequence is fixed ascending, arabic block before roman; singleOrder only orders records within. */}}
+  {{ $chapters := sort $arabic "num" | append (sort $roman "num") }}
+  {{ $loose := where $all "Section" "not in" $chapterNames }}
+
+  {{ if eq $mode "single" }}
+    {{/* One-page document stack: _index first, loose records per singleOrder, then chapters. */}}
+    <article class="record-page">{{ .Content }}</article>
+    {{ range sort $loose "Date" $order }}
+      {{ partial "inline/record-card.html" . }}
+    {{ end }}
+    {{ range $chapters }}
+      <details class="chapter" open>
+        <summary>{{ .name }}</summary>
+        {{ range sort .pages "Date" $order }}
+          {{ partial "inline/record-card.html" . }}
+        {{ end }}
+      </details>
     {{ end }}
   {{ else if eq $mode "posts" }}
     {{ if $firstPage }}{{ .Content }}{{ end }}
@@ -63,31 +96,47 @@
     {{ end }}
   {{ else }}
     {{ .Content }}
-    {{/* basic: link index, featured pinned to top, both groups newest-first. */}}
-    {{ $featured := slice }}
-    {{ $rest := slice }}
-    {{ range where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" }}
+    {{/* basic: link index (featured pinned, newest-first); loose records first, then chapters. */}}
+    {{ partial "inline/record-list.html" $loose }}
+    {{ range $chapters }}
+      <details class="chapter" open>
+        <summary>{{ .name }}</summary>
+        {{ partial "inline/record-list.html" .pages }}
+      </details>
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{/* One record as a single-mode document card. */}}
+{{ define "_partials/inline/record-card.html" }}
+  {{ $fmt := site.Params.dateTitleFormat }}
+  {{ $key := .File.ContentBaseName }}
+  {{ if not (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $key) }}
+    {{ $key = .Date.Format "2006-01-02_15-04" }}
+  {{ end }}
+  <article class="record-page">
+    <h2 class="record-head">{{ if and .Title (ne .Title $key) }}{{ .Title }}{{ else }}<time datetime="{{ substr $key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .Date }}{{ else }}{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}{{ end }}</time>{{ end }}</h2>
+    {{ partial "record.html" .Content }}
+    {{ if and site.Params.showTags (ne .Params.showTags false) .Params.tags }}<p class="post-tags">{{ range .Params.tags }}<span>#{{ . }}</span> {{ end }}</p>{{ end }}
+    {{ if and site.Params.datePostFormat (ne .Params.showDate false) }}<p class="post-date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format site.Params.datePostFormat .Date }}</time></p>{{ end }}
+  </article>
+{{ end }}
+
+{{/* A set of records as the basic-mode link list, featured pinned, newest first. */}}
+{{ define "_partials/inline/record-list.html" }}
+  {{ $fmt := site.Params.dateTitleFormat }}
+  {{ $sorted := sort (where . "Params.featured" true) "Date" "desc" | append (sort (where . "Params.featured" "!=" true) "Date" "desc") }}
+  {{ with $sorted }}
+  <ul class="records">
+    {{ range . }}
       {{ $key := .File.ContentBaseName }}
       {{ if not (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $key) }}
         {{ $key = .Date.Format "2006-01-02_15-04" }}
       {{ end }}
-      {{ $item := dict "key" $key "date" .Date "page" . }}
-      {{ if .Params.featured }}
-        {{ $featured = $featured | append $item }}
-      {{ else }}
-        {{ $rest = $rest | append $item }}
-      {{ end }}
+      <li>
+        <a href="{{ .RelPermalink }}">{{ if and .Title (ne .Title $key) }}{{ .Title }}{{ else }}<time datetime="{{ substr $key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .Date }}{{ else }}{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}{{ end }}</time>{{ end }}</a>
+      </li>
     {{ end }}
-    {{ $records := sort $featured "date" "desc" | append (sort $rest "date" "desc") }}
-    {{ if $records }}
-    <ul class="records">
-      {{ range $records }}
-        {{ $p := .page }}
-        <li>
-          <a href="{{ $p.RelPermalink }}">{{ if and $p.Title (ne $p.Title .key) }}{{ $p.Title }}{{ else }}<time datetime="{{ substr .key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .date }}{{ else }}{{ substr .key 0 10 }} {{ replace (substr .key 11) "-" ":" }}{{ end }}</time>{{ end }}</a>
-        </li>
-      {{ end }}
-    </ul>
-    {{ end }}
+  </ul>
   {{ end }}
 {{ end }}

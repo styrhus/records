@@ -96,6 +96,12 @@
     }
     .mode-single .record-page:last-child { margin-bottom: 0; }
     .mode-single .record-head { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); margin: 0 0 1rem; }
+    /* Chapters: numbered records/ folders fold under a clickable title. */
+    details.chapter { margin: 2.5rem 0; }
+    details.chapter > summary { cursor: pointer; font-size: 1.3em; font-weight: 600; line-height: 1.25; }
+    details.chapter > summary::marker { color: var(--dim); }
+    details.chapter > summary:hover { color: var(--accent); }
+    details.chapter[open] > summary { margin-bottom: 1rem; }
     footer { margin-top: 4rem; font-size: 0.85em; color: var(--dim); }
     footer sup { font-size: 0.7em; }
     /* Optional brand mark, pinned to the viewport corner (params.logo). */
