@@ -14,7 +14,7 @@ showRepoURL = true   # footer link to params.repoURL; false hides it (repoURL st
 # epub = "records.epub"  # footer "Get EPUB" link to the pandoc-built site EPUB (see pandoc/ in the records repo); unset shows none
 # logo = "fuglekasse.svg"  # brand mark fixed to the bottom-right corner; unset shows none
 # favicon = "fuglekasse.svg"  # <link rel="icon"> file in static/; unset falls back to the shipped fuglekasse.svg
-# spotify = "https://open.spotify.com/playlist/…"  # Spotify logo in the header that opens an embedded player; share or embed URL; unset shows none
+# spotify = "https://open.spotify.com/playlist/…"  # Spotify logo pinned bottom-left that opens an embedded player; share or embed URL; unset shows none
 
 [params.style]
 font = "Architects Daughter"

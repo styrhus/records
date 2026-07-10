@@ -124,10 +124,10 @@ params:
   # since favicons are square and logos are often not.
   # favicon: fuglekasse.svg
 
-  # Spotify logo in the site header, right after the title, on every page.
-  # Click opens a drop-down with the embedded player. Takes the playlist's
-  # share URL (https://open.spotify.com/playlist/<id>) or embed URL — both
-  # work. Unset shows no Spotify logo.
+  # Spotify logo pinned to the bottom-left corner of every page, opposite
+  # params.logo. Click opens the embedded player above it. Takes the
+  # playlist's share URL (https://open.spotify.com/playlist/<id>) or embed
+  # URL — both work. Unset shows no Spotify logo.
   # spotify: https://open.spotify.com/playlist/<id>
 
   # Look & feel — Fuglekasse ships these defaults; uncomment a line to override.
