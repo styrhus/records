@@ -6,7 +6,7 @@ This project contains two kinds of things. They have two licenses.
 
 ## Code
 
-All source code and build tooling in `hugo/` and `.ai/` (including scripts, skills, Hugo themes/layouts/config, Makefiles) is
+All source code and build tooling in `hugo/`, `pandoc/` and `.ai/` (including scripts, skills, Hugo themes/layouts/config, Makefiles) is
 licensed under:
 
 **MIT License**
