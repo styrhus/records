@@ -128,6 +128,13 @@ site-wide, or opt a single record out with `showTags: false` in its front
 matter. Records may live in subfolders (`records/linux/…`); the folders are
 organisation only and render no index page of their own.
 
+## Footer repo link
+
+`params.repoURL` puts a small link to your repository in the footer (and, with
+`params.insidesBranch`, a second link to that branch). Set
+`params.showRepoURL: false` to hide both — `repoURL` itself stays useful, as it
+also rewrites relative `records/` links to raw forge URLs. On by default.
+
 ## Logo
 
 Set `params.logo` to a file in `static/` (the theme ships `fuglekasse.svg`, or

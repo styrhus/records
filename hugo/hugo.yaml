@@ -49,6 +49,9 @@ cascade:
 # per-fork via HUGO_PARAMS_REPOURL. This value is the local-dev default.
 params:
   repoURL: https://codeberg.org/tb4/records
+  # Set to false to hide the footer repo link; repoURL keeps rewriting
+  # relative records/ links either way. Fuglekasse defaults to true.
+  # showRepoURL: false
 
   # Deploy command /cpd runs from the repo root after commit + push.
   # Commented out = the push-triggered Pages workflow deploys, nothing to run.

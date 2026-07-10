@@ -9,6 +9,7 @@ showToc = false      # floating table-of-contents widget (top-right, home page; 
 # dateTitleFormat = "02. January 2006"  # Go date layout for timestamp-fallback titles; unset keeps the raw slug
 # datePostFormat = "02. January 2006 15:04"  # show the record date bottom-right in each post; unset shows none
 showTags = true      # show front-matter tags as dim #labels under each post; a page opts out with showTags: false
+showRepoURL = true   # footer link to params.repoURL; false hides it (repoURL still rewrites record links)
 # pdf = "records.pdf"  # footer "Get PDF" link to the pandoc-built site PDF (see pandoc/ in the records repo); unset shows none
 # epub = "records.epub"  # footer "Get EPUB" link to the pandoc-built site EPUB (see pandoc/ in the records repo); unset shows none
 # logo = "fuglekasse.svg"  # brand mark fixed to the bottom-right corner; unset shows none

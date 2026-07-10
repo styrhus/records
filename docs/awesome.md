@@ -57,7 +57,9 @@ and the chapter just shows its number.
 
 ## The footer
 
-The small links at the bottom come from `repoURL` in `hugo/hugo.yaml`.
+The small links at the bottom come from `repoURL` in `hugo/hugo.yaml`. Don't
+want your repo linked? Set `showRepoURL: false` under `params:` — the link
+disappears, while `repoURL` keeps rewriting relative links inside records.
 Add a `records/LICENSE.md` and a license link appears too. Its `title:` becomes
 the link text — any language works (`title: Lizenz`); without one it reads "License".
 
