@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Build the site's records into one PDF: book.lua assembles, pandoc renders
-# HTML with the site-matching stylesheet, WeasyPrint prints it.
+# Build the site's records into one PDF and/or EPUB: book.lua assembles, pandoc
+# renders — HTML printed by WeasyPrint for the PDF, straight to EPUB otherwise.
 # Usage: pandoc/build.sh [outdir]   (default: hugo/public)
 # Env overrides: SITE_CONFIG, RECORDS_DIR (testing).
 set -euo pipefail
@@ -14,10 +14,11 @@ yaml_value() { # yaml_value <pattern> — first uncommented "key: value", stripp
   sed -n "s/^$1:[[:space:]]*//p" "$SITE_CONFIG" | head -1 | sed "s/[[:space:]]*#.*$//; s/[\"']//g"
 }
 
-# params.pdf names the output file; unset/commented = feature off.
+# params.pdf / params.epub name the output files; unset/commented = feature off.
 PDF_NAME="$(yaml_value '[[:space:]]*pdf')"
-if [ -z "$PDF_NAME" ]; then
-  echo "pandoc/build.sh: params.pdf unset in $SITE_CONFIG — skipping PDF build"
+EPUB_NAME="$(yaml_value '[[:space:]]*epub')"
+if [ -z "$PDF_NAME" ] && [ -z "$EPUB_NAME" ]; then
+  echo "pandoc/build.sh: params.pdf and params.epub unset in $SITE_CONFIG — skipping book build"
   exit 0
 fi
 
@@ -29,11 +30,28 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 pandoc lua "$SCRIPT_DIR/book.lua" "$RECORDS_DIR" "$ROOT" "$SITE_CONFIG" > "$TMP/book.json"
-pandoc -f json "$TMP/book.json" \
-  --standalone --toc --toc-depth=2 \
-  -c "$SCRIPT_DIR/pdf.css" \
-  --highlight-style "$SCRIPT_DIR/highlight.theme" \
-  -o "$TMP/book.html"
 mkdir -p "$OUTDIR"
-weasyprint "$TMP/book.html" "$OUTDIR/$PDF_NAME"
-echo "pandoc/build.sh: built $OUTDIR/$PDF_NAME from $RECORDS_DIR"
+
+if [ -n "$PDF_NAME" ]; then
+  pandoc -f json "$TMP/book.json" \
+    --standalone --toc --toc-depth=2 \
+    -c "$SCRIPT_DIR/pdf.css" \
+    --highlight-style "$SCRIPT_DIR/highlight.theme" \
+    -o "$TMP/book.html"
+  weasyprint "$TMP/book.html" "$OUTDIR/$PDF_NAME"
+  echo "pandoc/build.sh: built $OUTDIR/$PDF_NAME from $RECORDS_DIR"
+fi
+
+if [ -n "$EPUB_NAME" ]; then
+  # title = dc:title (book.lua only sets pagetitle); header-includes cleared —
+  # its palette/@font-face CSS is PDF-only. Split at h2 = one file per record.
+  pandoc -f json "$TMP/book.json" \
+    --lua-filter "$SCRIPT_DIR/epub.lua" \
+    --toc --toc-depth=2 --split-level=2 \
+    -M title="$(yaml_value 'title')" \
+    -M header-includes= \
+    -c "$SCRIPT_DIR/epub.css" \
+    --highlight-style "$SCRIPT_DIR/highlight.theme" \
+    -o "$OUTDIR/$EPUB_NAME"
+  echo "pandoc/build.sh: built $OUTDIR/$EPUB_NAME from $RECORDS_DIR"
+fi

@@ -100,6 +100,13 @@ lines are stripped, and `singleOrder`, `dateTitleFormat`, `datePostFormat` and
 `showTags` are honoured. The word-folder caveat from Chapters applies to the
 PDF too. Comment the param out to disable both the link and the CI build.
 
+Set `params.epub` the same way — `epub: records.epub` — for a **Get EPUB**
+footer link. The same workflow step and tooling build it from the same
+assembled book (same content, order and exclusions), but styled structurally
+(`pandoc/epub.css`): e-readers override fonts and render grayscale, so the
+site palette does not carry over. Also unset by default; the two params are
+independent — set either or both.
+
 Records without a hand-written `title:` show their timestamp slug
 (`2026-07-06_23-25`). Set `params.dateTitleFormat` to a Go/Hugo
 [date layout](https://gohugo.io/methods/time/format/) — e.g. `"02. January 2006"` —

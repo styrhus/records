@@ -1,0 +1,23 @@
+/* Structural EPUB stylesheet: e-readers override fonts and render grayscale,
+   so nothing here relies on colour — borders, indentation and case only. */
+
+/* chapters and record titles (h1.chapter / h2.record-head from book.lua) */
+h1.chapter { margin: 1.5em 0 1em; }
+h2.record-head { font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.08em; margin: 1.5em 0 1em; }
+
+/* speaker turns (user/assistant classes from book.lua; pandoc may emit <section>) */
+.user { border-left: 3px solid; padding-left: 1em; }
+.assistant { margin-left: 1em; }
+h6.speaker { font-variant: small-caps; font-size: 0.9em; letter-spacing: 0.08em; margin: 1.5em 0 0.25em; }
+
+/* content */
+code { font-family: monospace; font-size: 0.9em; }
+pre { border: 1px solid; padding: 0.6em; margin: 1em 0; white-space: pre-wrap; overflow-wrap: break-word; }
+blockquote { border-left: 3px solid; margin: 1em 0; padding-left: 1em; font-style: italic; }
+blockquote > :first-child { margin-top: 0; }
+blockquote > :last-child { margin-bottom: 0; }
+table { border-collapse: collapse; margin: 1em 0; }
+th, td { border: 1px solid; padding: 0.3em 0.6em; text-align: left; }
+img { max-width: 100%; }
+.post-tags, .post-date { font-size: 0.85em; }
+.post-date { text-align: right; }

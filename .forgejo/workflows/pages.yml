@@ -37,16 +37,19 @@ jobs:
           HUGO_PARAMS_REPOURL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
             hugo --minify --baseURL "${PAGES_URL}" --destination "$GITHUB_WORKSPACE/public"
 
-      # Renders the records into public/<params.pdf> with the tooling in
-      # pandoc/; a no-op (and no tool installs) when params.pdf is unset.
-      - name: Build PDF
+      # Renders the records into public/<params.pdf> and/or public/<params.epub>
+      # with the tooling in pandoc/; a no-op (and no tool installs) when both
+      # params are unset. WeasyPrint is PDF-only, so it installs only for pdf:.
+      - name: Build PDF and EPUB
         run: |
-          if ! grep -Eq '^[[:space:]]*pdf:' hugo/hugo.yaml; then
-            echo "params.pdf unset — skipping PDF build"
+          if ! grep -Eq '^[[:space:]]*(pdf|epub):' hugo/hugo.yaml; then
+            echo "params.pdf and params.epub unset — skipping book build"
             exit 0
           fi
-          apt-get update -qq
-          apt-get install -y -qq --no-install-recommends weasyprint fonts-dejavu-core
+          if grep -Eq '^[[:space:]]*pdf:' hugo/hugo.yaml; then
+            apt-get update -qq
+            apt-get install -y -qq --no-install-recommends weasyprint fonts-dejavu-core
+          fi
           wget -q https://github.com/jgm/pandoc/releases/download/3.1.11.1/pandoc-3.1.11.1-1-amd64.deb -O /tmp/pandoc.deb
           dpkg -i /tmp/pandoc.deb
           HUGO_PARAMS_REPOURL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
