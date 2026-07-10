@@ -153,8 +153,8 @@ rectangular.
 
 Set `params.spotify` to a Spotify URL — the share form
 (`https://open.spotify.com/playlist/<id>`) or the embed form
-(`…/embed/playlist/<id>`), both work — and a Spotify logo is pinned to the
-bottom-left corner of every page, the mirror of `params.logo` bottom-right,
+(`…/embed/playlist/<id>`), both work — and a small Spotify logo is pinned to
+the bottom-left corner of every page, opposite `params.logo` bottom-right,
 staying put while you scroll. Clicking it opens a panel with the embedded
 player above the logo; clicking anywhere else closes it (the music keeps
 playing). Browsers that honour lazy-loaded iframes fetch nothing from Spotify
