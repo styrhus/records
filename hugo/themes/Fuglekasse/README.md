@@ -149,6 +149,17 @@ Set `params.favicon` to a file in `static/` to use as the browser-tab icon
 kept separate from `params.logo` because favicons are square while logos are often
 rectangular.
 
+## Spotify
+
+Set `params.spotify` to a Spotify URL — the share form
+(`https://open.spotify.com/playlist/<id>`) or the embed form
+(`…/embed/playlist/<id>`), both work — and a small Spotify logo appears in the
+header after the site title, on every page. Clicking it drops down a panel with
+the embedded player; clicking anywhere else closes it (the music keeps playing).
+Browsers that honour lazy-loaded iframes fetch nothing from Spotify until the
+panel is first opened; the rest load the player with the page. Works without
+JavaScript. Unset, no logo is shown.
+
 ## 404 page
 
 Fuglekasse ships a default error page (`content/404.md`), built to `/404.html`
