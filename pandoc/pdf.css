@@ -50,8 +50,8 @@ nav#TOC::before { content: "Contents"; display: block; font-size: 1.3em; font-we
 nav#TOC ul { list-style: none; margin: 0; padding: 0; }
 nav#TOC ul ul { padding-left: 1rem; }
 nav#TOC li { margin: 0.3rem 0; }
-nav#TOC a { color: var(--fg); }
-nav#TOC a::after { content: target-counter(attr(href), page); float: right; color: var(--dim); }
+nav#TOC a { color: var(--fg); display: block; }
+nav#TOC a::after { content: leader(". ") " " target-counter(attr(href), page); color: var(--dim); }
 
 /* chapters and record titles (site: details.chapter summary, .record-head) */
 h1.chapter { page-break-before: always; page-break-after: avoid; font-size: 1.3em; font-weight: 600; margin: 40% 0 1rem; }
