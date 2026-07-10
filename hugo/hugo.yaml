@@ -102,6 +102,11 @@ params:
   # with `showTags: false` in its front matter.
   # showTags: false
 
+  # The whole site as one PDF, built by the Pages workflow with the tooling in
+  # pandoc/ and served from the site root; the footer shows a "Get PDF" link.
+  # The value is the filename. Comment out to disable both build and link.
+  pdf: tb4.pdf
+
   # Brand mark pinned to the bottom-right corner of every page. Point it at a
   # file in the theme's static/ (or your own static/); remove to show none.
   logo: fuglekasse.svg

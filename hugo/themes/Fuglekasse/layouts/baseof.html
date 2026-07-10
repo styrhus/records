@@ -153,6 +153,7 @@
   </main>
   <footer>
     {{ with site.GetPage "/license" }}<a href="{{ .RelPermalink }}">{{ or .Title "License" }}</a>{{ end }}
+    {{ with site.Params.pdf }}<a href="{{ . | relURL }}">Get PDF</a>{{ end }}
     {{ with site.Params.insidesBranch }}<sup><a href="{{ site.Params.repoURL }}/src/branch/{{ . }}">{{ . }}</a></sup>{{ end }}
     {{ with site.Params.repoURL }}<sup><a href="{{ . }}">{{ replaceRE `^https?://` "" . }}</a></sup>{{ end }}
   </footer>

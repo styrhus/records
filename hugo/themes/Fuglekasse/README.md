@@ -85,7 +85,20 @@ chapter as a row you click to reveal its records. In `single` mode the links
 jump to the record on the same page (opening its chapter if it was collapsed);
 in `basic` mode they open the record's own page.
 
-## Record titles
+## Get PDF
+
+Set `params.pdf` to a filename — `pdf: records.pdf` — and the footer shows a
+**Get PDF** link to that file at the site root. It is **unset by default**: the
+theme only renders the link; the file itself is built by the
+[records](https://codeberg.org/tb4/records) repo's Pages workflow with the
+tooling in `pandoc/`, which turns the whole site into one PDF book — cover
+(greeting and title), table of contents with page numbers, loose records first,
+then chapters ascending, each record under its display title, in the site's
+light palette and typography (`params.style.light`, syntax colours included).
+Drafts, `LICENSE.md`, `404.md` and `ignoreFiles` matches stay out, signature
+lines are stripped, and `singleOrder`, `dateTitleFormat`, `datePostFormat` and
+`showTags` are honoured. The word-folder caveat from Chapters applies to the
+PDF too. Comment the param out to disable both the link and the CI build.
 
 Records without a hand-written `title:` show their timestamp slug
 (`2026-07-06_23-25`). Set `params.dateTitleFormat` to a Go/Hugo

@@ -1,0 +1,89 @@
+/* Print mirror of the site CSS (themes/Fuglekasse/layouts/baseof.html), light
+   palette. book.lua injects the site's params.style.light after this file, so
+   these :root values are the theme defaults, overridden per site config. */
+:root {
+  --bg: #d5d6db;
+  --fg: #343b58;
+  --dim: #9699a3;
+  --accent: #34548a;
+  --surface: #cbccd1;
+}
+
+@page {
+  size: A4;
+  margin: 20mm 18mm 22mm;
+  background: #d5d6db; /* --bg; page boxes take literals */
+  @bottom-center {
+    content: counter(page);
+    font-family: system-ui, sans-serif;
+    font-size: 9pt;
+    color: #9699a3; /* --dim; page-margin boxes take literals */
+  }
+}
+@page :first {
+  @bottom-center { content: none; }
+}
+
+html {
+  font-size: 10.5pt;
+  background: var(--bg);
+}
+body {
+  font-family: system-ui, sans-serif;
+  line-height: 1.65;
+  background: var(--bg);
+  color: var(--fg);
+  margin: 0;
+}
+h1, h2, h3, h4, h5, h6 { line-height: 1.25; }
+a { color: var(--accent); text-decoration: none; }
+
+/* cover */
+.cover { page-break-after: always; margin-top: 40%; }
+.greeting { font-family: cursive; font-size: 3.5rem; line-height: 1.15; margin: 0 0 1.75rem; }
+.cover-title { font-size: 1.6rem; font-weight: 600; }
+.cover-date { font-size: 0.85em; color: var(--dim); margin-top: 0.75rem; }
+
+/* table of contents */
+nav#TOC { page-break-after: always; }
+nav#TOC::before { content: "Contents"; display: block; font-size: 1.3em; font-weight: 600; margin: 0 0 1rem; }
+nav#TOC ul { list-style: none; margin: 0; padding: 0; }
+nav#TOC ul ul { padding-left: 1rem; }
+nav#TOC li { margin: 0.3rem 0; }
+nav#TOC a { color: var(--fg); }
+nav#TOC a::after { content: target-counter(attr(href), page); float: right; color: var(--dim); }
+
+/* chapters and record titles (site: details.chapter summary, .record-head) */
+h1.chapter { page-break-before: always; page-break-after: avoid; font-size: 1.3em; font-weight: 600; margin: 40% 0 1rem; }
+h2.record-head { page-break-before: always; page-break-after: avoid; font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); margin: 0 0 1rem; }
+
+/* speaker turns (site: section.user / section.assistant); pandoc may emit
+   the wrapping div as <section>, so match by class only */
+.user { border-left: 3px solid var(--accent); padding-left: 1rem; }
+.assistant { opacity: 0.75; }
+h6.speaker { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; margin: 2.5rem 0 0.25rem; page-break-after: avoid; }
+.user h6.speaker { color: var(--accent); }
+.assistant h6.speaker { color: var(--fg); }
+.record > :first-child > :first-child { margin-top: 0; }
+
+/* content headings (demoted two levels under record titles) */
+h3, h4 { margin: 2rem 0 0.4rem; page-break-after: avoid; }
+h4 { font-size: 1.15em; }
+h5 { font-size: 1.05em; margin: 1.5rem 0 0.3rem; page-break-after: avoid; }
+
+/* content, as on the site */
+code, pre { font-size: 0.9em; background: var(--surface); }
+code { padding: 0.1em 0.3em; border-radius: 3px; }
+pre { padding: 0.75rem; border-radius: 6px; white-space: pre-wrap; overflow-wrap: break-word; }
+pre code { padding: 0; background: none; }
+div.sourceCode { margin: 1rem 0; }
+div.sourceCode pre { margin: 0; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid var(--dim); padding: 0.4em 0.7em; text-align: left; }
+tbody tr:nth-child(even) { background: var(--surface); }
+blockquote { margin: 1rem 0; padding: 0.6rem 1rem; border-left: 4px solid var(--accent); background: var(--surface); border-radius: 4px; }
+blockquote > :first-child { margin-top: 0; }
+blockquote > :last-child { margin-bottom: 0; }
+img { max-width: 100%; }
+.post-tags, .post-date { font-size: 0.85em; color: var(--dim); margin: 0.5rem 0 0; }
+.post-date { text-align: right; }

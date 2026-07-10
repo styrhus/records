@@ -11,6 +11,7 @@ on:
     paths:
       - 'hugo/**'
       - 'records/**'
+      - 'pandoc/**'
       - '.forgejo/workflows/pages.yml'
   workflow_dispatch:
 
@@ -35,6 +36,21 @@ jobs:
           cd hugo
           HUGO_PARAMS_REPOURL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
             hugo --minify --baseURL "${PAGES_URL}" --destination "$GITHUB_WORKSPACE/public"
+
+      # Renders the records into public/<params.pdf> with the tooling in
+      # pandoc/; a no-op (and no tool installs) when params.pdf is unset.
+      - name: Build PDF
+        run: |
+          if ! grep -Eq '^[[:space:]]*pdf:' hugo/hugo.yaml; then
+            echo "params.pdf unset — skipping PDF build"
+            exit 0
+          fi
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends weasyprint fonts-dejavu-core
+          wget -q https://github.com/jgm/pandoc/releases/download/3.1.11.1/pandoc-3.1.11.1-1-amd64.deb -O /tmp/pandoc.deb
+          dpkg -i /tmp/pandoc.deb
+          HUGO_PARAMS_REPOURL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+            ./pandoc/build.sh "$GITHUB_WORKSPACE/public"
 
       - name: Deploy to Codeberg Pages
         uses: https://codeberg.org/git-pages/action@v2
