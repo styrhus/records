@@ -172,9 +172,11 @@ Set `params.spotify` to a Spotify URL — the share form
 the bottom-left corner of every page, opposite `params.logo` bottom-right,
 staying put while you scroll. Clicking it opens a panel with the embedded
 player above the logo; clicking anywhere else closes it (the music keeps
-playing). Browsers that honour lazy-loaded iframes fetch nothing from Spotify
-until the panel is first opened; the rest load the player with the page. Works
-without JavaScript. Unset, no logo is shown.
+playing). Nothing is fetched from Spotify until the panel is first opened — the
+player loads on first open, so it sizes itself to the visible panel (a hidden
+load would render the compact layout). Works without JavaScript via a
+`noscript` fallback that loads the player with the page. Unset, no logo is
+shown.
 
 ## 404 page
 
