@@ -425,8 +425,11 @@ local function speakerOf(b)
   return nil
 end
 
+-- Mic icon on Human headings of voiceRecorded records; same SVG as record.html.
+local micSvg = '<span class="voice-icon" title="voice recorded"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg></span>'
+
 -- Mirror record.html: drop signatures, wrap speaker turns in user/assistant divs.
-local function turnDivs(blocks)
+local function turnDivs(blocks, voice)
   local divs, cur, curClass = pandoc.Blocks({}), pandoc.Blocks({}), nil
   local function flush()
     if #cur > 0 then
@@ -440,7 +443,9 @@ local function turnDivs(blocks)
     if who then
       flush()
       curClass = who
-      cur:insert(pandoc.Header(6, b.content, pandoc.Attr("", { "speaker" })))
+      local label = pandoc.Inlines(b.content)
+      if voice and who == "user" then label:insert(pandoc.RawInline("html", micSvg)) end
+      cur:insert(pandoc.Header(6, label, pandoc.Attr("", { "speaker" })))
     elseif not isSignature(b) then
       cur:insert(b)
     end
@@ -480,7 +485,7 @@ local body = pandoc.Blocks({})
 local function addRecord(r)
   local recDir = path.directory(r.file)
   body:insert(pandoc.Header(2, titleInlines(r), pandoc.Attr(r.base, { "record-head" })))
-  body:insert(pandoc.Div(turnDivs(readBody(r.body)):walk(contentFilter(recDir)), pandoc.Attr("", { "record" })))
+  body:insert(pandoc.Div(turnDivs(readBody(r.body), isTrue(r.meta.voiceRecorded)):walk(contentFilter(recDir)), pandoc.Attr("", { "record" })))
   if showTags and not isFalse(r.meta.showTags) and r.meta.tags then
     local inls = pandoc.Inlines({})
     for i, tag in ipairs(r.meta.tags) do

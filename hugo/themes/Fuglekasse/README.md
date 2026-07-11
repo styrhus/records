@@ -128,6 +128,13 @@ site-wide, or opt a single record out with `showTags: false` in its front
 matter. Records may live in subfolders (`records/linux/…`); the folders are
 organisation only and render no index page of their own.
 
+## Voice-recorded records
+
+Give a record `voiceRecorded: true` in its front matter and a small dim
+microphone icon follows the **Human** label on every human turn — on the
+record page, in all home modes, and in the PDF/EPUB books — marking the
+conversation as spoken rather than typed. Absent or `false`, nothing changes.
+
 ## Footer repo link
 
 `params.repoURL` puts a small link to your repository in the footer (and, with

@@ -64,6 +64,8 @@ h2.record-head { page-break-before: always; page-break-after: avoid; font-size: 
 h6.speaker { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; margin: 2.5rem 0 0.25rem; page-break-after: avoid; }
 .user h6.speaker { color: var(--accent); }
 .assistant h6.speaker { color: var(--fg); }
+/* mic icon on Human labels of voiceRecorded records */
+.voice-icon svg { height: 0.9em; width: auto; margin-left: 0.4em; color: var(--dim); vertical-align: baseline; }
 .record > :first-child > :first-child { margin-top: 0; }
 
 /* content headings (demoted two levels under record titles) */

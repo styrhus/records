@@ -9,6 +9,8 @@ h2.record-head { font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.
 .user { border-left: 3px solid; padding-left: 1em; }
 .assistant { margin-left: 1em; }
 h6.speaker { font-variant: small-caps; font-size: 0.9em; letter-spacing: 0.08em; margin: 1.5em 0 0.25em; }
+/* mic icon on Human labels of voiceRecorded records; stroke inline on the SVG */
+.voice-icon svg { height: 0.9em; width: auto; margin-left: 0.4em; vertical-align: baseline; }
 
 /* content */
 code { font-family: monospace; font-size: 0.9em; }
