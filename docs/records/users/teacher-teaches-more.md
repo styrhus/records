@@ -1,6 +1,6 @@
 ---
 title: Teacher teaches more
-date: 2026-07-08
+date: 2026-07-08T02:42:54+02:00
 tags: ["user", "how-to", "git"]
 ---
 
