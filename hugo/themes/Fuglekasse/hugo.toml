@@ -1,5 +1,6 @@
 # Fuglekasse ships its brand defaults here. A site's hugo.yaml deep-merges over
 # these (site params win), so a forker overrides any subset from that one file.
+# Root keys (like timeZone) don't merge from themes — those live in the site config.
 [params]
 pageMode = "basic"   # "basic" (link index) | "posts" (excerpt feed) | "single" (one-page document stack)
 postsCount = 3       # posts mode: how many latest records to show

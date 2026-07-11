@@ -118,6 +118,13 @@ bottom-right in each post — on record pages and in the posts/single home modes
 Unset, no post date is shown. A single page can opt out with `showDate: false`
 in its front matter.
 
+Dates without a UTC offset — front matter `date:` values and filename
+timestamps — are interpreted in the site's `timeZone`, so CI builds on UTC
+machines keep your wall-clock times. It's a root `hugo.yaml` key, not a param:
+Hugo ignores root keys in theme configs, so Fuglekasse can't ship a default —
+the records repo's `hugo.yaml` sets `timeZone: Europe/Oslo`; point it at your
+own zone.
+
 ## Tags
 
 Give a record `tags: [linux, hardware]` in its front matter and dim `#linux

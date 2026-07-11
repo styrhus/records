@@ -15,6 +15,11 @@ contentDir: ../records
 frontmatter:
   date: [':default', ':filename']
 
+# Time zone for interpreting dates without a UTC offset (front matter date:
+# and filename timestamps), so CI builds on UTC machines keep your wall-clock
+# times. A root config key — the theme can't ship a default, so it lives here.
+timeZone: Europe/Oslo
+
 # Filename date extraction strips the date prefix from the slug
 # (/18-41/ would collide across days); use the full filename as URL.
 permalinks:
