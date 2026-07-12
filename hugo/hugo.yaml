@@ -112,13 +112,13 @@ params:
 
   # The whole site as one PDF, built by the Pages workflow with the tooling in
   # pandoc/ and served from the site root; the footer shows a "Get PDF" link.
-  # The value is the filename. Comment out to disable both build and link.
-  pdf: tb4.pdf
+  # The value is the filename. Uncomment to enable both build and link.
+  # pdf: tb4.pdf
 
   # The whole site as one EPUB, built by the same workflow step and served from
   # the site root; the footer shows a "Get EPUB" link. The value is the
-  # filename. Comment out to disable both build and link.
-  epub: tb4.epub
+  # filename. Uncommend to enable both build and link.
+  # epub: tb4.epub
 
   # Brand mark pinned to the bottom-right corner of every page. Point it at a
   # file in the theme's static/ (or your own static/); remove to show none.
