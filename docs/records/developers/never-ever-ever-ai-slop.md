@@ -16,7 +16,7 @@ The next day I got two Emails regarding the two issues I created, same content i
 
 As you know, English is my third language. The word `slop` I do not understand. 
 
-`dot_claude/` must remember this. *Ich will nicht ausgestosen werden, ich will Teil der Gemeinschaft bleiben*.
+`dot_claude/` must remember this. *Ich will nicht ausgestoßen werden, ich will Teil der Gemeinschaft bleiben*.
 
 ## Assistant
 
