@@ -4,7 +4,7 @@ Your records, published. Drop Markdown into `records/`, get a website —
 **records** is your own publishing _datamaskineri_.
 
 Fork, enable Actions, push — your words appear at
-`https://<you>.codeberg.page/records/`.
+`https://<you>.codeberg.page/records/` (or your own domain name).
 
 The front page explains the rest: <https://tb4.codeberg.page/records/>.
 
