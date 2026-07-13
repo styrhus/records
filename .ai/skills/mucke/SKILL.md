@@ -21,7 +21,7 @@ Now playing (captured at invocation):
 ## Steps
 
 1. Title reads `__NOTHING_PLAYING__` or is empty → say nothing is playing and stop.
-2. Target file: the file attached or named in `$ARGUMENTS`. None or several → ask which; do not guess.
+2. Target file: the file attached or named in `$ARGUMENTS`; if none, the file currently open in the IDE. Still none, or several → ask which; do not guess.
 3. Append one line at the end of the file, separated from existing content by a blank line — the music icon, then title and artist verbatim (no escaping, no reformatting), joined by ` • `:
 
    ```
