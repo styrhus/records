@@ -58,7 +58,7 @@ local repoURL = os.getenv("HUGO_PARAMS_REPOURL") or str(params.repoURL) or ""
 local styleParams = params.style or {}
 local lightParams = styleParams.light or {}
 local light = {}
-for k, dflt in pairs({ bg = "#d5d6db", fg = "#343b58", dim = "#9699a3", accent = "#34548a", surface = "#cbccd1" }) do
+for k, dflt in pairs({ bg = "#d5d6db", fg = "#343b58", dim = "#9699a3", accent = "#34548a", surface = "#e5e6ea" }) do
   light[k] = str(lightParams[k]) or dflt
 end
 local fontName = str(styleParams.font) or "Architects Daughter"
