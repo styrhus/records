@@ -86,6 +86,14 @@ params:
   # default) or "desc" (newest at top). No effect in basic/posts modes.
   # singleOrder: asc
 
+  # Book look (single-flowing mode only): three specially named files in
+  # records/ become book furniture — forside.md the front cover (rendered
+  # first, replacing the _index.md intro), side-1.md page 1 right after it,
+  # bakside.md the back cover, always last. Dated records flow between them
+  # per singleOrder; the PDF/EPUB drop their generated cover for forside and
+  # give each special file its own page. All three are optional. Off by default.
+  # bookLook: true
+
   # Chapter fold state in basic/single modes (numbered records/<n>/ folders):
   #   latest    — open the chapter holding the newest record, collapse the rest (default)
   #   expanded  — every chapter open

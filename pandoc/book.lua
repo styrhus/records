@@ -54,6 +54,9 @@ local singleOrder = str(params.singleOrder) or "asc"
 if singleOrder ~= "asc" and singleOrder ~= "desc" then singleOrder = "asc" end
 -- single-flowing: bare turn stream — no titles/tags/dates/chapters, dinkus between records.
 local flowing = str(params.pageMode) == "single-flowing"
+-- bookLook (flowing only): forside/side-1/bakside at the records root become
+-- front cover, page 1 and back cover; forside replaces the intro and the cover page.
+local bookLook = boolOr(params.bookLook, false)
 local showTags = boolOr(params.showTags, true)
 local repoURL = os.getenv("HUGO_PARAMS_REPOURL") or str(params.repoURL) or ""
 
@@ -313,18 +316,25 @@ local function byDate(a, b)
   return a.rel < b.rel
 end
 
+local SPECIAL = { forside = true, ["side-1"] = true, bakside = true }
+local special = {}
+
 local loose, chapterMap = {}, {}
 for _, r in ipairs(records) do
-  local num, kind = nil, nil
-  -- flowing flattens: chapter folders are ignored, every record is loose
-  if r.section and not flowing then num, kind = chapterNumber(r.section) end
-  if num then
-    if not chapterMap[r.section] then
-      chapterMap[r.section] = { name = r.section, num = num, kind = kind, records = {} }
-    end
-    table.insert(chapterMap[r.section].records, r)
+  if flowing and bookLook and not r.section and SPECIAL[r.base] then
+    special[r.base] = r
   else
-    loose[#loose + 1] = r
+    local num, kind = nil, nil
+    -- flowing flattens: chapter folders are ignored, every record is loose
+    if r.section and not flowing then num, kind = chapterNumber(r.section) end
+    if num then
+      if not chapterMap[r.section] then
+        chapterMap[r.section] = { name = r.section, num = num, kind = kind, records = {} }
+      end
+      table.insert(chapterMap[r.section].records, r)
+    else
+      loose[#loose + 1] = r
+    end
   end
 end
 table.sort(loose, byDate)
@@ -511,11 +521,19 @@ local function addRecord(r)
   end
 end
 
-if introFile then
+-- bookLook specials: no title/tags/date/separator; class drives the page-break CSS.
+local function addSpecial(r)
+  body:insert(pandoc.Div(turnDivs(readBody(r.body), isTrue(r.meta.voiceRecorded)):walk(contentFilter(path.directory(r.file))), pandoc.Attr("", { "record", "book-" .. r.base })))
+end
+
+if introFile and not special.forside then
   local _, introBody = splitFrontmatter(slurp(introFile) or "")
   local introBlocks = readBody(introBody):walk(contentFilter(path.directory(introFile)))
   body:insert(pandoc.Div(introBlocks, pandoc.Attr("", { "intro" })))
 end
+
+if special.forside then addSpecial(special.forside) end
+if special["side-1"] then addSpecial(special["side-1"]) end
 
 for _, r in ipairs(loose) do addRecord(r) end
 
@@ -533,19 +551,24 @@ for _, ch in ipairs(chapters) do
   for _, r in ipairs(ch.records) do addRecord(r) end
 end
 
+if special.bakside then addSpecial(special.bakside) end
+
 ---------------------------------------------------------------- metadata
 
 local doc = pandoc.Pandoc(body)
 doc.meta.pagetitle = siteTitle
 doc.meta["document-css"] = false
 
-local cover = pandoc.Blocks({})
-if greeting then
-  cover:insert(pandoc.Div({ pandoc.Plain({ pandoc.Str(greeting) }) }, pandoc.Attr("", { "greeting" })))
+-- With a forside, the forside is the cover — skip the generated cover page.
+if not special.forside then
+  local cover = pandoc.Blocks({})
+  if greeting then
+    cover:insert(pandoc.Div({ pandoc.Plain({ pandoc.Str(greeting) }) }, pandoc.Attr("", { "greeting" })))
+  end
+  cover:insert(pandoc.Div({ pandoc.Plain({ pandoc.Str(siteTitle) }) }, pandoc.Attr("", { "cover-title" })))
+  cover:insert(pandoc.Div({ pandoc.Plain({ pandoc.Str(os.date("%Y-%m-%d")) }) }, pandoc.Attr("", { "cover-date" })))
+  doc.meta["include-before"] = pandoc.MetaBlocks({ pandoc.Div(cover, pandoc.Attr("", { "cover" })) })
 end
-cover:insert(pandoc.Div({ pandoc.Plain({ pandoc.Str(siteTitle) }) }, pandoc.Attr("", { "cover-title" })))
-cover:insert(pandoc.Div({ pandoc.Plain({ pandoc.Str(os.date("%Y-%m-%d")) }) }, pandoc.Attr("", { "cover-date" })))
-doc.meta["include-before"] = pandoc.MetaBlocks({ pandoc.Div(cover, pandoc.Attr("", { "cover" })) })
 
 -- Palette + greeting font from site params, injected after pdf.css so they win.
 local css = string.format(":root{--bg:%s;--fg:%s;--dim:%s;--accent:%s;--surface:%s}@page{background:%s}",

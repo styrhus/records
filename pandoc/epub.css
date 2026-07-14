@@ -25,3 +25,6 @@ img { max-width: 100%; }
 .post-date { text-align: right; }
 /* single-flowing mode: dinkus between records */
 .record-sep { text-align: center; margin: 2em 0; }
+/* bookLook specials: page breaks where the reader honours them */
+.book-forside, .book-side-1 { page-break-after: always; }
+.book-bakside { page-break-before: always; }

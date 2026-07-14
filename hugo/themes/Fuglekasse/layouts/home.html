@@ -80,16 +80,47 @@
   {{ $chapters := sort $arabic "num" | append (sort $roman "num") }}
   {{ $loose := where $all "Section" "not in" $chapterNames }}
 
+  {{/* bookLook (single-flowing only): records/forside.md, side-1.md and bakside.md
+       become front cover, page 1 and back cover — forside replaces the _index intro,
+       bakside closes the stream; dated records keep singleOrder between them.
+       $flow is the final flowing order, shared by the stream and the TOC. */}}
+  {{ $bookLook := site.Params.bookLook | default false }}
+  {{ $forside := false }}
+  {{ $flow := slice }}
+  {{ if eq $mode "single-flowing" }}
+    {{ $side1 := false }}
+    {{ $bakside := false }}
+    {{ if $bookLook }}
+      {{ $rest := slice }}
+      {{ range $loose }}
+        {{ if and (not .Section) (eq .File.ContentBaseName "forside") }}{{ $forside = . }}
+        {{ else if and (not .Section) (eq .File.ContentBaseName "side-1") }}{{ $side1 = . }}
+        {{ else if and (not .Section) (eq .File.ContentBaseName "bakside") }}{{ $bakside = . }}
+        {{ else }}{{ $rest = $rest | append . }}{{ end }}
+      {{ end }}
+      {{ $loose = $rest }}
+    {{ end }}
+    {{ with $forside }}{{ $flow = $flow | append . }}{{ end }}
+    {{ with $side1 }}{{ $flow = $flow | append . }}{{ end }}
+    {{ with sort $loose "Date" $order }}{{ $flow = $flow | append . }}{{ end }}
+    {{ with $bakside }}{{ $flow = $flow | append . }}{{ end }}
+  {{ else if $bookLook }}
+    {{ warnf "Fuglekasse: bookLook is only honoured in pageMode \"single-flowing\"" }}
+  {{ end }}
+
   {{/* Floating table of contents (params.showToc): top-right, collapsed; home page, single/basic modes. */}}
-  {{ if and site.Params.showToc (ne $mode "posts") (or $loose $chapters) }}
+  {{ if and site.Params.showToc (ne $mode "posts") (or $loose $chapters $flow) }}
     {{ $isSingle := in (slice "single" "single-flowing") $mode }}
     {{ $dir := cond $isSingle $order "desc" }}
     <details class="toc">
       <summary aria-label="Table of contents"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></summary>
       <nav class="toc-body">
-        {{ with $loose }}
+        {{/* single-flowing lists $flow as-is so bookLook's cover/back-cover order carries over. */}}
+        {{ $tocLoose := sort $loose "Date" $dir }}
+        {{ if eq $mode "single-flowing" }}{{ $tocLoose = $flow }}{{ end }}
+        {{ with $tocLoose }}
           <ul class="toc-loose">
-            {{ range sort . "Date" $dir }}
+            {{ range . }}
               <li><a href="{{ cond $isSingle (printf "#%s" (path.Base .RelPermalink)) .RelPermalink }}">{{ partial "inline/record-title.html" . }}</a></li>
             {{ end }}
           </ul>
@@ -123,11 +154,14 @@
       </details>
     {{ end }}
   {{ else if eq $mode "single-flowing" }}
-    {{/* Continuous conversation: intro, then bare turn streams split by a dinkus. */}}
-    {{ .Content }}
-    {{ range $i, $r := sort $loose "Date" $order }}
+    {{/* Continuous conversation: intro, then bare turn streams split by a dinkus.
+         With bookLook, forside stands in for the intro. */}}
+    {{ if not $forside }}{{ .Content }}{{ end }}
+    {{ range $i, $r := $flow }}
       {{ if $i }}<div class="record-sep" aria-hidden="true">· · ·</div>{{ end }}
-      <article class="record-flow" id="{{ path.Base $r.RelPermalink }}">
+      {{ $book := "" }}
+      {{ if and $bookLook (not $r.Section) (in (slice "forside" "side-1" "bakside") $r.File.ContentBaseName) }}{{ $book = printf " book-%s" $r.File.ContentBaseName }}{{ end }}
+      <article class="record-flow{{ $book }}" id="{{ path.Base $r.RelPermalink }}">
         {{ partial "record.html" (dict "content" $r.Content "prefix" (path.Base $r.RelPermalink) "voice" $r.Params.voiceRecorded) }}
       </article>
     {{ end }}

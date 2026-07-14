@@ -48,6 +48,24 @@ To go further, the templates live in `layouts/`, and all the CSS is at the top o
   and the PDF/EPUB build follows the same presentation (no table of contents,
   no per-record page breaks or chapter files).
 
+## Book look
+
+For a `single-flowing` site that should read as a proper book, set
+`params.bookLook: true` and drop up to three specially named files in your
+content directory root: `forside.md` (front cover — rendered first, standing
+in for the `_index.md` intro), `side-1.md` (page 1, right after the cover)
+and `bakside.md` (back cover, always last). The dated records flow between
+them per `singleOrder`; each file is optional and any subset works. They
+render in the stream like any other record — give them a `title:` so the
+table of contents has something to show.
+
+The PDF/EPUB build follows suit: the generated cover page (greeting, title,
+date) is dropped in favour of `forside.md`, `forside` and `side-1` each end
+their page, `bakside` starts a fresh one, and the `· · ·` dividers only
+separate the dated records. **Off by default**; in every other page mode the
+param is ignored (with a build warning) and the three files are ordinary
+records.
+
 ## Chapters
 
 Name a first-level folder in your content directory after a number — arabic
