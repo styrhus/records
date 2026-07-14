@@ -40,6 +40,13 @@ To go further, the templates live in `layouts/`, and all the CSS is at the top o
   `params.singleOrder` sets the record order — `"asc"` *(default)* runs
   oldest→newest (top→bottom), `"desc"` puts the newest at top. Records are still
   reachable by direct URL, so links you write inside `records/*.md` keep working.
+- `single-flowing` — one continuous conversation: greeting and `_index.md`
+  intro on top, then only the Human/Assistant turns of every record — no
+  titles, tags, dates or chapters (numbered folders are flattened into the
+  stream). Records are separated by a dimmed centred `· · ·` divider and
+  ordered by date per `params.singleOrder`. Direct record URLs keep working,
+  and the PDF/EPUB build follows the same presentation (no table of contents,
+  no per-record page breaks or chapter files).
 
 ## Chapters
 
@@ -48,7 +55,7 @@ Name a first-level folder in your content directory after a number — arabic
 case-insensitive) — and the home page groups its records into a **chapter**: a
 block titled with the folder name that folds and unfolds when its title is
 clicked. Chapters appear in the `single` and `basic` page modes (the `posts`
-feed stays flat).
+feed stays flat, and `single-flowing` flattens chapters into its stream).
 
 `params.chapterState` sets the fold state: `"latest"` *(default)* opens the
 chapter holding the newest record and collapses the rest, `"expanded"` opens
@@ -79,13 +86,15 @@ its own.
 
 Set `params.showToc: true` to add a floating table of contents — a small button
 pinned to the top-right corner of the **home page** (it stays put as you scroll)
-in the `single` and `basic` page modes. It is **off by default** and does
-nothing in `posts` mode.
+in every page mode but `posts`. It is **off by default** and does nothing in
+`posts` mode.
 
 Clicking the button opens a panel: loose (non-chapter) records first, then each
 chapter as a row you click to reveal its records. In `single` mode the links
 jump to the record on the same page (opening its chapter if it was collapsed);
-in `basic` mode they open the record's own page.
+in `basic` mode they open the record's own page. In `single-flowing` mode the
+panel is a flat record list (chapters are flattened) whose links jump to the
+record's spot in the stream — the records' display titles appear only here.
 
 ## Get PDF
 
@@ -101,13 +110,17 @@ Drafts, `LICENSE.md`, `404.md` and `ignoreFiles` matches stay out, signature
 lines are stripped, and `singleOrder`, `dateTitleFormat`, `datePostFormat` and
 `showTags` are honoured. The word-folder caveat from Chapters applies to the
 PDF too. Comment the param out to disable both the link and the CI build.
+With `pageMode: single-flowing` the book mirrors the site's flowing layout:
+cover, then one continuous stream with `· · ·` dividers — no table of
+contents, record titles, tags, dates, chapters or per-record page breaks.
 
 Set `params.epub` the same way — `epub: records.epub` — for a **Get EPUB**
 footer link. The same workflow step and tooling build it from the same
 assembled book (same content, order and exclusions), but styled structurally
 (`pandoc/epub.css`): e-readers override fonts and render grayscale, so the
 site palette does not carry over. Also unset by default; the two params are
-independent — set either or both.
+independent — set either or both. In `single-flowing` mode the EPUB is one
+continuous chapter — no table of contents or per-record file split.
 
 Records without a hand-written `title:` show their timestamp slug
 (`2026-07-06_23-25`). Set `params.dateTitleFormat` to a Go/Hugo

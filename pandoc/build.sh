@@ -22,6 +22,15 @@ if [ -z "$PDF_NAME" ] && [ -z "$EPUB_NAME" ]; then
   exit 0
 fi
 
+# single-flowing has no record-title headings — no TOC, no EPUB per-record split.
+PAGE_MODE="$(yaml_value '[[:space:]]*pageMode')"
+TOC_ARGS=(--toc --toc-depth=2)
+SPLIT_ARGS=(--split-level=2)
+if [ "$PAGE_MODE" = "single-flowing" ]; then
+  TOC_ARGS=()
+  SPLIT_ARGS=()
+fi
+
 # contentDir as Hugo reads it, resolved relative to the config's directory.
 CONTENT_DIR="$(yaml_value 'contentDir')"
 RECORDS_DIR="${RECORDS_DIR:-$(cd "$(dirname "$SITE_CONFIG")/${CONTENT_DIR:-../records}" && pwd)}"
@@ -34,7 +43,7 @@ mkdir -p "$OUTDIR"
 
 if [ -n "$PDF_NAME" ]; then
   pandoc -f json "$TMP/book.json" \
-    --standalone --toc --toc-depth=2 \
+    --standalone "${TOC_ARGS[@]}" \
     -c "$SCRIPT_DIR/pdf.css" \
     --highlight-style "$SCRIPT_DIR/highlight.theme" \
     -o "$TMP/book.html"
@@ -47,7 +56,7 @@ if [ -n "$EPUB_NAME" ]; then
   # its palette/@font-face CSS is PDF-only. Split at h2 = one file per record.
   pandoc -f json "$TMP/book.json" \
     --lua-filter "$SCRIPT_DIR/epub.lua" \
-    --toc --toc-depth=2 --split-level=2 \
+    "${TOC_ARGS[@]}" "${SPLIT_ARGS[@]}" \
     -M title="$(yaml_value 'title')" \
     -M header-includes= \
     -c "$SCRIPT_DIR/epub.css" \

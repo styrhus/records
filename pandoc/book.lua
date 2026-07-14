@@ -52,6 +52,8 @@ local dateTitleFormat = str(params.dateTitleFormat)
 local datePostFormat = str(params.datePostFormat)
 local singleOrder = str(params.singleOrder) or "asc"
 if singleOrder ~= "asc" and singleOrder ~= "desc" then singleOrder = "asc" end
+-- single-flowing: bare turn stream — no titles/tags/dates/chapters, dinkus between records.
+local flowing = str(params.pageMode) == "single-flowing"
 local showTags = boolOr(params.showTags, true)
 local repoURL = os.getenv("HUGO_PARAMS_REPOURL") or str(params.repoURL) or ""
 
@@ -314,7 +316,8 @@ end
 local loose, chapterMap = {}, {}
 for _, r in ipairs(records) do
   local num, kind = nil, nil
-  if r.section then num, kind = chapterNumber(r.section) end
+  -- flowing flattens: chapter folders are ignored, every record is loose
+  if r.section and not flowing then num, kind = chapterNumber(r.section) end
   if num then
     if not chapterMap[r.section] then
       chapterMap[r.section] = { name = r.section, num = num, kind = kind, records = {} }
@@ -481,9 +484,18 @@ local function titleInlines(r)
 end
 
 local body = pandoc.Blocks({})
+local firstRecord = true
 
 local function addRecord(r)
   local recDir = path.directory(r.file)
+  if flowing then
+    if not firstRecord then
+      body:insert(pandoc.Div({ pandoc.Plain({ pandoc.Str("· · ·") }) }, pandoc.Attr("", { "record-sep" })))
+    end
+    firstRecord = false
+    body:insert(pandoc.Div(turnDivs(readBody(r.body), isTrue(r.meta.voiceRecorded)):walk(contentFilter(recDir)), pandoc.Attr("", { "record" })))
+    return
+  end
   body:insert(pandoc.Header(2, titleInlines(r), pandoc.Attr(r.base, { "record-head" })))
   body:insert(pandoc.Div(turnDivs(readBody(r.body), isTrue(r.meta.voiceRecorded)):walk(contentFilter(recDir)), pandoc.Attr("", { "record" })))
   if showTags and not isFalse(r.meta.showTags) and r.meta.tags then

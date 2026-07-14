@@ -2,8 +2,9 @@
   {{ $mode := site.Params.pageMode | default "basic" }}
   {{ $dfmt := site.Params.datePostFormat }}
   {{ $showTags := site.Params.showTags }}
-  {{ if not (in (slice "basic" "posts" "single") $mode) }}
+  {{ if not (in (slice "basic" "posts" "single" "single-flowing") $mode) }}
     {{ warnf "Fuglekasse: unknown pageMode %q, falling back to \"basic\"" $mode }}
+    {{ $mode = "basic" }}
   {{ end }}
   {{ $order := site.Params.singleOrder | default "asc" }}
   {{ if not (in (slice "asc" "desc") $order) }}
@@ -32,11 +33,12 @@
   {{ if $firstPage }}{{ with site.Params.greeting }}<h1 class="greeting">{{ . }}</h1>{{ end }}{{ end }}
 
   {{/* Chapters: first-level folders named as numbers — arabic or roman — group
-       their records under a collapsible title in single/basic modes. */}}
+       their records under a collapsible title in single/basic modes.
+       single-flowing flattens: no grouping, every record joins $loose. */}}
   {{ $arabic := slice }}
   {{ $roman := slice }}
   {{ $chapterNames := slice }}
-  {{ if ne $mode "posts" }}
+  {{ if in (slice "single" "basic") $mode }}
     {{ range $all.GroupBy "Section" }}
       {{ $name := .Key }}
       {{/* Optional chapter title from records/<n>/_index.md; .File guards that
@@ -80,7 +82,7 @@
 
   {{/* Floating table of contents (params.showToc): top-right, collapsed; home page, single/basic modes. */}}
   {{ if and site.Params.showToc (ne $mode "posts") (or $loose $chapters) }}
-    {{ $isSingle := eq $mode "single" }}
+    {{ $isSingle := in (slice "single" "single-flowing") $mode }}
     {{ $dir := cond $isSingle $order "desc" }}
     <details class="toc">
       <summary aria-label="Table of contents"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></summary>
@@ -119,6 +121,15 @@
           {{ partial "inline/record-card.html" . }}
         {{ end }}
       </details>
+    {{ end }}
+  {{ else if eq $mode "single-flowing" }}
+    {{/* Continuous conversation: intro, then bare turn streams split by a dinkus. */}}
+    {{ .Content }}
+    {{ range $i, $r := sort $loose "Date" $order }}
+      {{ if $i }}<div class="record-sep" aria-hidden="true">· · ·</div>{{ end }}
+      <article class="record-flow" id="{{ path.Base $r.RelPermalink }}">
+        {{ partial "record.html" (dict "content" $r.Content "prefix" (path.Base $r.RelPermalink) "voice" $r.Params.voiceRecorded) }}
+      </article>
     {{ end }}
   {{ else if eq $mode "posts" }}
     {{ if $firstPage }}{{ .Content }}{{ end }}

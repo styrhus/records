@@ -76,11 +76,14 @@ params:
   #   basic  — link index (default)
   #   posts  — latest N records as an excerpt feed (postsCount sets N, default 3)
   #   single — one-page document stack, _index.md on top, records per singleOrder
+  #   single-flowing — one continuous conversation: only the Human/Assistant
+  #            turns, no titles/tags/dates/chapters, records split by a "· · ·"
+  #            divider; ordered by date per singleOrder (PDF/EPUB follow suit)
   # pageMode: single
   postsCount: 3
 
-  # single mode record order: "asc" (oldest→newest, top→bottom, default) or
-  # "desc" (newest at top). No effect in basic/posts modes.
+  # single/single-flowing mode record order: "asc" (oldest→newest, top→bottom,
+  # default) or "desc" (newest at top). No effect in basic/posts modes.
   # singleOrder: asc
 
   # Chapter fold state in basic/single modes (numbered records/<n>/ folders):
@@ -92,7 +95,7 @@ params:
   # chapterState: latest
 
   # Floating table of contents: a collapsed button pinned top-right on the home
-  # page (single/basic modes) that opens to the chapters and their records.
+  # page (all modes but posts) that opens to the chapters and their records.
   # Off by default; uncomment to enable.
   # showToc: true
 

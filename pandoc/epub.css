@@ -23,3 +23,5 @@ th, td { border: 1px solid; padding: 0.3em 0.6em; text-align: left; }
 img { max-width: 100%; }
 .post-tags, .post-date { font-size: 0.85em; }
 .post-date { text-align: right; }
+/* single-flowing mode: dinkus between records */
+.record-sep { text-align: center; margin: 2em 0; }
