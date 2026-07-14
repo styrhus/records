@@ -1,0 +1,6 @@
+{{- /* Static-asset URL: prefixed with params.cdnURL in production builds, site-relative otherwise. */ -}}
+{{- if and hugo.IsProduction site.Params.cdnURL -}}
+{{- printf "%s/%s" (strings.TrimSuffix "/" site.Params.cdnURL) (strings.TrimPrefix "/" .) -}}
+{{- else -}}
+{{- relURL . -}}
+{{- end -}}

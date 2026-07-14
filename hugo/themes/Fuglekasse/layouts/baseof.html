@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="{{ or site.Params.favicon "fuglekasse.svg" | relURL }}">
+  <link rel="icon" href="{{ partial "static-url.html" (or site.Params.favicon "fuglekasse.svg") }}">
   <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ $t := .Title }}{{ if not $t }}{{ $t = .File.ContentBaseName }}{{ end }}{{ with site.Params.dateTitleFormat }}{{ if findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $t }}{{ $t = time.Format . $.Date }}{{ end }}{{ end }}{{ $t }} · {{ site.Title }}{{ end }}</title>
   <style>
     /* Palette + display font come from hugo.yaml params.style (see the theme README). */
@@ -152,7 +152,7 @@
     /* Architects Daughter by Kimberly Geswein — SIL OFL 1.1, see fonts/OFL.txt. */
     @font-face {
       font-family: "{{ $s.font | safeCSS }}";
-      src: url("{{ $s.fontfile | relURL }}") format("woff2");
+      src: url("{{ partial "static-url.html" $s.fontfile }}") format("woff2");
       font-display: swap;
     }
     .greeting { font-family: "{{ $s.font | safeCSS }}", cursive; font-size: 3.5rem; line-height: 1.15; margin: 0 0 1.75rem; }
@@ -165,14 +165,14 @@
   </main>
   <footer>
     {{ with site.GetPage "/license" }}<a href="{{ .RelPermalink }}">{{ or .Title "License" }}</a>{{ end }}
-    {{ with site.Params.pdf }}<a href="{{ . | relURL }}">Get PDF</a>{{ end }}
-    {{ with site.Params.epub }}<a href="{{ . | relURL }}">Get EPUB</a>{{ end }}
+    {{ with site.Params.pdf }}<a href="{{ partial "static-url.html" . }}">Get PDF</a>{{ end }}
+    {{ with site.Params.epub }}<a href="{{ partial "static-url.html" . }}">Get EPUB</a>{{ end }}
     {{ if site.Params.showRepoURL }}
     {{ with site.Params.insidesBranch }}<sup><a href="{{ site.Params.repoURL }}/src/branch/{{ . }}">{{ . }}</a></sup>{{ end }}
     {{ with site.Params.repoURL }}<sup><a href="{{ . }}">{{ replaceRE `^https?://` "" . }}</a></sup>{{ end }}
     {{ end }}
   </footer>
-  {{ with site.Params.logo }}<img class="site-logo" src="{{ . | relURL }}" alt="">{{ end }}
+  {{ with site.Params.logo }}<img class="site-logo" src="{{ partial "static-url.html" . }}" alt="">{{ end }}
   {{- with site.Params.spotify }}
   {{- $url := replaceRE `^(https://open\.spotify\.com)/(embed/)?` "${1}/embed/" . }}
   <details class="spotify">

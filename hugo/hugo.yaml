@@ -63,6 +63,12 @@ params:
   # Point it at your own mechanism, also further up the file tree, e.g.
   # "./deploy.sh", "../deploy.sh" or "make -C ../.. deploy".
   # deployCommand: ./deploy.sh
+
+  # Serve static assets (favicon, font, logo, pdf/epub) from a CDN pull zone
+  # that fetches from this site's URL. Production builds only — local dev
+  # stays site-relative. Unset serves everything from the site itself.
+  # cdnURL: https://example.b-cdn.net/
+
   # Loud hand-written greeting atop the home page; set your own word or remove.
   greeting: Velkommen
 
