@@ -15,6 +15,7 @@
       --dim: {{ $s.light.dim | safeCSS }};
       --accent: {{ $s.light.accent | safeCSS }};
       --surface: {{ $s.light.surface | safeCSS }};
+      --card: {{ $s.light.card | safeCSS }};
     }
     @media (prefers-color-scheme: dark) {
       :root {
@@ -23,6 +24,7 @@
         --dim: {{ $s.dark.dim | safeCSS }};
         --accent: {{ $s.dark.accent | safeCSS }};
         --surface: {{ $s.dark.surface | safeCSS }};
+        --card: {{ $s.dark.card | safeCSS }};
       }
     }
     body {
@@ -92,7 +94,7 @@
     .mode-posts .pager .previous { margin-left: auto; }
     /* single mode: each record is a flowing "document" card, gap between them */
     .mode-single .record-page {
-      background: var(--bg);
+      background: var(--card);
       border: 1px solid var(--surface);
       border-radius: 8px;
       padding: 2rem 1.75rem;

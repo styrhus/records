@@ -29,6 +29,7 @@ fg = "#343b58"
 dim = "#9699a3"
 accent = "#34548a"
 surface = "#cbccd1"
+card = "#f5f5f7"
 
 # Dracula — dim lifted from #6272a4 so small footer/label text stays legible.
 [params.style.dark]
@@ -37,3 +38,4 @@ fg = "#f8f8f2"
 dim = "#8b96c9"
 accent = "#bd93f9"
 surface = "#44475a"
+card = "#323445"
