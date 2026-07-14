@@ -62,6 +62,7 @@
     blockquote { margin: 1rem 0; padding: 0.6rem 1rem; border-left: 4px solid var(--accent); background: var(--surface); border-radius: 4px; }
     blockquote > :first-child { margin-top: 0; }
     blockquote > :last-child { margin-bottom: 0; }
+    blockquote pre, blockquote code { background: var(--bg); } /* --surface on --surface would blend */
     /* Syntax colours track light/dark. Light = Tokyo Night Light, dark = Dracula — matching params.style. */
     :root {
       --hl-comment: #757985; --hl-keyword: #523881; --hl-string: #2f4f0b;
