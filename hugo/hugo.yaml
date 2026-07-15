@@ -64,7 +64,7 @@ params:
   # "./deploy.sh", "../deploy.sh" or "make -C ../.. deploy".
   # deployCommand: ./deploy.sh
 
-  # Serve static assets (favicon, font, logo, pdf/epub) from a CDN pull zone
+  # Serve static assets (favicon, font, logo, pdf/epub/booklet) from a CDN pull zone
   # that fetches from this site's URL. Production builds only — local dev
   # stays site-relative. Unset serves everything from the site itself.
   # cdnURL: https://example.b-cdn.net/
@@ -136,6 +136,13 @@ params:
   # the site root; the footer shows a "Get EPUB" link. The value is the
   # filename. Uncommend to enable both build and link.
   # epub: tb4.epub
+
+  # The book as a paper-saving print booklet: A5 pages placed two-up on A4
+  # landscape sheets in folding order — print two-sided (flip on short edge),
+  # fold the stack in half, and four site pages share each sheet of paper.
+  # Built by the same workflow step (needs pypdf next to WeasyPrint); the
+  # footer shows a "Get booklet" link. The value is the filename.
+  # booklet: tb4-booklet.pdf
 
   # Brand mark pinned to the bottom-right corner of every page. Point it at a
   # file in the theme's static/ (or your own static/); remove to show none.

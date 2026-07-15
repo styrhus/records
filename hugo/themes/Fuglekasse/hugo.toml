@@ -14,10 +14,11 @@ showTags = true      # show front-matter tags as dim #labels under each post; a 
 showRepoURL = true   # footer link to params.repoURL; false hides it (repoURL still rewrites record links)
 # pdf = "records.pdf"  # footer "Get PDF" link to the pandoc-built site PDF (see pandoc/ in the records repo); unset shows none
 # epub = "records.epub"  # footer "Get EPUB" link to the pandoc-built site EPUB (see pandoc/ in the records repo); unset shows none
+# booklet = "records-booklet.pdf"  # footer "Get booklet" link to the print booklet (A5 pages two-up on A4 landscape, folding order); unset shows none
 # logo = "fuglekasse.svg"  # brand mark fixed to the bottom-right corner; unset shows none
 # favicon = "fuglekasse.svg"  # <link rel="icon"> file in static/; unset falls back to the shipped fuglekasse.svg
 # spotify = "https://open.spotify.com/playlist/…"  # Spotify logo pinned bottom-left that opens an embedded player; share or embed URL; unset shows none
-# cdnURL = "https://example.b-cdn.net/"  # CDN prefix for static assets (favicon, font, logo, pdf/epub) in production builds; unset serves them from the site
+# cdnURL = "https://example.b-cdn.net/"  # CDN prefix for static assets (favicon, font, logo, pdf/epub/booklet) in production builds; unset serves them from the site
 
 [params.style]
 font = "Architects Daughter"

@@ -1,0 +1,8 @@
+/* Booklet geometry override, loaded after pdf.css: the book is rendered at A5
+   so impose.py can place two pages per A4 landscape sheet. Geometry only —
+   colours and everything else stay pdf.css / site-palette values. */
+@page {
+  size: A5;
+  margin: 12mm 10mm 14mm;
+}
+html { font-size: 9pt; }

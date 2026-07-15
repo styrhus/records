@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Build the site's records into one PDF and/or EPUB: book.lua assembles, pandoc
-# renders — HTML printed by WeasyPrint for the PDF, straight to EPUB otherwise.
+# Build the site's records into one PDF, EPUB and/or print booklet: book.lua
+# assembles, pandoc renders — HTML printed by WeasyPrint for the PDF and the
+# booklet (A5 pages imposed 2-up on A4 landscape), straight to EPUB otherwise.
 # Usage: pandoc/build.sh [outdir]   (default: hugo/public)
 # Env overrides: SITE_CONFIG, RECORDS_DIR (testing).
 set -euo pipefail
@@ -14,11 +15,13 @@ yaml_value() { # yaml_value <pattern> — first uncommented "key: value", stripp
   sed -n "s/^$1:[[:space:]]*//p" "$SITE_CONFIG" | head -1 | sed "s/[[:space:]]*#.*$//; s/[\"']//g"
 }
 
-# params.pdf / params.epub name the output files; unset/commented = feature off.
+# params.pdf / params.epub / params.booklet name the output files;
+# unset/commented = feature off.
 PDF_NAME="$(yaml_value '[[:space:]]*pdf')"
 EPUB_NAME="$(yaml_value '[[:space:]]*epub')"
-if [ -z "$PDF_NAME" ] && [ -z "$EPUB_NAME" ]; then
-  echo "pandoc/build.sh: params.pdf and params.epub unset in $SITE_CONFIG — skipping book build"
+BOOKLET_NAME="$(yaml_value '[[:space:]]*booklet')"
+if [ -z "$PDF_NAME" ] && [ -z "$EPUB_NAME" ] && [ -z "$BOOKLET_NAME" ]; then
+  echo "pandoc/build.sh: params.pdf/epub/booklet unset in $SITE_CONFIG — skipping book build"
   exit 0
 fi
 
@@ -49,6 +52,27 @@ if [ -n "$PDF_NAME" ]; then
     -o "$TMP/book.html"
   weasyprint "$TMP/book.html" "$OUTDIR/$PDF_NAME"
   echo "pandoc/build.sh: built $OUTDIR/$PDF_NAME from $RECORDS_DIR"
+fi
+
+# Print booklet: the same book at A5, imposed two-up onto A4 landscape sheets
+# in folding order by impose.py (pypdf). Blank filler pages take the site's
+# light bg so padded sheets match; the sed only reads flow-style `light: {…}`.
+if [ -n "$BOOKLET_NAME" ]; then
+  if python3 -c 'import pypdf' 2>/dev/null; then
+    pandoc -f json "$TMP/book.json" \
+      --standalone "${TOC_ARGS[@]}" \
+      -c "$SCRIPT_DIR/pdf.css" -c "$SCRIPT_DIR/booklet.css" \
+      --highlight-style "$SCRIPT_DIR/highlight.theme" \
+      -o "$TMP/booklet.html"
+    weasyprint "$TMP/booklet.html" "$TMP/booklet-a5.pdf"
+    BG="$(sed -n "/^[[:space:]]*#/d; s/.*light:[[:space:]]*{[^}]*bg:[[:space:]]*[\"']\{0,1\}\(#[0-9a-fA-F]\{3,8\}\).*/\1/p" "$SITE_CONFIG" | head -1)"
+    printf '<style>@page{size:A5;margin:0;background:%s}</style>' "${BG:-#d5d6db}" \
+      | weasyprint - "$TMP/blank.pdf"
+    python3 "$SCRIPT_DIR/impose.py" "$TMP/booklet-a5.pdf" "$OUTDIR/$BOOKLET_NAME" "$TMP/blank.pdf"
+    echo "pandoc/build.sh: built $OUTDIR/$BOOKLET_NAME from $RECORDS_DIR"
+  else
+    echo "pandoc/build.sh: params.booklet set but pypdf is missing — skipping booklet" >&2
+  fi
 fi
 
 if [ -n "$EPUB_NAME" ]; then
