@@ -8,3 +8,10 @@
 }
 html, body { background: #fff; }
 html { font-size: 9pt; }
+
+/* bookLook: blank verso after each cover page, so side-1 and the first
+   record open on a recto (right A5 in the folded booklet). */
+.book-forside, .book-side-1 { page-break-after: right; }
+@page :blank {
+  @bottom-center { content: none; }
+}

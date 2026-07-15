@@ -141,6 +141,9 @@ params:
   # background, two-up on A4 landscape sheets in folding order — print
   # two-sided (flip on short edge),
   # fold the stack in half, and four site pages share each sheet of paper.
+  # With bookLook, forside and side-1 get a blank verso after them (each opens
+  # on a right-hand A5 page) and bakside stays the very last page, sharing the
+  # outer sheet with forside as the folded book's back cover.
   # Built by the same workflow step (needs pypdf next to WeasyPrint); the
   # footer shows a "Get booklet" link. The value is the filename.
   # booklet: tb4-booklet.pdf

@@ -59,13 +59,20 @@ fi
 # pages stay pypdf-blank white, matching the page background.
 if [ -n "$BOOKLET_NAME" ]; then
   if python3 -c 'import pypdf' 2>/dev/null; then
+    # bookLook: keep bakside the very last page (the back cover, sharing the
+    # outer sheet with forside) — padding blanks go before it.
+    IMPOSE_ARGS=()
+    if [ "$PAGE_MODE" = "single-flowing" ] && [ "$(yaml_value '[[:space:]]*bookLook')" = "true" ] \
+       && [ -f "$RECORDS_DIR/bakside.md" ]; then
+      IMPOSE_ARGS=(--pad-before-last)
+    fi
     pandoc -f json "$TMP/book.json" \
       --standalone "${TOC_ARGS[@]}" \
       -c "$SCRIPT_DIR/pdf.css" -c "$SCRIPT_DIR/booklet.css" \
       --highlight-style "$SCRIPT_DIR/highlight.theme" \
       -o "$TMP/booklet.html"
     weasyprint "$TMP/booklet.html" "$TMP/booklet-a5.pdf"
-    python3 "$SCRIPT_DIR/impose.py" "$TMP/booklet-a5.pdf" "$OUTDIR/$BOOKLET_NAME"
+    python3 "$SCRIPT_DIR/impose.py" "${IMPOSE_ARGS[@]}" "$TMP/booklet-a5.pdf" "$OUTDIR/$BOOKLET_NAME"
     echo "pandoc/build.sh: built $OUTDIR/$BOOKLET_NAME from $RECORDS_DIR"
   else
     echo "pandoc/build.sh: params.booklet set but pypdf is missing — skipping booklet" >&2

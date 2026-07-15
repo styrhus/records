@@ -145,7 +145,11 @@ Set `params.booklet` — `booklet: records-booklet.pdf` — for a paper-saving
 onto A4 landscape sheets in folding order, so four site pages share each sheet
 of paper. Print it two-sided (flip on the **short** edge), fold the stack in
 half, and it reads like a little newspaper; the page background is plain white
-to spare ink (other palette colours carry over from the PDF). Also unset by
+to spare ink (other palette colours carry over from the PDF). With
+**Book look** on, the booklet behaves like a real book: a blank verso follows
+`forside` and `side-1` (so each opens on a right-hand A5 page), and `bakside`
+stays the very last page — the outer sheet prints `bakside` and `forside`
+side by side, folding into the back and front covers. Also unset by
 default and independent of the
 other two params; the build additionally needs `pypdf` next to WeasyPrint
 (the workflow skips just the booklet, with a note, when it is missing).
