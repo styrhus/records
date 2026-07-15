@@ -137,8 +137,9 @@ params:
   # filename. Uncommend to enable both build and link.
   # epub: tb4.epub
 
-  # The book as a paper-saving print booklet: A5 pages placed two-up on A4
-  # landscape sheets in folding order — print two-sided (flip on short edge),
+  # The book as a paper-saving print booklet: A5 pages on a white (ink-saving)
+  # background, two-up on A4 landscape sheets in folding order — print
+  # two-sided (flip on short edge),
   # fold the stack in half, and four site pages share each sheet of paper.
   # Built by the same workflow step (needs pypdf next to WeasyPrint); the
   # footer shows a "Get booklet" link. The value is the filename.

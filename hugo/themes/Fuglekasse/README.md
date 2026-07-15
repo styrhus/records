@@ -144,8 +144,9 @@ Set `params.booklet` — `booklet: records-booklet.pdf` — for a paper-saving
 **Get booklet** footer link: the same book rendered at A5 and imposed two-up
 onto A4 landscape sheets in folding order, so four site pages share each sheet
 of paper. Print it two-sided (flip on the **short** edge), fold the stack in
-half, and it reads like a little newspaper; padding pages take the page
-background, so blanks blend in. Also unset by default and independent of the
+half, and it reads like a little newspaper; the page background is plain white
+to spare ink (other palette colours carry over from the PDF). Also unset by
+default and independent of the
 other two params; the build additionally needs `pypdf` next to WeasyPrint
 (the workflow skips just the booklet, with a note, when it is missing).
 
