@@ -1,0 +1,13 @@
+# Build output
+out/
+dist/
+
+# Node modules
+node_modules/
+
+# Extension package
+*.vsix
+
+# IDE
+.vscode-test/
+.DS_Store

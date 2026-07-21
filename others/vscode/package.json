@@ -1,0 +1,64 @@
+{
+  "name": "records-chat",
+  "displayName": "Records Chat",
+  "description": "Chat-style editor for the records site — mechanical skills without AI (or with Ollama).",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Chat"
+  ],
+  "activationEvents": [
+    "onCommand:records.openChat"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "records.openChat",
+        "title": "Records: Open Chat"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "records.openChat",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Records",
+      "properties": {
+        "records.binaryPath": {
+          "type": "string",
+          "default": "records",
+          "description": "Path to the recordkit CLI (records command)."
+        },
+        "records.ollamaEndpoint": {
+          "type": "string",
+          "default": "",
+          "description": "Optional: Ollama endpoint URL (e.g., http://localhost:11434) to enable two-sided /record and voice skills."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.90.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0"
+  },
+  "dependencies": {}
+}

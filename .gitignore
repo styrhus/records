@@ -14,3 +14,11 @@ records/testfolder/
 # recordkit local memory (/myname, etc.) — personal, not published
 **/.mem/*
 !**/.mem/.gitkeep
+
+# others/ plugins — build artifacts (subproject .gitignores cover most; catch stragglers)
+others/**/node_modules/
+others/**/out/
+others/**/*.vsix
+others/**/__pycache__/
+others/**/.pytest_cache/
+others/**/*.egg-info/
