@@ -1,0 +1,2 @@
+# Keeps the gitignored .mem/ directory present in fresh clones.
+# recordkit writes local, personal state here (e.g. /myname). Its contents are gitignored.

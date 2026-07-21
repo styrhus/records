@@ -1,0 +1,13 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Packaging / build output
+*.egg-info/
+build/
+dist/
+
+# Local virtualenvs
+.venv/
+venv/

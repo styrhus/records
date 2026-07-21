@@ -1,0 +1,19 @@
+[project]
+name = "recordkit"
+version = "0.1.0"
+description = "Run the mechanical records skills without AI: create Hugo-frontmatter records, feature, commit/push/deploy, stamp now-playing."
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+records = "recordkit.cli:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["recordkit"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

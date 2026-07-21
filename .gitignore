@@ -10,3 +10,7 @@ records/programmers-in-10-years-from-now.md
 records/scalar-at-it-s-best.md
 records/a*zxc.md
 records/testfolder/
+
+# recordkit local memory (/myname, etc.) — personal, not published
+**/.mem/*
+!**/.mem/.gitkeep
