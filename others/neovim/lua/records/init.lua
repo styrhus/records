@@ -166,7 +166,7 @@ end
 
 function start_recording(mode, args)
   local draft = mode == "me"
-  local result = run_cli("new", { arguments = args, draft = draft and "true" or nil })
+  local result = run_cli("new", { arguments = args, draft = draft or nil })
   recording = { file = result.path, draft = draft }
   add_line("Recording (" .. mode .. "): " .. result.path, "Function")
 end
@@ -189,8 +189,8 @@ function commit(mode, message)
   local deploy = mode == "cpd"
   local result = run_cli("commit", {
     message = message,
-    push = push and "true" or nil,
-    deploy = deploy and "true" or nil,
+    push = push or nil,
+    deploy = deploy or nil,
   })
   add_line(string.format("Commit %s: %s", push and "(pushed)" or "(staged)", message), "Function")
 end

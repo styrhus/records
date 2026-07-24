@@ -2,18 +2,42 @@
   "name": "records-chat",
   "displayName": "Records Chat",
   "description": "Chat-style editor for the records site — mechanical skills without AI (or with Ollama).",
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "publisher": "tb4",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://codeberg.org/tb4/records.git",
+    "directory": "others/vscode"
+  },
   "engines": {
     "vscode": "^1.90.0"
   },
   "categories": [
     "Chat"
   ],
-  "activationEvents": [
-    "onCommand:records.openChat"
-  ],
   "main": "./out/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "records",
+          "title": "Records",
+          "icon": "media/activity-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "records": [
+        {
+          "type": "webview",
+          "id": "recordsChat",
+          "name": "Chat",
+          "contextualTitle": "Records Chat"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "records.openChat",
@@ -48,17 +72,13 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "package": "vsce package --no-dependencies"
   },
   "devDependencies": {
     "@types/vscode": "^1.90.0",
     "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "eslint": "^8.0.0",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0"
+    "@vscode/vsce": "^3.0.0",
+    "typescript": "^5.0.0"
   },
   "dependencies": {}
 }

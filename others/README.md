@@ -11,9 +11,10 @@ others/
 │   ├── tests/           # 30 unit tests (config discovery, frontmatter, slug, etc.)
 │   ├── pyproject.toml   # pip-installable package
 │   └── .gitignore       # __pycache__, .pytest_cache, build artifacts
-├── vscode/              # Records Chat: VSCode webview panel
-│   ├── src/             # extension.ts, panel.ts (TypeScript)
-│   ├── package.json     # vsce scaffold
+├── vscode/              # Records Chat: VSCode sidebar chat view (installable .vsix)
+│   ├── src/             # extension.ts, chatViewProvider.ts (TypeScript)
+│   ├── media/           # activity-bar SVG + marketplace icon
+│   ├── package.json     # vsce packaging (npm run package)
 │   └── .gitignore       # node_modules, out/, *.vsix
 ├── neovim/              # records.nvim: Neovim Lua plugin
 │   └── lua/records/     # :Records command, chat split
@@ -53,13 +54,19 @@ records commit -m "docs: add linux hardware notes" --push
 
 ### 3. VSCode Plugin
 
-From VS Code, open this repo folder:
+Package once and install permanently (VS Code and VSCodium):
 
-```
-F5  →  Extension Dev Host  →  Cmd/Ctrl+Shift+R  →  "Records: Open Chat"
+```bash
+cd vscode
+npm install && npm run package
+codium --install-extension records-chat-0.2.0.vsix   # or: code --install-extension …
 ```
 
-In the chat panel, type:
+Reload the editor and click the birdhouse icon in the activity bar (or `Ctrl/Cmd+Shift+R`,
+or "Records: Open Chat" in the palette). For development, F5 from `vscode/` still launches
+an Extension Dev Host instead.
+
+In the chat view, type:
 
 ```
 /all #linux How To
@@ -128,7 +135,8 @@ cd python && python -m pytest -q
 cd vscode
 npm install
 npm run compile  # or: npm run watch
-F5  # Launch Extension Dev Host
+F5               # Launch Extension Dev Host
+npm run package  # Build the installable .vsix (then codium/code --install-extension)
 ```
 
 ### Neovim

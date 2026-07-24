@@ -1,21 +1,17 @@
 import * as vscode from "vscode";
-import { RecordsChatPanel } from "./panel";
+import { ChatViewProvider } from "./chatViewProvider";
 
 export function activate(context: vscode.ExtensionContext) {
-  let panel: RecordsChatPanel | undefined;
+  const provider = new ChatViewProvider(context.extensionUri);
 
-  const command = vscode.commands.registerCommand("records.openChat", () => {
-    if (panel) {
-      panel.reveal();
-    } else {
-      panel = new RecordsChatPanel(context.extensionUri);
-      panel.onDisposed(() => {
-        panel = undefined;
-      });
-    }
-  });
-
-  context.subscriptions.push(command);
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(ChatViewProvider.viewType, provider, {
+      webviewOptions: { retainContextWhenHidden: true },
+    }),
+    vscode.commands.registerCommand("records.openChat", () =>
+      vscode.commands.executeCommand("recordsChat.focus")
+    )
+  );
 }
 
 export function deactivate() {}

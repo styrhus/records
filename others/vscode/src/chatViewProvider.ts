@@ -1,59 +1,73 @@
 import * as vscode from "vscode";
 import * as child_process from "child_process";
-import * as path from "path";
 
 interface RecordingSession {
   file: string;
   draft: boolean;
 }
 
-type MessageToPanel = {
-  type: "update-status" | "response" | "error" | "output";
+type MessageToView = {
+  type: "update-status" | "response" | "error" | "output" | "setup";
   content?: string;
   json?: Record<string, unknown>;
   error?: string;
 };
 
-type MessageFromPanel = {
-  type: "slash" | "message" | "stop-recording";
+type MessageFromView = {
+  type: "slash" | "message" | "stop-recording" | "open-settings";
   command?: string;
   args?: string;
   text?: string;
 };
 
-export class RecordsChatPanel {
-  private panel: vscode.WebviewPanel;
-  private disposables: vscode.Disposable[] = [];
-  private recording: RecordingSession | undefined;
-  private _onDisposed: vscode.EventEmitter<void> = new vscode.EventEmitter();
-  readonly onDisposed = this._onDisposed.event;
+export class ChatViewProvider implements vscode.WebviewViewProvider {
+  static readonly viewType = "recordsChat";
 
-  constructor(extensionUri: vscode.Uri) {
-    this.panel = vscode.window.createWebviewPanel(
-      "recordsChat",
-      "Records Chat",
-      vscode.ViewColumn.Beside,
-      { enableScripts: true }
+  private view?: vscode.WebviewView;
+  private recording: RecordingSession | undefined;
+
+  constructor(private readonly extensionUri: vscode.Uri) {}
+
+  resolveWebviewView(webviewView: vscode.WebviewView): void {
+    this.view = webviewView;
+    webviewView.webview.options = { enableScripts: true };
+    webviewView.webview.html = this.getWebviewContent();
+
+    webviewView.webview.onDidReceiveMessage((message: MessageFromView) =>
+      this.handleMessage(message)
     );
 
-    this.panel.webview.html = this.getWebviewContent();
-    this.panel.onDidDispose(() => {
-      this.disposables.forEach((d) => d.dispose());
-      this._onDisposed.fire();
+    const configListener = vscode.workspace.onDidChangeConfiguration((e) => {
+      if (e.affectsConfiguration("records.binaryPath")) {
+        void this.probeCLI();
+      }
     });
 
-    this.panel.webview.onDidReceiveMessage(
-      (message: MessageFromPanel) => this.handleMessage(message),
-      undefined,
-      this.disposables
-    );
+    webviewView.onDidDispose(() => {
+      configListener.dispose();
+      this.view = undefined;
+    });
+
+    void this.probeCLI();
   }
 
-  reveal() {
-    this.panel.reveal(vscode.ViewColumn.Beside);
+  private async probeCLI() {
+    try {
+      const result = await this.runCLI("config", {});
+      this.postMessage({
+        type: "update-status",
+        content: `records CLI ready — dir: ${result.records_dir}`,
+      });
+    } catch (e) {
+      const notFound = (e as NodeJS.ErrnoException).code === "ENOENT";
+      this.postMessage({
+        type: "setup",
+        error: notFound ? "records CLI not found" : String(e),
+      });
+    }
   }
 
-  private async handleMessage(message: MessageFromPanel) {
+  private async handleMessage(message: MessageFromView) {
     try {
       if (message.type === "slash") {
         await this.handleSlash(message.command || "", message.args || "");
@@ -67,6 +81,11 @@ export class RecordsChatPanel {
       } else if (message.type === "stop-recording") {
         this.recording = undefined;
         this.postMessage({ type: "update-status", content: "Recording stopped." });
+      } else if (message.type === "open-settings") {
+        await vscode.commands.executeCommand(
+          "workbench.action.openSettings",
+          "records.binaryPath"
+        );
       }
     } catch (e) {
       this.postMessage({ type: "error", error: String(e) });
@@ -115,7 +134,7 @@ export class RecordsChatPanel {
     try {
       const result = await this.runCLI("new", {
         arguments: args,
-        ...(draft && { draft: "true" }),
+        ...(draft && { draft: true }),
       });
       this.recording = { file: result.path as string, draft };
       this.postMessage({
@@ -158,10 +177,10 @@ export class RecordsChatPanel {
     }
 
     try {
-      const result = await this.runCLI("commit", {
+      await this.runCLI("commit", {
         message,
-        ...(push && { push: "true" }),
-        ...(deploy && { deploy: "true" }),
+        ...(push && { push: true }),
+        ...(deploy && { deploy: true }),
       });
       this.postMessage({
         type: "output",
@@ -229,11 +248,13 @@ export class RecordsChatPanel {
   ): Promise<Record<string, unknown>> {
     const cfg = vscode.workspace.getConfiguration("records");
     const bin = cfg.get<string>("binaryPath") || "records";
+    // CLI discovers the records dir from cwd — run it from the workspace, not the extension host
+    const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 
     const args: string[] = [command];
     for (const [k, v] of Object.entries(opts)) {
       if (k === "arguments") {
-        args.push(v as string);
+        if (v) args.push(v as string);
       } else if (v === true) {
         args.push(`--${k}`);
       } else if (v && typeof v === "string") {
@@ -242,8 +263,11 @@ export class RecordsChatPanel {
     }
 
     return new Promise((resolve, reject) => {
-      child_process.execFile(bin, args, { encoding: "utf-8" }, (err, stdout) => {
-        if (err) reject(err);
+      child_process.execFile(bin, args, { encoding: "utf-8", cwd }, (err, stdout) => {
+        if (err) {
+          reject(err);
+          return;
+        }
         try {
           resolve(JSON.parse(stdout));
         } catch (e) {
@@ -253,8 +277,8 @@ export class RecordsChatPanel {
     });
   }
 
-  private postMessage(message: MessageToPanel) {
-    this.panel.webview.postMessage(message);
+  private postMessage(message: MessageToView) {
+    this.view?.webview.postMessage(message);
   }
 
   private getWebviewContent(): string {
@@ -262,25 +286,27 @@ export class RecordsChatPanel {
 <html>
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Records Chat</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: system-ui, -apple-system, sans-serif;
-      background: var(--vscode-editor-background);
+      background: var(--vscode-sideBar-background);
       color: var(--vscode-editor-foreground);
       display: flex;
       flex-direction: column;
       height: 100vh;
-      padding: 1rem;
+      padding: 0.5rem;
     }
     #output {
       flex: 1;
       overflow-y: auto;
       border: 1px solid var(--vscode-border-color);
       padding: 0.5rem;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
       background: var(--vscode-textCodeBlock-background);
       border-radius: 4px;
       font-size: 0.9rem;
@@ -290,6 +316,16 @@ export class RecordsChatPanel {
     .status { color: var(--vscode-symbolIcon-functionForeground); }
     .error { color: var(--vscode-errorForeground); }
     .output { color: var(--vscode-terminal-ansiBrightCyan); }
+    .setup {
+      border: 1px solid var(--vscode-inputValidation-warningBorder);
+      border-radius: 4px;
+      padding: 0.5rem;
+    }
+    .setup code {
+      display: block;
+      margin: 0.3rem 0;
+      user-select: all;
+    }
     #input-area {
       display: flex;
       gap: 0.5rem;
@@ -305,7 +341,7 @@ export class RecordsChatPanel {
     }
     #input:focus { outline: none; border-color: var(--vscode-focusBorder-background); }
     button {
-      padding: 0.5rem 1rem;
+      padding: 0.3rem 0.8rem;
       background: var(--vscode-button-background);
       color: var(--vscode-button-foreground);
       border: none;
@@ -334,6 +370,8 @@ export class RecordsChatPanel {
         addLine(\`ERROR: \${msg.error}\`, "error");
       } else if (msg.type === "output") {
         addLine(msg.content, "output");
+      } else if (msg.type === "setup") {
+        addSetup(msg.error);
       }
     });
 
@@ -359,6 +397,43 @@ export class RecordsChatPanel {
       const div = document.createElement("div");
       div.className = \`message \${cls}\`;
       div.textContent = text;
+      output.appendChild(div);
+      output.scrollTop = output.scrollHeight;
+    }
+
+    function addSetup(error) {
+      const div = document.createElement("div");
+      div.className = "message setup";
+
+      const head = document.createElement("div");
+      head.className = "error";
+      head.textContent = error;
+      div.appendChild(head);
+
+      const body = document.createElement("div");
+      body.textContent = "Install the recordkit CLI (from the repo root):";
+      div.appendChild(body);
+
+      const pip = document.createElement("code");
+      pip.textContent = "pip install -e others/python";
+      div.appendChild(pip);
+
+      const pipx = document.createElement("code");
+      pipx.textContent = "pipx install ./others/python";
+      div.appendChild(pipx);
+
+      const hint = document.createElement("div");
+      hint.textContent =
+        "Already installed elsewhere? Point records.binaryPath at the binary:";
+      div.appendChild(hint);
+
+      const btn = document.createElement("button");
+      btn.textContent = "Open Settings";
+      btn.addEventListener("click", () =>
+        vscode.postMessage({ type: "open-settings" })
+      );
+      div.appendChild(btn);
+
       output.appendChild(div);
       output.scrollTop = output.scrollHeight;
     }
