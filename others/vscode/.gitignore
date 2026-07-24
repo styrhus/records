@@ -2,8 +2,9 @@
 out/
 dist/
 
-# Node modules
+# Node modules and lock files
 node_modules/
+package-lock.json
 
 # Extension package
 *.vsix
