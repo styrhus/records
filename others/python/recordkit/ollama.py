@@ -125,6 +125,27 @@ def chat(endpoint: str, model: str, messages: list[dict], timeout: float = DEFAU
     return content.strip()
 
 
+def ephemeral_reply(endpoint: str, model: str, human: str, history: list,
+                    timeout: float = DEFAULT_TIMEOUT, context: str | None = None) -> dict:
+    """Generate one reply from in-memory history; nothing is ever written to disk."""
+    human = human.strip()
+    if not human:
+        raise RuntimeError("empty message")
+    if not isinstance(history, list) or not all(
+        isinstance(m, dict) and m.get("role") in ("user", "assistant")
+        and isinstance(m.get("content"), str)
+        for m in history
+    ):
+        raise RuntimeError("invalid history")
+    messages = list(history)
+    if context:
+        # model-only: sent as a system message, like reply()
+        messages.insert(0, {"role": "system", "content": context})
+    messages.append({"role": "user", "content": human})
+    assistant = chat(endpoint, model, messages, timeout)
+    return {"model": model, "reply": assistant, "appended": False}
+
+
 def reply(file: Path, endpoint: str, model: str, human: str,
           timeout: float = DEFAULT_TIMEOUT, context: str | None = None) -> dict:
     """Generate + append one signed turn; nothing is written when generation fails."""

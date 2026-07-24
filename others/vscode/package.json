@@ -2,7 +2,7 @@
   "name": "records-chat",
   "displayName": "Records Chat",
   "description": "Chat-style editor for the records site — mechanical skills without AI (or with Ollama).",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "publisher": "tb4",
   "license": "MIT",
   "icon": "media/icon.png",
@@ -49,6 +49,11 @@
         "command": "records.openChat",
         "key": "ctrl+shift+r",
         "mac": "cmd+shift+r"
+      },
+      {
+        "command": "records.openChat",
+        "key": "ctrl+shift+\\",
+        "mac": "cmd+shift+\\"
       }
     ],
     "configuration": {

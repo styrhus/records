@@ -67,6 +67,18 @@ directory listings (paths only, 500 entries), 256 KiB total, sent as a single sy
 message to the model. Context is model-only and per-turn — it is never written to the
 record. The VSCode extension's `@` attachments and active-editor chip use these flags.
 
+`records ollama-chat` is the fileless sibling for chatting without a recording: same flags
+minus `--file`, prior turns passed as a JSON array via `--history` (`-` = stdin, default
+`[]`), same context flags. It prints `{"model", "reply", "appended": false}` and never
+touches disk — the VSCode extension uses it for ephemeral chat, keeping the history in
+memory per session:
+
+```bash
+echo '[{"role": "user", "content": "hi"}, {"role": "assistant", "content": "yo"}]' |
+records ollama-chat --endpoint http://localhost:11434 --model mistral:latest \
+                    --human "your message" --history -
+```
+
 ## Model Recommendations
 
 - **mistral** (7B) — fast, good for general recording
@@ -108,7 +120,7 @@ This keeps the Records site usable offline or on minimal hardware.
 
 ## Status
 
-- **recordkit CLI**: done — `records ollama-reply` (stdlib urllib, unit-tested with a mocked HTTP layer).
+- **recordkit CLI**: done — `records ollama-reply` and the fileless `records ollama-chat` (stdlib urllib, unit-tested with a mocked HTTP layer).
 - **VSCode**: done (0.3.0) — `/record` goes two-sided when `records.ollamaEndpoint` + `records.ollamaModel` are set, with a busy indicator and the user-only fallback; `/all` and `/me` stay user-only.
 - **Neovim**: pending — wire `config.ollama_endpoint` (+ a model option) to `ollama-reply` in `handle_slash`.
 - **Voice skills**: pending — piggyback by injecting a system prompt into the request (the `messages` array makes this a small change).

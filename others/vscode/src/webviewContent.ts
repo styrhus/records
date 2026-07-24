@@ -32,7 +32,8 @@ export function getWebviewContent(commandsJson: string): string {
       font-family: monospace;
     }
     .message { margin-bottom: 0.5rem; white-space: pre-wrap; overflow-wrap: anywhere; }
-    .status { color: var(--vscode-symbolIcon-functionForeground); }
+    .status { color: var(--vscode-descriptionForeground); }
+    .user { color: var(--vscode-editor-foreground); }
     .error { color: var(--vscode-errorForeground); }
     .output { color: var(--vscode-terminal-ansiBrightCyan); }
     .response { color: var(--vscode-terminal-ansiBrightGreen); }
@@ -249,6 +250,10 @@ export function getWebviewContent(commandsJson: string): string {
         spModel.value = msg.model || "";
         settingsPanel.style.display = "block";
         spEndpoint.focus();
+        return;
+      }
+      if (msg.type === "focus-input") {
+        input.focus();
         return;
       }
       if (msg.type === "busy") {
@@ -480,7 +485,7 @@ export function getWebviewContent(commandsJson: string): string {
     function submit() {
       const text = input.value.trim();
       if (!text) return;
-      addLine("> " + text, "status");
+      addLine("> " + text, "user");
       input.value = "";
       closePopup();
       suppress = { slash: false, fileAnchor: -1 };

@@ -30,7 +30,8 @@ type MessageToView = {
     | "model-info"
     | "file-list"
     | "active-editor"
-    | "settings-values";
+    | "settings-values"
+    | "focus-input";
   content?: string;
   error?: string;
   model?: string;
@@ -65,6 +66,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
   private view?: vscode.WebviewView;
   private recording: RecordingSession | undefined;
+  private chatHistory: { role: "user" | "assistant"; content: string }[] = [];
+  private pendingFocus = false;
 
   constructor(private readonly extensionUri: vscode.Uri) {}
 
@@ -125,6 +128,10 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       if (message.type === "ready") {
         this.postModelInfo();
         this.postActiveEditor(vscode.window.activeTextEditor);
+        if (this.pendingFocus) {
+          this.pendingFocus = false;
+          this.postMessage({ type: "focus-input" });
+        }
       } else if (message.type === "slash") {
         await this.handleSlash(message.command || "", message.args || "");
       } else if (message.type === "message") {
@@ -166,8 +173,41 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             ? "Message recorded (attachments ignored — no model configured)."
             : "Message recorded.",
       });
+    } else if (this.ollamaConfig()?.model) {
+      await this.ephemeralChat(text, files, dirs);
     } else {
-      this.postMessage({ type: "error", error: "No active recording session." });
+      this.postMessage({
+        type: "update-status",
+        content:
+          "No recording — /record to start, or set an Ollama model (⚙) to chat without recording.",
+      });
+    }
+  }
+
+  private async ephemeralChat(text: string, contextFiles: string[], contextDirs: string[]) {
+    const { endpoint, model } = this.ollamaConfig()!;
+    this.postMessage({ type: "busy", content: `${model} is thinking… (not recorded)` });
+    try {
+      const result = await this.runCLI(
+        "ollama-chat",
+        {
+          endpoint,
+          model,
+          human: text,
+          history: "-",
+          "context-file": contextFiles,
+          "context-dir": contextDirs,
+        },
+        JSON.stringify(this.chatHistory)
+      );
+      const reply = result.reply as string;
+      this.chatHistory.push({ role: "user", content: text }, { role: "assistant", content: reply });
+      this.postMessage({ type: "response", content: reply });
+    } catch (e) {
+      this.postMessage({
+        type: "error",
+        error: `Ollama failed — nothing recorded. (${e instanceof Error ? e.message : e})`,
+      });
     }
   }
 
@@ -184,6 +224,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         break;
       case "esc":
         this.recording = undefined;
+        this.chatHistory = [];
         this.postMessage({ type: "update-status", content: "Recording stopped." });
         break;
       case "stick":
@@ -291,6 +332,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         ...(draft && { draft: true }),
       });
       this.recording = { file: result.path as string, draft, ollama };
+      this.chatHistory = [];
       this.postMessage({
         type: "update-status",
         content: `Recording (${mode}${ollama ? ` · ollama ${ollama.model}` : ""}): ${result.path}`,
@@ -425,9 +467,19 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  focusInput() {
+    if (this.view) {
+      this.postMessage({ type: "focus-input" });
+    } else {
+      // view not resolved yet — flushed when the webview posts "ready"
+      this.pendingFocus = true;
+    }
+  }
+
   private async runCLI(
     command: string,
-    opts: Record<string, string | boolean | string[]>
+    opts: Record<string, string | boolean | string[]>,
+    stdinData?: string
   ): Promise<Record<string, unknown>> {
     const cfg = vscode.workspace.getConfiguration("records");
     const bin = cfg.get<string>("binaryPath") || "records";
@@ -448,7 +500,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     }
 
     return new Promise((resolve, reject) => {
-      child_process.execFile(bin, args, { encoding: "utf-8", cwd }, (err, stdout) => {
+      const child = child_process.execFile(bin, args, { encoding: "utf-8", cwd }, (err, stdout) => {
         if (err) {
           // the CLI reports failures as {"error": ...} on stdout before exiting non-zero
           try {
@@ -469,6 +521,10 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
           reject(new Error(`Invalid CLI response: ${stdout}`));
         }
       });
+      if (stdinData !== undefined) {
+        child.stdin?.write(stdinData);
+        child.stdin?.end();
+      }
     });
   }
 

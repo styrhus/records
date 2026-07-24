@@ -191,6 +191,127 @@ def test_reply_context_is_ephemeral(tmp_path, monkeypatch):
     assert all(m["role"] != "system" for m in calls[1]["payload"]["messages"])
 
 
+def test_ephemeral_reply_basic(monkeypatch):
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls))
+    r = ollama.ephemeral_reply("http://localhost:11434", "m:latest", "hi", [])
+    assert r == {"model": "m:latest", "reply": "yo", "appended": False}
+    assert calls[0]["payload"]["messages"] == [{"role": "user", "content": "hi"}]
+
+
+def test_ephemeral_reply_with_history(monkeypatch):
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls))
+    history = [{"role": "user", "content": "first"}, {"role": "assistant", "content": "yo"}]
+    ollama.ephemeral_reply("http://localhost:11434", "m", "second", history)
+    assert [m["content"] for m in calls[0]["payload"]["messages"]] == ["first", "yo", "second"]
+    # the caller's list is not mutated
+    assert len(history) == 2
+
+
+def test_ephemeral_reply_with_context(monkeypatch):
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls))
+    ollama.ephemeral_reply("http://localhost:11434", "m", "hi",
+                           [{"role": "user", "content": "old"}], context="CTX")
+    msgs = calls[0]["payload"]["messages"]
+    assert msgs[0] == {"role": "system", "content": "CTX"}
+    assert msgs[1] == {"role": "user", "content": "old"}
+    assert msgs[-1] == {"role": "user", "content": "hi"}
+
+
+def test_ephemeral_reply_empty_message():
+    with pytest.raises(RuntimeError, match="empty message"):
+        ollama.ephemeral_reply("http://localhost:11434", "m", "   ", [])
+
+
+@pytest.mark.parametrize("history", [
+    "not a list",
+    [{"role": "system", "content": "x"}],
+    [{"role": "user"}],
+    [{"role": "user", "content": 42}],
+    ["plain string"],
+])
+def test_ephemeral_reply_invalid_history(history):
+    with pytest.raises(RuntimeError, match="invalid history"):
+        ollama.ephemeral_reply("http://localhost:11434", "m", "hi", history)
+
+
+def test_cli_ollama_chat_inline_history(monkeypatch, capsys):
+    import json
+
+    from recordkit import cli
+
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls))
+    rc = cli.main(["ollama-chat", "--endpoint", "http://localhost:11434", "--model", "m",
+                   "--human", "second",
+                   "--history", '[{"role": "user", "content": "first"},'
+                                ' {"role": "assistant", "content": "yo"}]'])
+    assert rc == 0
+    assert [m["content"] for m in calls[0]["payload"]["messages"]] == ["first", "yo", "second"]
+    out = json.loads(capsys.readouterr().out)
+    assert out == {"model": "m", "reply": "yo", "appended": False}
+
+
+def test_cli_ollama_chat_history_stdin(monkeypatch):
+    import io
+
+    from recordkit import cli
+
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls))
+    monkeypatch.setattr("sys.stdin", io.StringIO('[{"role": "user", "content": "first"}]'))
+    rc = cli.main(["ollama-chat", "--endpoint", "http://localhost:11434", "--model", "m",
+                   "--human", "hi", "--history", "-"])
+    assert rc == 0
+    assert [m["content"] for m in calls[0]["payload"]["messages"]] == ["first", "hi"]
+
+
+def test_cli_ollama_chat_default_history(monkeypatch):
+    from recordkit import cli
+
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls))
+    rc = cli.main(["ollama-chat", "--endpoint", "http://localhost:11434", "--model", "m",
+                   "--human", "hi"])
+    assert rc == 0
+    assert calls[0]["payload"]["messages"] == [{"role": "user", "content": "hi"}]
+
+
+def test_cli_ollama_chat_bad_json(monkeypatch, capsys):
+    import json
+
+    from recordkit import cli
+
+    monkeypatch.setattr(ollama, "_http_post", _mock_post([]))
+    rc = cli.main(["ollama-chat", "--endpoint", "http://localhost:11434", "--model", "m",
+                   "--human", "hi", "--history", "{nope"])
+    assert rc == 1
+    out = json.loads(capsys.readouterr().out)
+    assert "invalid history JSON" in out["error"]
+
+
+def test_cli_ollama_chat_context_flags(tmp_path, monkeypatch):
+    from recordkit import cli
+
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls))
+    src = tmp_path / "a.py"
+    src.write_text("code\n")
+    d = tmp_path / "pkg"
+    d.mkdir()
+    (d / "m.py").write_text("")
+    rc = cli.main(["ollama-chat", "--endpoint", "http://localhost:11434", "--model", "m",
+                   "--human", "hi", "--context-file", str(src), "--context-dir", str(d)])
+    assert rc == 0
+    system = calls[0]["payload"]["messages"][0]
+    assert system["role"] == "system"
+    assert f"### File: {src}" in system["content"]
+    assert f"### Directory: {d}" in system["content"]
+    assert not list(tmp_path.glob("*.md"))
+
+
 def test_cli_context_flags(tmp_path, monkeypatch):
     from recordkit import cli
 

@@ -8,9 +8,10 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.registerWebviewViewProvider(ChatViewProvider.viewType, provider, {
       webviewOptions: { retainContextWhenHidden: true },
     }),
-    vscode.commands.registerCommand("records.openChat", () =>
-      vscode.commands.executeCommand("recordsChat.focus")
-    )
+    vscode.commands.registerCommand("records.openChat", async () => {
+      await vscode.commands.executeCommand("recordsChat.focus");
+      provider.focusInput();
+    })
   );
 }
 

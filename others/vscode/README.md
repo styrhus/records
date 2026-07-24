@@ -6,6 +6,8 @@ Works in VS Code and VSCodium alike.
 ## Features
 
 - Persistent chat in the activity bar (birdhouse icon) — open it once, it stays put
+- Ephemeral chat: with an Ollama model configured, chatting works without an active
+  recording — history lives in memory only, nothing is written to disk
 - Slash-command autocomplete: type `/` for a filtered command popup with argument hints
 - `@` file attachments: type `@` to pick workspace files/folders as model-only context
 - Active-editor context chip: the open file is sent as context (click the chip to disable)
@@ -37,16 +39,20 @@ Build the extension package once, then install the `.vsix` permanently:
 ```bash
 cd others/vscode
 npm install
-npm run package          # produces records-chat-0.4.0.vsix
-codium --install-extension records-chat-0.4.0.vsix   # VSCodium
-code --install-extension records-chat-0.4.0.vsix     # VS Code
+npm run package          # produces records-chat-0.5.0.vsix
+codium --install-extension records-chat-0.5.0.vsix   # VSCodium
+code --install-extension records-chat-0.5.0.vsix     # VS Code
 ```
 
-Reload the editor — the birdhouse icon appears in the activity bar. Click it, or press
-`Ctrl+Shift+R` / `Cmd+Shift+R`, or run "Records: Open Chat" from the command palette.
+Reload the editor — the birdhouse icon appears in the activity bar. Click it, press
+`Ctrl+Shift+R` / `Cmd+Shift+R` or `Ctrl+Shift+\` / `Cmd+Shift+\` (that's `Ctrl+|` on a
+US layout), or run "Records: Open Chat" from the command palette. All of these focus the
+chat's text input directly.
 
 > `npm run package` needs Node; with mise: `mise exec node@24 -- npm run package`.
 > Note: `Ctrl+Shift+R` shadows the editor's default Refactor binding while an editor has focus.
+> On non-US layouts the second binding follows the physical `\` key — check
+> Preferences → Keyboard Shortcuts if it doesn't respond, and rebind as needed.
 
 ## Usage
 
@@ -88,6 +94,12 @@ to the model (`/api/chat`) and appends the reply as a signed `## Human`/`## Assi
 input is locked and a busy line shows; there is no streaming. If Ollama is unreachable or
 errors, the message is recorded user-only and a warning appears. `/all` and `/me` always
 record user-only. Voice skills as system-prompt presets are still future.
+
+Without an active recording, messages still reach the model via `records ollama-chat`:
+the conversation is ephemeral — history is kept in the extension's memory and sent with
+each turn, nothing touches disk, and a failed turn just shows an error. The in-memory
+history resets when a recording starts (`/record`, `/all`, `/me`) and on `/esc`. With no
+model configured and no recording, the chat shows a dim hint instead of an error.
 
 ### File context (`@` and the editor chip)
 

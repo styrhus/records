@@ -58,6 +58,18 @@ def _build_parser() -> argparse.ArgumentParser:
     ol.add_argument("--context-dir", action="append", default=[], dest="context_dirs",
                     help="directory whose file listing goes to the model only (repeatable)")
 
+    oc = sub.add_parser("ollama-chat", help="ephemeral chat turn via a local Ollama model — no file")
+    oc.add_argument("--endpoint", required=True, help="Ollama base URL, e.g. http://localhost:11434")
+    oc.add_argument("--model", required=True, help="model tag, e.g. mistral:latest")
+    oc.add_argument("--human", required=True, help="text, or '-' to read stdin")
+    oc.add_argument("--history", default="[]",
+                    help="prior turns as a JSON array of {role, content}, or '-' to read stdin")
+    oc.add_argument("--timeout", type=float, default=ollama.DEFAULT_TIMEOUT)
+    oc.add_argument("--context-file", action="append", default=[], dest="context_files",
+                    help="file whose contents go to the model only (repeatable)")
+    oc.add_argument("--context-dir", action="append", default=[], dest="context_dirs",
+                    help="directory whose file listing goes to the model only (repeatable)")
+
     st = sub.add_parser("stick", help="feature a record (/stick)")
     grp = st.add_mutually_exclusive_group(required=True)
     grp.add_argument("--file")
@@ -102,6 +114,16 @@ def main(argv: list[str] | None = None) -> int:
             _emit(ollama.reply(Path(args.file), args.endpoint, args.model,
                                _stdin_or(args.human), timeout=args.timeout,
                                context=context or None))
+        elif args.cmd == "ollama-chat":
+            context = ollama.build_context([Path(p) for p in args.context_files],
+                                           [Path(p) for p in args.context_dirs])
+            try:
+                history = json.loads(_stdin_or(args.history))
+            except json.JSONDecodeError as e:
+                raise RuntimeError(f"invalid history JSON: {e}") from e
+            _emit(ollama.ephemeral_reply(args.endpoint, args.model, _stdin_or(args.human),
+                                         history, timeout=args.timeout,
+                                         context=context or None))
         elif args.cmd == "stick":
             if args.file:
                 _emit(stick.feature_file(Path(args.file)))

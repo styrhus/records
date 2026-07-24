@@ -59,12 +59,13 @@ Package once and install permanently (VS Code and VSCodium):
 ```bash
 cd vscode
 npm install && npm run package
-codium --install-extension records-chat-0.2.0.vsix   # or: code --install-extension …
+codium --install-extension records-chat-0.5.0.vsix   # or: code --install-extension …
 ```
 
 Reload the editor and click the birdhouse icon in the activity bar (or `Ctrl/Cmd+Shift+R`,
-or "Records: Open Chat" in the palette). For development, F5 from `vscode/` still launches
-an Extension Dev Host instead.
+`Ctrl/Cmd+Shift+\` — `Ctrl+|` on a US layout — or "Records: Open Chat" in the palette; all
+focus the chat input). For development, F5 from `vscode/` still launches an Extension Dev
+Host instead.
 
 In the chat view, type:
 
@@ -128,6 +129,15 @@ records ollama-reply --endpoint http://localhost:11434 --model mistral:latest \
   --context-file src/main.py --context-dir docs
 ```
 
+Without an active recording, the VSCode chat still talks to the model via
+`records ollama-chat` — same flags minus `--file`, prior turns passed as JSON
+(`--history`, `-` = stdin), nothing written to disk:
+
+```bash
+records ollama-chat --endpoint http://localhost:11434 --model mistral:latest \
+  --human "explain this" --history '[{"role": "user", "content": "earlier turn"}]'
+```
+
 In the VSCode extension the same flags back `@` file attachments and the active-editor
 context chip. See `ollama/README.md` for details.
 
@@ -137,7 +147,7 @@ context chip. See `ollama/README.md` for details.
 
 ```bash
 cd python && python -m pytest -q
-# 51 tests, ~0.2s
+# 65 tests, ~0.2s
 ```
 
 ### VSCode
