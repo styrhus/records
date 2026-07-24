@@ -53,6 +53,10 @@ def _build_parser() -> argparse.ArgumentParser:
     ol.add_argument("--file", required=True)
     ol.add_argument("--human", required=True, help="text, or '-' to read stdin")
     ol.add_argument("--timeout", type=float, default=ollama.DEFAULT_TIMEOUT)
+    ol.add_argument("--context-file", action="append", default=[], dest="context_files",
+                    help="file whose contents go to the model only, never the record (repeatable)")
+    ol.add_argument("--context-dir", action="append", default=[], dest="context_dirs",
+                    help="directory whose file listing goes to the model only (repeatable)")
 
     st = sub.add_parser("stick", help="feature a record (/stick)")
     grp = st.add_mutually_exclusive_group(required=True)
@@ -93,8 +97,11 @@ def main(argv: list[str] | None = None) -> int:
                                _stdin_or(args.assistant), args.model)
             _emit({"file": args.file, "appended": True})
         elif args.cmd == "ollama-reply":
+            context = ollama.build_context([Path(p) for p in args.context_files],
+                                           [Path(p) for p in args.context_dirs])
             _emit(ollama.reply(Path(args.file), args.endpoint, args.model,
-                               _stdin_or(args.human), timeout=args.timeout))
+                               _stdin_or(args.human), timeout=args.timeout,
+                               context=context or None))
         elif args.cmd == "stick":
             if args.file:
                 _emit(stick.feature_file(Path(args.file)))

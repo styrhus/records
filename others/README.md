@@ -8,7 +8,7 @@ This directory contains the **no-AI engine and plugins** for the Records site �
 others/
 ├── python/              # recordkit: stateless library + CLI (JSON I/O)
 │   ├── recordkit/       # modules: config, naming, create, stick, commit, mucke, etc.
-│   ├── tests/           # 30 unit tests (config discovery, frontmatter, slug, etc.)
+│   ├── tests/           # 51 unit tests (config discovery, frontmatter, ollama, etc.)
 │   ├── pyproject.toml   # pip-installable package
 │   └── .gitignore       # __pycache__, .pytest_cache, build artifacts
 ├── vscode/              # Records Chat: VSCode sidebar chat view (installable .vsix)
@@ -119,8 +119,17 @@ ollama pull mistral
 ```
 
 `/record` becomes two-sided (user msg → model → reply + signature), with multi-turn context
-per recording session, via `records ollama-reply` (Neovim wiring pending). See
-`ollama/README.md` for details.
+per recording session, via `records ollama-reply` (Neovim wiring pending). Workspace files
+can ride along as model-only context (never written to the record):
+
+```bash
+records ollama-reply --endpoint http://localhost:11434 --model mistral:latest \
+  --file records/2026-07-24_10-00.md --human "explain this" \
+  --context-file src/main.py --context-dir docs
+```
+
+In the VSCode extension the same flags back `@` file attachments and the active-editor
+context chip. See `ollama/README.md` for details.
 
 ## Development
 
@@ -128,7 +137,7 @@ per recording session, via `records ollama-reply` (Neovim wiring pending). See
 
 ```bash
 cd python && python -m pytest -q
-# 40 tests, ~0.1s
+# 51 tests, ~0.2s
 ```
 
 ### VSCode

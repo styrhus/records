@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 import * as child_process from "child_process";
+import { getWebviewContent } from "./webviewContent";
+import { COMMANDS } from "./commands";
 
 interface OllamaConfig {
   endpoint: string;
@@ -12,19 +14,51 @@ interface RecordingSession {
   ollama?: OllamaConfig;
 }
 
+interface Attachment {
+  path: string;
+  kind: "file" | "dir";
+}
+
 type MessageToView = {
-  type: "update-status" | "response" | "error" | "output" | "setup" | "busy";
+  type:
+    | "update-status"
+    | "response"
+    | "error"
+    | "output"
+    | "setup"
+    | "busy"
+    | "model-info"
+    | "file-list"
+    | "active-editor"
+    | "settings-values";
   content?: string;
-  json?: Record<string, unknown>;
   error?: string;
+  model?: string;
+  endpoint?: string;
+  files?: { path: string; type: "file" | "dir" }[];
+  path?: string;
 };
 
 type MessageFromView = {
-  type: "slash" | "message" | "stop-recording" | "open-settings";
+  type:
+    | "ready"
+    | "slash"
+    | "message"
+    | "open-settings"
+    | "list-files"
+    | "get-settings"
+    | "save-settings";
   command?: string;
   args?: string;
   text?: string;
+  attachments?: Attachment[];
+  activeEditor?: string;
+  endpoint?: string;
+  model?: string;
 };
+
+const FIND_EXCLUDES =
+  "{**/node_modules/**,**/.git/**,**/out/**,**/dist/**,**/.venv/**,**/__pycache__/**,**/public/**}";
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
   static readonly viewType = "recordsChat";
@@ -37,7 +71,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
   resolveWebviewView(webviewView: vscode.WebviewView): void {
     this.view = webviewView;
     webviewView.webview.options = { enableScripts: true };
-    webviewView.webview.html = this.getWebviewContent();
+    webviewView.webview.html = getWebviewContent(JSON.stringify(COMMANDS));
 
     webviewView.webview.onDidReceiveMessage((message: MessageFromView) =>
       this.handleMessage(message)
@@ -49,12 +83,18 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         e.affectsConfiguration("records.ollamaEndpoint") ||
         e.affectsConfiguration("records.ollamaModel")
       ) {
+        this.postModelInfo();
         void this.probeCLI();
       }
     });
 
+    const editorListener = vscode.window.onDidChangeActiveTextEditor((editor) =>
+      this.postActiveEditor(editor)
+    );
+
     webviewView.onDidDispose(() => {
       configListener.dispose();
+      editorListener.dispose();
       this.view = undefined;
     });
 
@@ -82,20 +122,19 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
   private async handleMessage(message: MessageFromView) {
     try {
-      if (message.type === "slash") {
+      if (message.type === "ready") {
+        this.postModelInfo();
+        this.postActiveEditor(vscode.window.activeTextEditor);
+      } else if (message.type === "slash") {
         await this.handleSlash(message.command || "", message.args || "");
       } else if (message.type === "message") {
-        if (this.recording?.ollama) {
-          await this.appendOllamaTurn(message.text || "");
-        } else if (this.recording) {
-          await this.appendUserMessage(message.text || "");
-          this.postMessage({ type: "update-status", content: "Message recorded." });
-        } else {
-          this.postMessage({ type: "error", error: "No active recording session." });
-        }
-      } else if (message.type === "stop-recording") {
-        this.recording = undefined;
-        this.postMessage({ type: "update-status", content: "Recording stopped." });
+        await this.handleChatMessage(message);
+      } else if (message.type === "list-files") {
+        await this.listFiles();
+      } else if (message.type === "get-settings") {
+        this.getSettings();
+      } else if (message.type === "save-settings") {
+        await this.saveSettings(message.endpoint || "", message.model || "");
       } else if (message.type === "open-settings") {
         await vscode.commands.executeCommand(
           "workbench.action.openSettings",
@@ -104,6 +143,31 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       }
     } catch (e) {
       this.postMessage({ type: "error", error: String(e) });
+    }
+  }
+
+  private async handleChatMessage(message: MessageFromView) {
+    const text = message.text || "";
+    const attachments = message.attachments || [];
+    const files = attachments.filter((a) => a.kind === "file").map((a) => a.path);
+    const dirs = attachments.filter((a) => a.kind === "dir").map((a) => a.path);
+    if (message.activeEditor && !files.includes(message.activeEditor)) {
+      files.push(message.activeEditor);
+    }
+
+    if (this.recording?.ollama) {
+      await this.appendOllamaTurn(text, files, dirs);
+    } else if (this.recording) {
+      await this.appendUserMessage(text);
+      this.postMessage({
+        type: "update-status",
+        content:
+          files.length || dirs.length
+            ? "Message recorded (attachments ignored — no model configured)."
+            : "Message recorded.",
+      });
+    } else {
+      this.postMessage({ type: "error", error: "No active recording session." });
     }
   }
 
@@ -151,6 +215,66 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     return { endpoint, model: (cfg.get<string>("ollamaModel") || "").trim() };
   }
 
+  private postModelInfo() {
+    const ollama = this.ollamaConfig();
+    this.postMessage({
+      type: "model-info",
+      model: ollama?.model || undefined,
+      endpoint: ollama?.endpoint,
+    });
+  }
+
+  private postActiveEditor(editor: vscode.TextEditor | undefined) {
+    // undefined fires when the webview itself takes focus — keep the last real editor
+    if (!editor) return;
+    const uri = editor.document.uri;
+    if (uri.scheme !== "file") return;
+    const rel = vscode.workspace.asRelativePath(uri, false);
+    if (rel === uri.fsPath) return; // outside the workspace
+    this.postMessage({ type: "active-editor", path: rel });
+  }
+
+  private async listFiles() {
+    const ws = vscode.workspace.workspaceFolders?.[0];
+    if (!ws) {
+      this.postMessage({ type: "file-list", files: [] });
+      this.postMessage({ type: "error", error: "No workspace folder open." });
+      return;
+    }
+    const uris = await vscode.workspace.findFiles("**/*", FIND_EXCLUDES, 2000);
+    const files = uris.map((u) => vscode.workspace.asRelativePath(u, false));
+    const dirs = new Set<string>();
+    for (const f of files) {
+      const parts = f.split("/");
+      for (let i = 1; i < parts.length; i++) dirs.add(parts.slice(0, i).join("/"));
+    }
+    const list: { path: string; type: "file" | "dir" }[] = [
+      ...[...dirs].sort().map((d) => ({ path: d, type: "dir" as const })),
+      ...files.sort().map((f) => ({ path: f, type: "file" as const })),
+    ];
+    this.postMessage({ type: "file-list", files: list });
+  }
+
+  private getSettings() {
+    const cfg = vscode.workspace.getConfiguration("records");
+    this.postMessage({
+      type: "settings-values",
+      endpoint: cfg.get<string>("ollamaEndpoint") || "",
+      model: cfg.get<string>("ollamaModel") || "",
+    });
+  }
+
+  private async saveSettings(endpoint: string, model: string) {
+    try {
+      const cfg = vscode.workspace.getConfiguration("records");
+      await cfg.update("ollamaEndpoint", endpoint.trim(), vscode.ConfigurationTarget.Global);
+      await cfg.update("ollamaModel", model.trim(), vscode.ConfigurationTarget.Global);
+      this.postMessage({ type: "update-status", content: "Ollama settings saved." });
+    } catch (e) {
+      this.postMessage({ type: "error", error: `Failed to save settings: ${e}` });
+    }
+  }
+
   private async startRecording(mode: string, args: string) {
     const draft = mode === "me";
     let ollama = mode === "record" ? this.ollamaConfig() : undefined;
@@ -181,12 +305,23 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     await this.runCLI("append", { file: this.recording.file, text });
   }
 
-  private async appendOllamaTurn(text: string) {
+  private async appendOllamaTurn(
+    text: string,
+    contextFiles: string[] = [],
+    contextDirs: string[] = []
+  ) {
     const { file, ollama } = this.recording!;
     const { endpoint, model } = ollama!;
     this.postMessage({ type: "busy", content: `${model} is thinking…` });
     try {
-      const result = await this.runCLI("ollama-reply", { file, endpoint, model, human: text });
+      const result = await this.runCLI("ollama-reply", {
+        file,
+        endpoint,
+        model,
+        human: text,
+        "context-file": contextFiles,
+        "context-dir": contextDirs,
+      });
       this.postMessage({ type: "response", content: result.reply as string });
     } catch (e) {
       await this.runCLI("append", { file, text });
@@ -292,7 +427,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
   private async runCLI(
     command: string,
-    opts: Record<string, string | boolean>
+    opts: Record<string, string | boolean | string[]>
   ): Promise<Record<string, unknown>> {
     const cfg = vscode.workspace.getConfiguration("records");
     const bin = cfg.get<string>("binaryPath") || "records";
@@ -303,6 +438,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     for (const [k, v] of Object.entries(opts)) {
       if (k === "arguments") {
         if (v) args.push(v as string);
+      } else if (Array.isArray(v)) {
+        for (const item of v) if (item) args.push(`--${k}`, item);
       } else if (v === true) {
         args.push(`--${k}`);
       } else if (v && typeof v === "string") {
@@ -337,187 +474,5 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
   private postMessage(message: MessageToView) {
     this.view?.webview.postMessage(message);
-  }
-
-  private getWebviewContent(): string {
-    return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy"
-        content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Records Chat</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: var(--vscode-sideBar-background);
-      color: var(--vscode-editor-foreground);
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      padding: 0.5rem;
-    }
-    #output {
-      flex: 1;
-      overflow-y: auto;
-      border: 1px solid var(--vscode-border-color);
-      padding: 0.5rem;
-      margin-bottom: 0.5rem;
-      background: var(--vscode-textCodeBlock-background);
-      border-radius: 4px;
-      font-size: 0.9rem;
-      font-family: monospace;
-    }
-    .message { margin-bottom: 0.5rem; }
-    .status { color: var(--vscode-symbolIcon-functionForeground); }
-    .error { color: var(--vscode-errorForeground); }
-    .output { color: var(--vscode-terminal-ansiBrightCyan); }
-    .response { color: var(--vscode-terminal-ansiBrightGreen); white-space: pre-wrap; }
-    .busy { color: var(--vscode-descriptionForeground); font-style: italic; }
-    .setup {
-      border: 1px solid var(--vscode-inputValidation-warningBorder);
-      border-radius: 4px;
-      padding: 0.5rem;
-    }
-    .setup code {
-      display: block;
-      margin: 0.3rem 0;
-      user-select: all;
-    }
-    #input-area {
-      display: flex;
-      gap: 0.5rem;
-    }
-    #input {
-      flex: 1;
-      padding: 0.5rem;
-      background: var(--vscode-input-background);
-      color: var(--vscode-input-foreground);
-      border: 1px solid var(--vscode-inputBorder-background);
-      border-radius: 4px;
-      font-family: monospace;
-    }
-    #input:focus { outline: none; border-color: var(--vscode-focusBorder-background); }
-    button {
-      padding: 0.3rem 0.8rem;
-      background: var(--vscode-button-background);
-      color: var(--vscode-button-foreground);
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-    button:hover { background: var(--vscode-button-hoverBackground); }
-  </style>
-</head>
-<body>
-  <div id="output"></div>
-  <div id="input-area">
-    <input id="input" type="text" placeholder="Slash command or message…" />
-  </div>
-  <script>
-    const vscode = acquireVsCodeApi();
-    const output = document.getElementById("output");
-    const input = document.getElementById("input");
-
-    window.addEventListener("message", (e) => {
-      const msg = e.data;
-      if (msg.type === "busy") {
-        const div = addLine(msg.content, "busy");
-        div.id = "busy";
-        input.disabled = true;
-        return;
-      }
-      clearBusy();
-      if (msg.type === "update-status") {
-        addLine(\`[\${new Date().toLocaleTimeString()}] \${msg.content}\`, "status");
-      } else if (msg.type === "error") {
-        addLine(\`ERROR: \${msg.error}\`, "error");
-      } else if (msg.type === "output") {
-        addLine(msg.content, "output");
-      } else if (msg.type === "response") {
-        addLine(msg.content, "response");
-      } else if (msg.type === "setup") {
-        addSetup(msg.error);
-      }
-    });
-
-    function clearBusy() {
-      const busy = document.getElementById("busy");
-      if (busy) busy.remove();
-      if (input.disabled) {
-        input.disabled = false;
-        input.focus();
-      }
-    }
-
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        const text = input.value.trim();
-        if (!text) return;
-        addLine(\`> \${text}\`, "status");
-        input.value = "";
-
-        if (text.startsWith("/")) {
-          const parts = text.split(/\\s+/);
-          const cmd = parts[0].slice(1);
-          const args = parts.slice(1).join(" ");
-          vscode.postMessage({ type: "slash", command: cmd, args });
-        } else {
-          vscode.postMessage({ type: "message", text });
-        }
-      }
-    });
-
-    function addLine(text, cls = "") {
-      const div = document.createElement("div");
-      div.className = \`message \${cls}\`;
-      div.textContent = text;
-      output.appendChild(div);
-      output.scrollTop = output.scrollHeight;
-      return div;
-    }
-
-    function addSetup(error) {
-      const div = document.createElement("div");
-      div.className = "message setup";
-
-      const head = document.createElement("div");
-      head.className = "error";
-      head.textContent = error;
-      div.appendChild(head);
-
-      const body = document.createElement("div");
-      body.textContent = "Install the recordkit CLI (from the repo root):";
-      div.appendChild(body);
-
-      const pip = document.createElement("code");
-      pip.textContent = "pip install -e others/python";
-      div.appendChild(pip);
-
-      const pipx = document.createElement("code");
-      pipx.textContent = "pipx install ./others/python";
-      div.appendChild(pipx);
-
-      const hint = document.createElement("div");
-      hint.textContent =
-        "Already installed elsewhere? Point records.binaryPath at the binary:";
-      div.appendChild(hint);
-
-      const btn = document.createElement("button");
-      btn.textContent = "Open Settings";
-      btn.addEventListener("click", () =>
-        vscode.postMessage({ type: "open-settings" })
-      );
-      div.appendChild(btn);
-
-      output.appendChild(div);
-      output.scrollTop = output.scrollHeight;
-    }
-  </script>
-</body>
-</html>`;
   }
 }

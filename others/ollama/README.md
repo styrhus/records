@@ -61,6 +61,12 @@ timeout 120s, `--timeout` to override), appends the new signed turn, and prints
 `{"file", "model", "reply", "appended"}` as JSON. On failure nothing is appended and it
 exits 1 with `{"error": "..."}`.
 
+Repeatable `--context-file <path>` / `--context-dir <path>` flags attach workspace context
+for that turn: file contents (64 KiB/file, binary/missing files degrade to a marker) and
+directory listings (paths only, 500 entries), 256 KiB total, sent as a single system
+message to the model. Context is model-only and per-turn — it is never written to the
+record. The VSCode extension's `@` attachments and active-editor chip use these flags.
+
 ## Model Recommendations
 
 - **mistral** (7B) — fast, good for general recording
@@ -89,7 +95,7 @@ prepend it to the user's message when calling the model.
 - **No streaming** yet — the plugin waits for the full model response before showing it.
 - **Context is per record** — the chat history is rebuilt from the record file on every turn, so context resets when a new recording starts (or `/esc`).
 - **No prompt templates** — model behavior depends entirely on the system prompt and the model itself.
-- **No tool use** — the model can't call commands or read files; it's pure text-in, text-out.
+- **No tool use** — the model can't call commands or read files on its own; it only sees what `--context-file`/`--context-dir` hand it, and that context is per-turn.
 
 ## Fallback (No Ollama)
 

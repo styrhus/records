@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0
+
+- Chat messages word-wrap; long lines no longer produce a horizontal scrollbar.
+- Slash-command autocomplete: typing `/` opens a popup with all commands and descriptions, filtered as you type (arrows/Tab/Enter to pick, Escape to dismiss); a known command shows its argument hint below the message log.
+- Settings gear (⚙) next to the input: an inline panel edits `records.ollamaEndpoint` / `records.ollamaModel` and persists them to the user settings.json.
+- `@` file attachments: typing `@` opens a workspace file/folder picker; picks become chips and their contents (folders: a file listing) are sent to Ollama as model-only context via the new `records ollama-reply --context-file/--context-dir` flags. The typed `@path` stays in the recorded message; the file contents are never written to the record, and context is per-turn.
+- Active-editor context: the file open in the editor shows as a chip above the input and is sent as model context; click the chip to toggle it off.
+- Active model line under the input (`model @ endpoint`, or `no model — user-only recording`), live-updating on settings changes.
+- Webview HTML moved to `src/webviewContent.ts`; the slash-command registry (`src/commands.ts`) feeds both autocomplete and dispatch.
+
 ## 0.3.0
 
 - Two-sided `/record` via Ollama: with `records.ollamaEndpoint` and the new `records.ollamaModel` setting configured, chat messages go through `records ollama-reply` (Ollama `/api/chat`) and each reply is appended as a signed `## Human`/`## Assistant` turn; context is multi-turn within a recording session.

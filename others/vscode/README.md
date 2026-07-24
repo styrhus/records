@@ -6,6 +6,10 @@ Works in VS Code and VSCodium alike.
 ## Features
 
 - Persistent chat in the activity bar (birdhouse icon) — open it once, it stays put
+- Slash-command autocomplete: type `/` for a filtered command popup with argument hints
+- `@` file attachments: type `@` to pick workspace files/folders as model-only context
+- Active-editor context chip: the open file is sent as context (click the chip to disable)
+- Settings gear (⚙) to set the Ollama endpoint/model; active model shown under the input
 - `/record`, `/all`, `/me` — create and transcribe records with Hugo frontmatter
 - `/stick [slug]` — feature a record (adds `featured: true`, clears `draft:`)
 - `/gc`, `/gcp`, `/cpd` — commit / push / deploy
@@ -33,9 +37,9 @@ Build the extension package once, then install the `.vsix` permanently:
 ```bash
 cd others/vscode
 npm install
-npm run package          # produces records-chat-0.3.0.vsix
-codium --install-extension records-chat-0.3.0.vsix   # VSCodium
-code --install-extension records-chat-0.3.0.vsix     # VS Code
+npm run package          # produces records-chat-0.4.0.vsix
+codium --install-extension records-chat-0.4.0.vsix   # VSCodium
+code --install-extension records-chat-0.4.0.vsix     # VS Code
 ```
 
 Reload the editor — the birdhouse icon appears in the activity bar. Click it, or press
@@ -84,5 +88,18 @@ to the model (`/api/chat`) and appends the reply as a signed `## Human`/`## Assi
 input is locked and a busy line shows; there is no streaming. If Ollama is unreachable or
 errors, the message is recorded user-only and a warning appears. `/all` and `/me` always
 record user-only. Voice skills as system-prompt presets are still future.
+
+### File context (`@` and the editor chip)
+
+Attachments and the active-editor file are passed to `records ollama-reply` as
+`--context-file` / `--context-dir` and injected as a single system message for that API
+call only — the record never contains file contents, so published transcripts stay clean.
+The typed `@path` mention remains part of your recorded message; the auto-attached editor
+file leaves no trace in the record. Context is **per-turn**: the model won't remember an
+attached file on the next message unless you attach it again. Folders send a file listing
+(paths only). Limits: 64 KiB per file, 256 KiB total, 500 listing entries; binary and
+missing files degrade to a marker instead of failing the turn. The `@` picker lists up to
+2000 workspace files (common build/VCS dirs excluded). Without a configured model,
+attachments are ignored and the message is recorded user-only with a notice.
 
 See `../ollama/README.md`.

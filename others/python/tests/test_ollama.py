@@ -106,3 +106,121 @@ def test_endpoint_trailing_slash(monkeypatch):
     monkeypatch.setattr(ollama, "_http_post", _mock_post(calls))
     ollama.chat("http://localhost:11434/", "m", [{"role": "user", "content": "hi"}], 5.0)
     assert calls[0]["url"] == "http://localhost:11434/api/chat"
+
+
+def test_build_context_file_block(tmp_path):
+    f = tmp_path / "a.py"
+    f.write_text("print('hi')\n")
+    ctx = ollama.build_context([f], [])
+    assert ctx.startswith("The user attached workspace context")
+    assert f"### File: {f}\n```\nprint('hi')\n\n```" in ctx
+
+
+def test_build_context_truncates_large_file(tmp_path):
+    f = tmp_path / "big.txt"
+    f.write_text("x" * (ollama.MAX_FILE_BYTES + 100))
+    ctx = ollama.build_context([f], [])
+    assert "… (truncated at 64 KiB)" in ctx
+    assert len(ctx) < ollama.MAX_FILE_BYTES + 500
+
+
+def test_build_context_binary_file(tmp_path):
+    f = tmp_path / "blob.bin"
+    f.write_bytes(b"\x00\x01\x02data")
+    ctx = ollama.build_context([f], [])
+    assert "(binary file — omitted)" in ctx
+    assert "\x00" not in ctx
+
+
+def test_build_context_missing_paths(tmp_path):
+    ctx = ollama.build_context([tmp_path / "nope.txt"], [tmp_path / "nodir"])
+    assert f"### File: {tmp_path / 'nope.txt'}\n(not found)" in ctx
+    assert f"### Directory: {tmp_path / 'nodir'}\n(not found)" in ctx
+
+
+def test_build_context_dir_listing(tmp_path):
+    d = tmp_path / "src"
+    (d / "sub").mkdir(parents=True)
+    (d / "b.py").write_text("")
+    (d / "sub" / "a.py").write_text("")
+    (d / ".hidden").write_text("")
+    (d / "node_modules").mkdir()
+    (d / "node_modules" / "x.js").write_text("")
+    ctx = ollama.build_context([], [d])
+    assert f"### Directory: {d}\nb.py\nsub/a.py" in ctx
+    assert ".hidden" not in ctx
+    assert "node_modules" not in ctx
+
+
+def test_build_context_empty():
+    assert ollama.build_context([], []) == ""
+
+
+def test_build_context_budget(tmp_path):
+    files = []
+    for i in range(6):
+        f = tmp_path / f"f{i}.txt"
+        f.write_text("y" * ollama.MAX_FILE_BYTES)
+        files.append(f)
+    ctx = ollama.build_context(files, [])
+    assert "… (context budget exceeded, remaining attachments omitted)" in ctx
+    assert len(ctx) < ollama.MAX_CONTEXT_BYTES + 1000
+
+
+def test_reply_with_context_model_only(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls))
+    f = tmp_path / "r.md"
+    f.write_text("---\ntitle: X\n---\n")
+    ollama.reply(f, "http://localhost:11434", "m", "hi", context="CTX")
+    msgs = calls[0]["payload"]["messages"]
+    assert msgs[0] == {"role": "system", "content": "CTX"}
+    assert msgs[-1] == {"role": "user", "content": "hi"}
+    # the record gets only the plain turn — context never touches the file
+    assert "CTX" not in f.read_text()
+    assert f.read_text().endswith("\n## Human\n\nhi\n\n## Assistant\n\nyo\n\n— m\n")
+
+
+def test_reply_context_is_ephemeral(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls))
+    f = tmp_path / "r.md"
+    f.write_text("---\ntitle: X\n---\n")
+    ollama.reply(f, "http://localhost:11434", "m", "first", context="CTX")
+    ollama.reply(f, "http://localhost:11434", "m", "second")
+    assert all(m["role"] != "system" for m in calls[1]["payload"]["messages"])
+
+
+def test_cli_context_flags(tmp_path, monkeypatch):
+    from recordkit import cli
+
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls))
+    src = tmp_path / "a.py"
+    src.write_text("code\n")
+    d = tmp_path / "pkg"
+    d.mkdir()
+    (d / "m.py").write_text("")
+    f = tmp_path / "r.md"
+    f.write_text("---\ntitle: X\n---\n")
+    rc = cli.main(["ollama-reply", "--endpoint", "http://localhost:11434", "--model", "m",
+                   "--file", str(f), "--human", "hi",
+                   "--context-file", str(src), "--context-dir", str(d)])
+    assert rc == 0
+    system = calls[0]["payload"]["messages"][0]
+    assert system["role"] == "system"
+    assert f"### File: {src}" in system["content"]
+    assert f"### Directory: {d}" in system["content"]
+
+
+def test_cli_no_context_flags(tmp_path, monkeypatch):
+    from recordkit import cli
+
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls))
+    f = tmp_path / "r.md"
+    f.write_text("---\ntitle: X\n---\n")
+    rc = cli.main(["ollama-reply", "--endpoint", "http://localhost:11434", "--model", "m",
+                   "--file", str(f), "--human", "hi"])
+    assert rc == 0
+    assert calls[0]["payload"]["messages"] == [{"role": "user", "content": "hi"}]

@@ -2,7 +2,7 @@
   "name": "records-chat",
   "displayName": "Records Chat",
   "description": "Chat-style editor for the records site — mechanical skills without AI (or with Ollama).",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "publisher": "tb4",
   "license": "MIT",
   "icon": "media/icon.png",
