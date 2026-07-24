@@ -22,7 +22,8 @@ jobs:
     # the job is never picked up there; this guard documents the intent
     # and protects if such a label ever appears.
     if: github.server_url == 'https://codeberg.org'
-    runs-on: codeberg-tiny-lazy
+    # runs-on: codeberg-tiny-lazy
+    runs-on: orc-always-available-stor
     container:
       image: codeberg.org/tb4/hugo-runner:latest
     steps:
