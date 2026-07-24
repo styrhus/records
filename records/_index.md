@@ -6,10 +6,16 @@ date: 2026-07-05T01:30:00+02:00
 This is your **records** site. Every Markdown file in `records/` becomes a page;
 this repository carries the machinery to write and publish them.
 
-**records** primary focus is enabling publishing websites directly from an Editor (e.g., Codium) with useful AI helpers.
+**records** focuses on publishing straight from your editor, with useful
+helpers. They run in well-known AI agents, or without one: a small
+[engine](https://codeberg.org/tb4/records/src/branch/main/others) drives
+the mechanical helpers from a VSCode chat sidebar, a Neovim split, or a
+plain `records` CLI — no model needed. Plug in
+[Ollama](https://codeberg.org/tb4/records/src/branch/main/others/ollama)
+and `/record` talks back with your own local model.
 
-No AI required, though: write or drop `.md` files into `records/` by hand and they
-publish just the same. The helpers below are optional conveniences.
+No helpers required, though: write or drop `.md` files into `records/` by
+hand and they publish just the same.
 
 ## The helpers
 

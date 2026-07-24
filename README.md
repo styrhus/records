@@ -38,3 +38,10 @@ to it. Every push publishes to the same site.
 Who is who? It's all in git. Each record carries its author in the history —
 `git log records/` never forgets. One site, many voices, and git is init
 together.
+
+## Record on your own
+
+The skills also run without big-tech AI: a small [engine](others/README.md)
+drives the mechanical ones from a VSCode chat sidebar, a Neovim split, or
+plain shell — no model needed. Add [Ollama](others/ollama/README.md) and
+`/record` talks back: your own local model, your records, your machine.
