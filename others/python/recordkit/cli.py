@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 from . import commit as commit_mod
-from . import config, create, mucke, myname, stick, writer
+from . import config, create, mucke, myname, ollama, stick, writer
 
 
 def _stdin_or(value: str) -> str:
@@ -46,6 +46,13 @@ def _build_parser() -> argparse.ArgumentParser:
     at.add_argument("--human", required=True, help="text, or '-' to read stdin")
     at.add_argument("--assistant", required=True, help="text, or '-' to read stdin")
     at.add_argument("--model", required=True, help="model tag for the signature line")
+
+    ol = sub.add_parser("ollama-reply", help="two-sided /record turn via a local Ollama model")
+    ol.add_argument("--endpoint", required=True, help="Ollama base URL, e.g. http://localhost:11434")
+    ol.add_argument("--model", required=True, help="model tag, e.g. mistral:latest")
+    ol.add_argument("--file", required=True)
+    ol.add_argument("--human", required=True, help="text, or '-' to read stdin")
+    ol.add_argument("--timeout", type=float, default=ollama.DEFAULT_TIMEOUT)
 
     st = sub.add_parser("stick", help="feature a record (/stick)")
     grp = st.add_mutually_exclusive_group(required=True)
@@ -85,6 +92,9 @@ def main(argv: list[str] | None = None) -> int:
             writer.append_turn(Path(args.file), _stdin_or(args.human),
                                _stdin_or(args.assistant), args.model)
             _emit({"file": args.file, "appended": True})
+        elif args.cmd == "ollama-reply":
+            _emit(ollama.reply(Path(args.file), args.endpoint, args.model,
+                               _stdin_or(args.human), timeout=args.timeout))
         elif args.cmd == "stick":
             if args.file:
                 _emit(stick.feature_file(Path(args.file)))

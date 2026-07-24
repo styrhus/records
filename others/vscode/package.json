@@ -2,7 +2,7 @@
   "name": "records-chat",
   "displayName": "Records Chat",
   "description": "Chat-style editor for the records site — mechanical skills without AI (or with Ollama).",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "tb4",
   "license": "MIT",
   "icon": "media/icon.png",
@@ -63,7 +63,12 @@
         "records.ollamaEndpoint": {
           "type": "string",
           "default": "",
-          "description": "Optional: Ollama endpoint URL (e.g., http://localhost:11434) to enable two-sided /record and voice skills."
+          "description": "Ollama endpoint URL (e.g., http://localhost:11434) enabling two-sided /record. Leave empty to disable — /record then records user-only."
+        },
+        "records.ollamaModel": {
+          "type": "string",
+          "default": "",
+          "description": "Ollama model tag for two-sided /record (e.g., qwen2.5-coder:latest). Required when ollamaEndpoint is set."
         }
       }
     }

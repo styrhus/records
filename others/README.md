@@ -18,7 +18,7 @@ others/
 │   └── .gitignore       # node_modules, out/, *.vsix
 ├── neovim/              # records.nvim: Neovim Lua plugin
 │   └── lua/records/     # :Records command, chat split
-└── ollama/              # Integration guide (README only)
+└── ollama/              # Ollama integration guide (two-sided /record — implemented)
 ```
 
 ## Quick Start
@@ -113,12 +113,14 @@ When you have a local LLM running:
 
 ```bash
 ollama pull mistral
-# Then configure the plugins:
-# VSCode Settings → records.ollamaEndpoint → http://localhost:11434
-# Neovim config → setup({ ollama_endpoint = "http://localhost:11434" })
+# Then configure the VSCode extension:
+# Settings → records.ollamaEndpoint → http://localhost:11434
+#          → records.ollamaModel    → mistral:latest
 ```
 
-`/record` becomes two-sided (user msg → model → reply + signature). See `ollama/README.md` for details.
+`/record` becomes two-sided (user msg → model → reply + signature), with multi-turn context
+per recording session, via `records ollama-reply` (Neovim wiring pending). See
+`ollama/README.md` for details.
 
 ## Development
 
@@ -126,7 +128,7 @@ ollama pull mistral
 
 ```bash
 cd python && python -m pytest -q
-# 30 tests, ~0.1s
+# 40 tests, ~0.1s
 ```
 
 ### VSCode
@@ -161,6 +163,6 @@ No build step — copy the plugin to your runtimepath or manage with a package m
 ## Next Steps
 
 - **Test both plugins** against the real records site (create a record, append, feature, commit).
-- **Wire Ollama support** in the plugins (detect endpoint, POST to `/api/generate`, parse response, call `append-turn`).
+- **Wire Ollama in Neovim** (the CLI's `ollama-reply` does the HTTP work; VSCode is done) and add the voice skills as system-prompt presets.
 - **Expand to other editors** (Emacs, Vim, etc.) — the CLI is editor-agnostic, so the pattern is straightforward.
 - **Package and ship** — make the engine installable via PyPI/Homebrew/Cargo, plugins via official registries.

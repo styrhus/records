@@ -33,9 +33,9 @@ Build the extension package once, then install the `.vsix` permanently:
 ```bash
 cd others/vscode
 npm install
-npm run package          # produces records-chat-0.2.0.vsix
-codium --install-extension records-chat-0.2.0.vsix   # VSCodium
-code --install-extension records-chat-0.2.0.vsix     # VS Code
+npm run package          # produces records-chat-0.3.0.vsix
+codium --install-extension records-chat-0.3.0.vsix   # VSCodium
+code --install-extension records-chat-0.3.0.vsix     # VS Code
 ```
 
 Reload the editor — the birdhouse icon appears in the activity bar. Click it, or press
@@ -72,12 +72,17 @@ The `publisher` field is `tb4` — it must match the registry namespace/publishe
 ## Settings
 
 - `records.binaryPath` (default: `"records"`) — path to the recordkit CLI
-- `records.ollamaEndpoint` (default: `""`) — optional Ollama endpoint to enable two-sided `/record`
+- `records.ollamaEndpoint` (default: `""`) — Ollama endpoint URL enabling two-sided `/record`; empty = disabled
+- `records.ollamaModel` (default: `""`) — Ollama model tag (e.g. `qwen2.5-coder:latest`); required when the endpoint is set
 
-## Ollama Integration (Future)
+## Ollama Integration
 
-When `ollamaEndpoint` is configured, `/record` becomes two-sided: user messages are sent to
-the local model, and assistant replies are stamped with the model tag (stripped by the site
-during rendering). All voice skills become system-prompt presets.
+With `records.ollamaEndpoint` and `records.ollamaModel` set, `/record` becomes two-sided:
+each chat message goes through `records ollama-reply`, which sends the record's turns so far
+to the model (`/api/chat`) and appends the reply as a signed `## Human`/`## Assistant` turn
+(the model tag is stripped by the site during rendering). While the model generates, the
+input is locked and a busy line shows; there is no streaming. If Ollama is unreachable or
+errors, the message is recorded user-only and a warning appears. `/all` and `/me` always
+record user-only. Voice skills as system-prompt presets are still future.
 
 See `../ollama/README.md`.

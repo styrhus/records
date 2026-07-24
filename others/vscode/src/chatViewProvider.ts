@@ -1,13 +1,19 @@
 import * as vscode from "vscode";
 import * as child_process from "child_process";
 
+interface OllamaConfig {
+  endpoint: string;
+  model: string;
+}
+
 interface RecordingSession {
   file: string;
   draft: boolean;
+  ollama?: OllamaConfig;
 }
 
 type MessageToView = {
-  type: "update-status" | "response" | "error" | "output" | "setup";
+  type: "update-status" | "response" | "error" | "output" | "setup" | "busy";
   content?: string;
   json?: Record<string, unknown>;
   error?: string;
@@ -38,7 +44,11 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     );
 
     const configListener = vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration("records.binaryPath")) {
+      if (
+        e.affectsConfiguration("records.binaryPath") ||
+        e.affectsConfiguration("records.ollamaEndpoint") ||
+        e.affectsConfiguration("records.ollamaModel")
+      ) {
         void this.probeCLI();
       }
     });
@@ -54,9 +64,12 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
   private async probeCLI() {
     try {
       const result = await this.runCLI("config", {});
+      const ollama = this.ollamaConfig();
       this.postMessage({
         type: "update-status",
-        content: `records CLI ready — dir: ${result.records_dir}`,
+        content: `records CLI ready — dir: ${result.records_dir} — ollama: ${
+          ollama ? ollama.model || "model unset" : "off"
+        }`,
       });
     } catch (e) {
       const notFound = (e as NodeJS.ErrnoException).code === "ENOENT";
@@ -72,7 +85,9 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       if (message.type === "slash") {
         await this.handleSlash(message.command || "", message.args || "");
       } else if (message.type === "message") {
-        if (this.recording) {
+        if (this.recording?.ollama) {
+          await this.appendOllamaTurn(message.text || "");
+        } else if (this.recording) {
           await this.appendUserMessage(message.text || "");
           this.postMessage({ type: "update-status", content: "Message recorded." });
         } else {
@@ -129,17 +144,32 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  private ollamaConfig(): OllamaConfig | undefined {
+    const cfg = vscode.workspace.getConfiguration("records");
+    const endpoint = (cfg.get<string>("ollamaEndpoint") || "").trim().replace(/\/+$/, "");
+    if (!endpoint) return undefined;
+    return { endpoint, model: (cfg.get<string>("ollamaModel") || "").trim() };
+  }
+
   private async startRecording(mode: string, args: string) {
     const draft = mode === "me";
+    let ollama = mode === "record" ? this.ollamaConfig() : undefined;
+    if (ollama && !ollama.model) {
+      this.postMessage({
+        type: "error",
+        error: "Set records.ollamaModel to enable two-sided /record — recording user-only.",
+      });
+      ollama = undefined;
+    }
     try {
       const result = await this.runCLI("new", {
         arguments: args,
         ...(draft && { draft: true }),
       });
-      this.recording = { file: result.path as string, draft };
+      this.recording = { file: result.path as string, draft, ollama };
       this.postMessage({
         type: "update-status",
-        content: `Recording (${mode}): ${result.path}`,
+        content: `Recording (${mode}${ollama ? ` · ollama ${ollama.model}` : ""}): ${result.path}`,
       });
     } catch (e) {
       this.postMessage({ type: "error", error: `Failed to start recording: ${e}` });
@@ -149,6 +179,24 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
   private async appendUserMessage(text: string) {
     if (!this.recording) throw new Error("No recording session");
     await this.runCLI("append", { file: this.recording.file, text });
+  }
+
+  private async appendOllamaTurn(text: string) {
+    const { file, ollama } = this.recording!;
+    const { endpoint, model } = ollama!;
+    this.postMessage({ type: "busy", content: `${model} is thinking…` });
+    try {
+      const result = await this.runCLI("ollama-reply", { file, endpoint, model, human: text });
+      this.postMessage({ type: "response", content: result.reply as string });
+    } catch (e) {
+      await this.runCLI("append", { file, text });
+      this.postMessage({
+        type: "error",
+        error: `Ollama failed — recorded your message user-only. (${
+          e instanceof Error ? e.message : e
+        })`,
+      });
+    }
   }
 
   private async stickRecord(slug: string) {
@@ -265,6 +313,16 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     return new Promise((resolve, reject) => {
       child_process.execFile(bin, args, { encoding: "utf-8", cwd }, (err, stdout) => {
         if (err) {
+          // the CLI reports failures as {"error": ...} on stdout before exiting non-zero
+          try {
+            const parsed = JSON.parse(stdout);
+            if (parsed && typeof parsed.error === "string") {
+              reject(new Error(parsed.error));
+              return;
+            }
+          } catch {
+            // fall through to the raw error
+          }
           reject(err);
           return;
         }
@@ -316,6 +374,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     .status { color: var(--vscode-symbolIcon-functionForeground); }
     .error { color: var(--vscode-errorForeground); }
     .output { color: var(--vscode-terminal-ansiBrightCyan); }
+    .response { color: var(--vscode-terminal-ansiBrightGreen); white-space: pre-wrap; }
+    .busy { color: var(--vscode-descriptionForeground); font-style: italic; }
     .setup {
       border: 1px solid var(--vscode-inputValidation-warningBorder);
       border-radius: 4px;
@@ -364,16 +424,34 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
     window.addEventListener("message", (e) => {
       const msg = e.data;
+      if (msg.type === "busy") {
+        const div = addLine(msg.content, "busy");
+        div.id = "busy";
+        input.disabled = true;
+        return;
+      }
+      clearBusy();
       if (msg.type === "update-status") {
         addLine(\`[\${new Date().toLocaleTimeString()}] \${msg.content}\`, "status");
       } else if (msg.type === "error") {
         addLine(\`ERROR: \${msg.error}\`, "error");
       } else if (msg.type === "output") {
         addLine(msg.content, "output");
+      } else if (msg.type === "response") {
+        addLine(msg.content, "response");
       } else if (msg.type === "setup") {
         addSetup(msg.error);
       }
     });
+
+    function clearBusy() {
+      const busy = document.getElementById("busy");
+      if (busy) busy.remove();
+      if (input.disabled) {
+        input.disabled = false;
+        input.focus();
+      }
+    }
 
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
@@ -399,6 +477,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       div.textContent = text;
       output.appendChild(div);
       output.scrollTop = output.scrollHeight;
+      return div;
     }
 
     function addSetup(error) {

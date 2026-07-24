@@ -2,13 +2,13 @@
 
 The Records engine (`../python/`) and plugins (VSCode, Neovim) are fully usable with **no AI** — they support all mechanical skills (create, feature, commit/deploy, now-playing) plus user-only recording (`/all`, `/me`).
 
-**Ollama** is the documented seam where a locally-hosted LLM brings back the AI features:
-- Two-sided `/record` — user message → local model → assistant reply + signature
-- Voice/style skills — `/poet`, `/pirate`, `/eq`, `/bff`, `/spellcorrect` — as system-prompt presets
+**Ollama** is the seam where a locally-hosted LLM brings back the AI features:
+- Two-sided `/record` — user message → local model → assistant reply + signature (**implemented**: recordkit CLI + VSCode extension)
+- Voice/style skills — `/poet`, `/pirate`, `/eq`, `/bff`, `/spellcorrect` — as system-prompt presets (future)
 
-## Setup (Future)
+## Setup
 
-When you want to enable Ollama:
+To enable Ollama:
 
 1. **Install and run Ollama** locally (https://ollama.ai). By default it listens on `http://localhost:11434`.
 
@@ -21,9 +21,10 @@ When you want to enable Ollama:
    ollama pull your-preferred-model
    ```
 
-3. **Configure the plugins** to point to your endpoint:
-   - **VSCode**: Settings → `records.ollamaEndpoint` → `http://localhost:11434`
-   - **Neovim**: In your config, pass the endpoint to `setup()`:
+3. **Configure the plugins** to point to your endpoint and model:
+   - **VSCode**: Settings → `records.ollamaEndpoint` → `http://localhost:11434` and
+     `records.ollamaModel` → the model tag (e.g. `mistral:latest`). Both are required.
+   - **Neovim** (not wired yet): In your config, pass the endpoint to `setup()`:
      ```lua
      require("records").setup({
        ollama_endpoint = "http://localhost:11434"
@@ -31,8 +32,8 @@ When you want to enable Ollama:
      ```
 
 4. **Use `/record` two-sided**:
-   - Type a user message or slash-command
-   - The plugin sends it to the local model (via the recordkit CLI, to be implemented)
+   - Type a user message after `/record`
+   - The plugin sends it through `records ollama-reply` (see below)
    - The model's reply appears in the chat, and is written to the file as:
      ```
      ## Human
@@ -44,6 +45,21 @@ When you want to enable Ollama:
      — model-name:7b
      ```
    - The signature (model tag) is automatically stripped by Hugo during rendering.
+
+## The CLI command
+
+The recordkit CLI does the HTTP work, so every plugin gets Ollama for free:
+
+```bash
+records ollama-reply --endpoint http://localhost:11434 --model mistral:latest \
+                     --file records/2026-07-24_12-00.md --human "your message"
+```
+
+It rebuilds the chat history from the record file's `## Human`/`## Assistant` sections
+(signature lines stripped), POSTs to `<endpoint>/api/chat` (`stream: false`, default
+timeout 120s, `--timeout` to override), appends the new signed turn, and prints
+`{"file", "model", "reply", "appended"}` as JSON. On failure nothing is appended and it
+exits 1 with `{"error": "..."}`.
 
 ## Model Recommendations
 
@@ -71,7 +87,7 @@ prepend it to the user's message when calling the model.
 ## Limitations
 
 - **No streaming** yet — the plugin waits for the full model response before showing it.
-- **No context window** — each `/record` turn is independent; multi-turn memory is on the roadmap.
+- **Context is per record** — the chat history is rebuilt from the record file on every turn, so context resets when a new recording starts (or `/esc`).
 - **No prompt templates** — model behavior depends entirely on the system prompt and the model itself.
 - **No tool use** — the model can't call commands or read files; it's pure text-in, text-out.
 
@@ -84,20 +100,9 @@ If Ollama is not configured or the endpoint is unreachable:
 
 This keeps the Records site usable offline or on minimal hardware.
 
-## Building Support
+## Status
 
-The plugins (VSCode, Neovim) need to:
-1. Detect if `ollama_endpoint` is configured.
-2. When `/record` is invoked and Ollama is available:
-   - Send the user's message to the CLI with a flag (e.g., `--ollama-reply`).
-   - The CLI POSTs the message to `http://localhost:11434/api/generate` (or `/api/chat`).
-   - Parse the model's response and pipe it to the display.
-   - Call `records append-turn --file ... --human ... --assistant ... --model <tag>`.
-3. Fall back to user-only mode if Ollama is absent or fails.
-
-Voice skills can piggyback on this by injecting a system prompt into the request.
-
----
-
-For now, enjoy the Records engine without AI — it's complete and rock-solid. Ollama support
-is a natural extension whenever you want it.
+- **recordkit CLI**: done — `records ollama-reply` (stdlib urllib, unit-tested with a mocked HTTP layer).
+- **VSCode**: done (0.3.0) — `/record` goes two-sided when `records.ollamaEndpoint` + `records.ollamaModel` are set, with a busy indicator and the user-only fallback; `/all` and `/me` stay user-only.
+- **Neovim**: pending — wire `config.ollama_endpoint` (+ a model option) to `ollama-reply` in `handle_slash`.
+- **Voice skills**: pending — piggyback by injecting a system prompt into the request (the `messages` array makes this a small change).
