@@ -21,9 +21,10 @@ jobs:
     # Codeberg only. On git.euh.no no runner carries the label below, so
     # the job is never picked up there; this guard documents the intent
     # and protects if such a label ever appears.
-    # forgejo.*, not github.*: Forgejo v16 evaluates job-level if server-side,
-    # where the github compat alias is not populated (forgejo/forgejo#13030).
-    if: forgejo.server_url == 'https://codeberg.org'
+    # Both slash forms: Forgejo v16 evaluates job-level if server-side
+    # (forgejo/forgejo#13030), where server_url is AppURL with a trailing
+    # slash; runner-side evaluation yields it without.
+    if: github.server_url == 'https://codeberg.org' || github.server_url == 'https://codeberg.org/'
     runs-on: codeberg-tiny-lazy
     container:
       image: codeberg.org/tb4/hugo-runner:latest
