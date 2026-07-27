@@ -162,6 +162,7 @@ params:
   # playlist's share URL (https://open.spotify.com/playlist/<id>) or embed
   # URL — both work. Unset shows no Spotify logo.
   # spotify: https://open.spotify.com/playlist/<id>
+  spotify: https://open.spotify.com/playlist/4O49cydRwgT8wBITSY2Zgn?si=3bd2ea5ec828431b
 
   # Look & feel — Fuglekasse ships these defaults; uncomment a line to override.
   # style:
