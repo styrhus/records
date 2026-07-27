@@ -114,6 +114,31 @@ in `basic` mode they open the record's own page. In `single-flowing` mode the
 panel is a flat record list (chapters are flattened) whose links jump to the
 record's spot in the stream — the records' display titles appear only here.
 
+## Filtering
+
+Set `params.showFilter: true` to add a record filter to the `single` home page —
+a small funnel button pinned to the bottom-left corner (beside the Spotify logo
+when that is set) that opens a panel above it. It is **off by default** and
+honoured only in `single` mode; in every other page mode the param is ignored
+(with a build warning).
+
+The panel offers the tags actually used across your records (a card matches if
+it carries *any* checked tag), the languages set in front matter plus a
+`(none)` bucket for records without one (the language section only appears once
+some record sets a `language:`), and an inclusive from/to date range. The
+groups combine: a card must pass every active group to stay visible. Chapters
+whose cards are all filtered away hide too; chapters holding matches open
+automatically while a filter is active and return to their `chapterState` fold
+when it clears.
+
+The filter state lives in the URL query string —
+`?tags=a,b&language=nb,none&from=2026-01-01&to=2026-12-31` — kept in sync as
+you click, so a filtered view is a shareable link and survives reload. A `#`
+anchor pointing at a filtered-out record does not scroll anywhere until the
+filter clears. Tags containing a comma cannot be filtered (the comma is the
+list separator). Without JavaScript the panel still opens and closes as a
+plain `<details>`, but the controls do nothing.
+
 ## Get PDF
 
 Set `params.pdf` to a filename — `pdf: records.pdf` — and the footer shows a

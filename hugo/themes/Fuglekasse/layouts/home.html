@@ -16,6 +16,10 @@
     {{ warnf "Fuglekasse: unknown chapterState %q, falling back to \"latest\"" $chapterState }}
     {{ $chapterState = "latest" }}
   {{ end }}
+  {{ $showFilter := site.Params.showFilter | default false }}
+  {{ if and $showFilter (ne $mode "single") }}
+    {{ warnf "Fuglekasse: showFilter is only honoured in pageMode \"single\"" }}
+  {{ end }}
 
   {{ $all := where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" }}
   {{/* chapterState "latest": the chapter holding the newest record stays open. */}}
@@ -141,6 +145,7 @@
 
   {{ if eq $mode "single" }}
     {{/* One-page document stack: _index first, loose records per singleOrder, then chapters. */}}
+    {{ if $showFilter }}{{ partial "inline/filter.html" $all }}{{ end }}
     <article class="record-page">{{ .Content }}</article>
     {{ range sort $loose "Date" $order }}
       {{ partial "inline/record-card.html" . }}
@@ -200,7 +205,7 @@
 {{/* One record as a single-mode document card. */}}
 {{ define "_partials/inline/record-card.html" }}
   {{ $id := path.Base .RelPermalink }}
-  <article class="record-page"{{ with .Params.language }} lang="{{ . }}"{{ end }}>
+  <article class="record-page"{{ with .Params.language }} lang="{{ . }}"{{ end }}{{ with .Params.tags }} data-tags="{{ delimit . "," }}"{{ end }} data-date="{{ .Date.Format "2006-01-02" }}">
     {{ partial "lang-badge.html" . }}
     <h2 class="record-head" id="{{ $id }}">{{ partial "inline/record-title.html" . }}<a class="anchor" href="#{{ $id }}" aria-label="Link to this record">#</a></h2>
     {{ partial "record.html" (dict "content" .Content "prefix" $id "voice" .Params.voiceRecorded) }}
@@ -221,6 +226,40 @@
     {{ end }}
   </ul>
   {{ end }}
+{{ end }}
+
+{{/* Filter popper (params.showFilter, single mode): tag/language/date controls over the record cards. */}}
+{{ define "_partials/inline/filter.html" }}
+  {{ $tags := slice }}
+  {{ $langs := slice }}
+  {{ $hasNoLang := false }}
+  {{ range . }}
+    {{ range .Params.tags }}{{ $tags = $tags | append . }}{{ end }}
+    {{ with .Params.language }}{{ $langs = $langs | append . }}{{ else }}{{ $hasNoLang = true }}{{ end }}
+  {{ end }}
+  {{ $tags = sort (uniq $tags) }}
+  {{ $langs = sort (uniq $langs) }}
+  <details class="filter{{ if site.Params.spotify }} beside-spotify{{ end }}">
+    <summary aria-label="Filter records"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg></summary>
+    <form class="filter-body">
+      {{ with $tags }}
+      <fieldset><legend>Tags</legend>
+        {{ range . }}<label><input type="checkbox" name="tags" value="{{ . }}"> #{{ . }}</label>{{ end }}
+      </fieldset>
+      {{ end }}
+      {{ with $langs }}
+      <fieldset><legend>Language</legend>
+        {{ range . }}<label><input type="checkbox" name="language" value="{{ . }}"> {{ . }}</label>{{ end }}
+        {{ if $hasNoLang }}<label><input type="checkbox" name="language" value="none"> (none)</label>{{ end }}
+      </fieldset>
+      {{ end }}
+      <fieldset><legend>Date</legend>
+        <label>From <input type="date" name="from"></label>
+        <label>To <input type="date" name="to"></label>
+      </fieldset>
+      <button type="button" class="filter-clear">Clear</button>
+    </form>
+  </details>
 {{ end }}
 
 {{/* A record's display title: hand-written .Title, else the timestamp slug via dateTitleFormat. */}}

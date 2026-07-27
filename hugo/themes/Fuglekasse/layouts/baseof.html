@@ -157,6 +157,21 @@
     .spotify-body { position: absolute; left: 0; bottom: calc(100% + 0.5rem); width: min(22rem, calc(100vw - 2rem)); background: var(--surface); border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.14); }
     .spotify-body iframe { display: block; width: 100%; height: min(352px, calc(100vh - 6rem)); border: 0; border-radius: 12px; }
     .spotify-body iframe[data-src] { display: none; } /* unloaded; JS swaps in src on first open, no-JS uses the noscript iframe */
+    /* Record filter (params.showFilter, single mode): funnel bottom-left, panel opens above it. */
+    .filter { position: fixed; left: 1rem; bottom: 1rem; z-index: 1000; }
+    .filter.beside-spotify { left: 2.75rem; } /* clear the 16px Spotify logo + gap */
+    .filter > summary { list-style: none; cursor: pointer; color: var(--dim); }
+    .filter > summary::-webkit-details-marker { display: none; }
+    .filter > summary::marker { content: ""; }
+    .filter > summary:hover, .filter[open] > summary { color: var(--accent); }
+    .filter > summary svg { display: block; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .filter-body { position: absolute; left: 0; bottom: calc(100% + 0.5rem); width: min(16rem, calc(100vw - 2rem)); max-height: calc(100vh - 6rem); overflow-y: auto; padding: 0.75rem 1rem; background: var(--surface); border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.14); font-size: 0.9em; line-height: 1.5; }
+    .filter-body fieldset { border: none; margin: 0 0 0.5rem; padding: 0; }
+    .filter-body legend { font-weight: 600; padding: 0; }
+    .filter-body label { display: block; }
+    .filter-clear { font: inherit; color: var(--fg); background: var(--card); border: none; border-radius: 6px; padding: 0.15rem 0.6rem; cursor: pointer; }
+    .filter-clear:hover { color: var(--accent); }
+    .filter-hidden { display: none; }
     /* Architects Daughter by Kimberly Geswein — SIL OFL 1.1, see fonts/OFL.txt. */
     @font-face {
       font-family: "{{ $s.font | safeCSS }}";
@@ -265,14 +280,107 @@
         if (spotify.open && f) { f.src = f.getAttribute('data-src'); f.removeAttribute('data-src'); }
       });
 
-      // Close the open TOC / Spotify panel when clicking outside it.
-      var poppers = document.querySelectorAll('details.toc, details.spotify');
+      // Close the open TOC / Spotify / filter panel when clicking outside it.
+      var poppers = document.querySelectorAll('details.toc, details.spotify, details.filter');
       for (var k = 0; k < poppers.length; k++) {
         (function (d) {
           document.addEventListener('click', function (e) {
             if (d.open && !d.contains(e.target)) d.open = false;
           });
         })(poppers[k]);
+      }
+
+      // Record filter (single mode): hide non-matching cards, state synced with the URL query string.
+      var filter = document.querySelector('details.filter');
+      if (filter) {
+        function splitCSV(s) { return s ? s.split(',').filter(Boolean) : []; }
+
+        function readState() {
+          var q = new URLSearchParams(location.search);
+          return {
+            tags: splitCSV(q.get('tags')),
+            langs: splitCSV(q.get('language')),
+            from: q.get('from') || '',
+            to: q.get('to') || ''
+          };
+        }
+
+        function stateFromForm() {
+          var st = { tags: [], langs: [], from: '', to: '' };
+          filter.querySelectorAll('input:checked[name="tags"]').forEach(function (i) { st.tags.push(i.value); });
+          filter.querySelectorAll('input:checked[name="language"]').forEach(function (i) { st.langs.push(i.value); });
+          var from = filter.querySelector('input[name="from"]');
+          var to = filter.querySelector('input[name="to"]');
+          st.from = from ? from.value : '';
+          st.to = to ? to.value : '';
+          return st;
+        }
+
+        function prefill(st) {
+          filter.querySelectorAll('input[name="tags"]').forEach(function (i) { i.checked = st.tags.indexOf(i.value) !== -1; });
+          filter.querySelectorAll('input[name="language"]').forEach(function (i) { i.checked = st.langs.indexOf(i.value) !== -1; });
+          var from = filter.querySelector('input[name="from"]');
+          var to = filter.querySelector('input[name="to"]');
+          if (from) from.value = st.from;
+          if (to) to.value = st.to;
+        }
+
+        // Hand-built query string keeps the commas literal.
+        function writeURL(st) {
+          var parts = [];
+          if (st.tags.length) parts.push('tags=' + st.tags.map(encodeURIComponent).join(','));
+          if (st.langs.length) parts.push('language=' + st.langs.map(encodeURIComponent).join(','));
+          if (st.from) parts.push('from=' + st.from);
+          if (st.to) parts.push('to=' + st.to);
+          var qs = parts.join('&');
+          history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+        }
+
+        function applyFilter(st) {
+          var active = !!(st.tags.length || st.langs.length || st.from || st.to);
+          // [data-date] skips the metadata-less _index intro card.
+          document.querySelectorAll('main.mode-single article.record-page[data-date]').forEach(function (card) {
+            var show = true;
+            if (st.tags.length) {
+              var cardTags = splitCSV(card.getAttribute('data-tags'));
+              show = st.tags.some(function (t) { return cardTags.indexOf(t) !== -1; });
+            }
+            if (show && st.langs.length) show = st.langs.indexOf(card.getAttribute('lang') || 'none') !== -1;
+            if (show && st.from) show = card.dataset.date >= st.from;
+            if (show && st.to) show = card.dataset.date <= st.to;
+            card.classList.toggle('filter-hidden', active && !show);
+          });
+          document.querySelectorAll('details.chapter').forEach(function (ch) {
+            var hasMatch = !!ch.querySelector('article.record-page:not(.filter-hidden)');
+            ch.classList.toggle('filter-hidden', active && !hasMatch);
+            if (active && hasMatch) {
+              // Force-open so matches aren't hidden in a collapsed fold; remember the pre-filter state once.
+              if (!('filterOpen' in ch.dataset)) ch.dataset.filterOpen = ch.open ? '1' : '0';
+              ch.open = true;
+            } else if (!active && 'filterOpen' in ch.dataset) {
+              ch.open = ch.dataset.filterOpen === '1';
+              delete ch.dataset.filterOpen;
+            }
+          });
+        }
+
+        filter.addEventListener('change', function () {
+          var st = stateFromForm();
+          writeURL(st);
+          applyFilter(st);
+        });
+
+        var clear = filter.querySelector('.filter-clear');
+        if (clear) clear.addEventListener('click', function () {
+          filter.querySelectorAll('input[type="checkbox"]').forEach(function (i) { i.checked = false; });
+          filter.querySelectorAll('input[type="date"]').forEach(function (i) { i.value = ''; });
+          writeURL(stateFromForm());
+          applyFilter(stateFromForm());
+        });
+
+        var initial = readState();
+        prefill(initial);
+        applyFilter(initial);
       }
     })();
   </script>

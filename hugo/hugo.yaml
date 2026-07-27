@@ -107,6 +107,13 @@ params:
   # Off by default; uncomment to enable.
   # showToc: true
 
+  # Record filter (single mode only): a funnel button pinned bottom-left
+  # (beside the Spotify logo when set) that opens a panel to filter the record
+  # cards by tags, language and date range. Filter state lives in the URL
+  # (?tags=a,b&language=nb,none&from=2026-01-01&to=2026-12-31), so filtered
+  # views are shareable links. Off by default; uncomment to enable.
+  # showFilter: true
+
   # Render timestamp-fallback record titles as formatted dates, using Go/Hugo
   # date layout syntax (https://gohugo.io/methods/time/format/).
   # Remove to keep raw titles like "2026-07-06_23-25". Examples:
