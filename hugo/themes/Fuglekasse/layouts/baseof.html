@@ -1,6 +1,6 @@
 {{- $s := site.Params.style -}}
 <!DOCTYPE html>
-<html lang="{{ site.Language.Locale }}">
+<html lang="{{ or .Params.language site.Language.Locale }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -113,6 +113,9 @@
     .anchor:hover { text-decoration: none; }
     /* Mic icon on Human headings of voiceRecorded records. */
     .voice-icon svg { height: 0.7em; width: auto; margin-left: 0.4em; color: var(--accent); vertical-align: baseline; }
+    /* Language badge (frontmatter "language"), top right of records. */
+    .record-lang { float: right; font-size: 0.8em; color: var(--dim); margin: 0.3rem 0 0 0.6em; }
+    .record-lang svg { height: 0.9em; width: auto; vertical-align: -0.08em; }
     /* Chapters: numbered records/ folders fold under a clickable title. */
     details.chapter { margin: 2.5rem 0; }
     details.chapter > summary { cursor: pointer; font-size: 1.3em; font-weight: 600; line-height: 1.25; }

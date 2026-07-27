@@ -161,7 +161,7 @@
       {{ if $i }}<div class="record-sep" aria-hidden="true">· · ·</div>{{ end }}
       {{ $book := "" }}
       {{ if and $bookLook (not $r.Section) (in (slice "forside" "side-1" "bakside") $r.File.ContentBaseName) }}{{ $book = printf " book-%s" $r.File.ContentBaseName }}{{ end }}
-      <article class="record-flow{{ $book }}" id="{{ path.Base $r.RelPermalink }}">
+      <article class="record-flow{{ $book }}" id="{{ path.Base $r.RelPermalink }}"{{ with $r.Params.language }} lang="{{ . }}"{{ end }}>
         {{ partial "record.html" (dict "content" $r.Content "prefix" (path.Base $r.RelPermalink) "voice" $r.Params.voiceRecorded) }}
       </article>
     {{ end }}
@@ -200,7 +200,8 @@
 {{/* One record as a single-mode document card. */}}
 {{ define "_partials/inline/record-card.html" }}
   {{ $id := path.Base .RelPermalink }}
-  <article class="record-page">
+  <article class="record-page"{{ with .Params.language }} lang="{{ . }}"{{ end }}>
+    {{ partial "lang-badge.html" . }}
     <h2 class="record-head" id="{{ $id }}">{{ partial "inline/record-title.html" . }}<a class="anchor" href="#{{ $id }}" aria-label="Link to this record">#</a></h2>
     {{ partial "record.html" (dict "content" .Content "prefix" $id "voice" .Params.voiceRecorded) }}
     {{ if and site.Params.showTags (ne .Params.showTags false) .Params.tags }}<p class="post-tags">{{ range .Params.tags }}<span>#{{ . }}</span> {{ end }}</p>{{ end }}
