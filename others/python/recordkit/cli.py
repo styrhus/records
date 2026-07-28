@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 from . import commit as commit_mod
-from . import config, create, mucke, myname, ollama, stick, writer
+from . import config, create, mucke, myname, ollama, stick, werden, writer
 
 
 def _stdin_or(value: str) -> str:
@@ -89,6 +89,12 @@ def _build_parser() -> argparse.ArgumentParser:
     mk = sub.add_parser("mucke", help="stamp the now-playing track (/mucke)")
     mk.add_argument("--file", required=True)
 
+    wd = sub.add_parser("werden", help="advance the werden cycle (/werden — verse stays AI-only)")
+    wd.add_argument("structure", nargs="?", help="start a new structure (major step)")
+    wd.add_argument("--stamp", action="store_true",
+                    help="keep the current name; re-derive the number and re-stamp the docs")
+    wd.add_argument("--repo", default=".")
+
     cf = sub.add_parser("config", help="print the resolved records directory")
     cf.add_argument("--dir")
     return p
@@ -144,6 +150,8 @@ def main(argv: list[str] | None = None) -> int:
             _emit(myname.save(args.name, Path(args.memory_dir) if args.memory_dir else None))
         elif args.cmd == "mucke":
             _emit(mucke.stamp(Path(args.file)))
+        elif args.cmd == "werden":
+            _emit(werden.cycle(Path(args.repo), args.structure, stamp=args.stamp))
         elif args.cmd == "config":
             _emit({"records_dir": str(_records_dir(args))})
     except Exception as e:  # surface as JSON so the plugins can render it

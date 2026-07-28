@@ -1,5 +1,7 @@
 # Fuglekasse
 
+<!-- werden: 0.1.19 fuglekasse-scorpion -->
+
 The default theme for [records](https://codeberg.org/tb4/records) — Norwegian for
 *nesting box*. A deliberately small, config-driven Hugo theme for publishing
 conversation transcripts: four templates, one web font, no build step.

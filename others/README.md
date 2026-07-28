@@ -1,5 +1,7 @@
 # Records Without AI (`others/`)
 
+<!-- werden: 0.1.19 fuglekasse-scorpion -->
+
 This directory contains the **no-AI engine and plugins** for the Records site — letting you run the mechanical slash-commands without a model. Optionally add Ollama for the AI-driven skills.
 
 ## Architecture
@@ -7,10 +9,11 @@ This directory contains the **no-AI engine and plugins** for the Records site �
 ```
 others/
 ├── python/              # recordkit: stateless library + CLI (JSON I/O)
-│   ├── recordkit/       # modules: config, naming, create, stick, commit, mucke, etc.
-│   ├── tests/           # 51 unit tests (config discovery, frontmatter, ollama, etc.)
+│   ├── recordkit/       # modules: config, naming, create, stick, commit, mucke, werden, etc.
+│   ├── tests/           # 77 unit tests (config discovery, frontmatter, ollama, etc.)
 │   ├── pyproject.toml   # pip-installable package
 │   └── .gitignore       # __pycache__, .pytest_cache, build artifacts
+├── naming/              # werden-cycle name pools (dyr.json, strukturer.json) + scheme doc
 ├── vscode/              # Records Chat: VSCode sidebar chat view (installable .vsix)
 │   ├── src/             # extension.ts, chatViewProvider.ts (TypeScript)
 │   ├── media/           # activity-bar SVG + marketplace icon
@@ -50,6 +53,10 @@ records stick --slug how-to
 
 # Commit it
 records commit -m "docs: add linux hardware notes" --push
+
+# Advance the werden cycle (or --stamp to re-stamp without advancing)
+records werden
+# Output: {"old": "0.1.18 fuglekasse-spider", "new": "0.1.19 fuglekasse-scorpion", …}
 ```
 
 ### 3. VSCode Plugin
@@ -100,6 +107,7 @@ All of these work without a model:
 | `/gc`, `/gcp`, `/cpd` | `/gc -m "msg"` | Commit / push / deploy. `-m` required (no AI to author). |
 | `/myname` | `/myname <name>` | Save your name locally (in `.mem/`). |
 | `/mucke` | `/mucke` | Stamp now-playing MPRIS track into a file. |
+| `/werden` | `/werden [structure \| --stamp]` | Advance the development cycle (`CURRENT` + doc markers). |
 
 The AI-only skills (`/poet`, `/pirate`, `/eq`, `/bff`, `/spellcorrect`, `/diff-*`, `/review`, `/phil-gc`) remain in `.ai/skills/` and are available in Claude Code.
 
@@ -147,7 +155,7 @@ context chip. See `ollama/README.md` for details.
 
 ```bash
 cd python && python -m pytest -q
-# 65 tests, ~0.2s
+# 77 tests, ~0.2s
 ```
 
 ### VSCode
