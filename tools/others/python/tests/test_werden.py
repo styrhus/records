@@ -6,7 +6,7 @@ from recordkit import werden
 
 
 def _repo(tmp_path, current=None):
-    naming = tmp_path / "others" / "naming"
+    naming = tmp_path / "tools" / "others" / "naming"
     naming.mkdir(parents=True)
     (naming / "dyr.json").write_text(json.dumps(["flue", "beetle", "cricket"]), encoding="utf-8")
     (naming / "strukturer.json").write_text(json.dumps(["fuglekasse", "postkasse"]),
@@ -81,8 +81,11 @@ def test_stamps_markers_and_skips_exempt_paths(tmp_path):
     repo = _repo(tmp_path, "0.1.1 fuglekasse-flue\n")
     marker = "<!-- werden: 0.1.1 fuglekasse-flue -->"
     (repo / "README.md").write_text("# t\n\n> Fase — 0.1.1 fuglekasse-flue\n")
-    docs = repo / "others" / "README.md"
+    docs = repo / "tools" / "others" / "README.md"
     docs.write_text(f"# o\n{marker}\n")
+    mirror = repo / "tools" / "others" / "python" / "README.md"
+    mirror.parent.mkdir(parents=True)
+    mirror.write_text(f"literal {marker}\n")
     skill = repo / ".ai" / "skills" / "werden"
     skill.mkdir(parents=True)
     (skill / "SKILL.md").write_text(f"literal {marker}\n")
@@ -92,9 +95,10 @@ def test_stamps_markers_and_skips_exempt_paths(tmp_path):
     (repo / "blob.bin").write_bytes(b"\0" + marker.encode())
 
     out = werden.cycle(repo)
-    assert out["markers_updated"] == ["others/README.md"]
+    assert out["markers_updated"] == ["tools/others/README.md"]
     assert "<!-- werden: 0.1.2 fuglekasse-beetle -->" in docs.read_text()
     assert marker in (skill / "SKILL.md").read_text()
+    assert marker in mirror.read_text()
     assert marker in (nm / "x.md").read_text()
     assert marker.encode() in (repo / "blob.bin").read_bytes()
     assert out["fase_line"]

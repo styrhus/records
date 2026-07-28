@@ -15,7 +15,7 @@ This skill was invoked by the user — just do it, don't ask for confirmation.
 
 `/werden` moves the project to the next **werden cycle** — the project is never a state, always a
 becoming — and tells the docs where we now are. A cycle is named `<number> <structure>-<animal>`
-(see [others/naming/README.md](others/naming/README.md)). The animal is the *minor* part; the
+(see [tools/others/naming/README.md](tools/others/naming/README.md)). The animal is the *minor* part; the
 structure is the *major* part.
 
 - **`/werden`** (no arg) → bump the animal one position up `dyr.json`, keep the structure.
@@ -54,8 +54,8 @@ line near the bottom (the script renames it):
      automatically. Add the exact line the script printed —
      `<!-- werden: <number> <new-name> -->` — as its own line **directly under the first `#` heading**
      (or, for files with `---` frontmatter, right after the closing `---`) in each living doc:
-     - [others/README.md](others/README.md)
-     - [hugo/themes/Fuglekasse/README.md](hugo/themes/Fuglekasse/README.md)
+     - [tools/others/README.md](tools/others/README.md)
+     - [tools/hugo/themes/Fuglekasse/README.md](tools/hugo/themes/Fuglekasse/README.md)
    - If it says **fase line: NOT FOUND**, seed the exact line it printed —
      `> Fase — <number> <new-name>` — near the bottom of [README.md](README.md).
 
@@ -70,4 +70,4 @@ Do not commit — leave that to the user (`/gc`) unless they ask.
 - Keep edits marker-only. All other prose in the living docs stays untouched; the marker (and the
   README's fase line) is how "where we are at" is communicated, so a plain grep across the repo
   always reveals the current cycle.
-- The AI-free mirror is `records werden` in `others/python/` — same bump/stamp mechanics.
+- The AI-free mirror is `records werden` in `tools/others/python/` — same bump/stamp mechanics.

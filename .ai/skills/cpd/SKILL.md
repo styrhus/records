@@ -17,9 +17,9 @@ Before running anything, present the diff to the user (summarized, with the prop
 
 ## Records checkout
 
-!`find . -maxdepth 4 \( -path '*/.*' -o -path '*/node_modules' \) -prune -o -path '*/hugo/hugo.yaml' -print -exec grep -E '^contentDir:|^[[:space:]]*deployCommand:' {} \; 2>/dev/null; true`
+!`find . -maxdepth 5 \( -path '*/.*' -o -path '*/node_modules' \) -prune -o -path '*/hugo/hugo.yaml' -print -exec grep -E '^contentDir:|^[[:space:]]*deployCommand:' {} \; 2>/dev/null; true`
 
-The repository to commit, `<repo>`, is the one holding the `hugo/hugo.yaml` above — the parent of its `hugo/` dir (several matches → the shallowest path wins; no match → `$PWD`). If `<repo>` is not `.`, the status and diff below show the wrong repository: run `git -C <repo> status --short` and `git -C <repo> diff HEAD` and present those instead.
+The repository to commit, `<repo>`, is the one holding the `hugo/hugo.yaml` above — the parent of its `hugo/` dir, or the grandparent when that parent is named `tools/` (several matches → the shallowest path wins; no match → `$PWD`). If `<repo>` is not `.`, the status and diff below show the wrong repository: run `git -C <repo> status --short` and `git -C <repo> diff HEAD` and present those instead.
 
 ## Status and diff
 
@@ -40,6 +40,6 @@ The repository to commit, `<repo>`, is the one holding the `hugo/hugo.yaml` abov
 2. **Deploy.** Determine the method, in this order:
    - a `deployCommand` line is shown under Records checkout above → run that command from `<repo>`
    - otherwise, if `ls` finds a workflow file in `<repo>/.forgejo/workflows/` or `<repo>/.github/workflows/` → nothing to run — the push in step 1 already triggered the deploy; report that the workflow is publishing the site.
-   - neither → report that no deploy method was found (`deployCommand` under `params:` in `hugo/hugo.yaml` sets one) and stop; do not invent a deploy command.
+   - neither → report that no deploy method was found (`deployCommand` under `params:` in `tools/hugo/hugo.yaml` sets one) and stop; do not invent a deploy command.
 
    Run the deploy **after** commit + push succeeds. Report the deploy output.

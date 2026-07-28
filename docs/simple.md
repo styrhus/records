@@ -10,7 +10,7 @@ default welcome page. It is a normal Markdown file.
 ## The big greeting
 
 The handwritten word at the top of the front page comes from
-`hugo/hugo.yaml`:
+`tools/hugo/hugo.yaml`:
 
 ```yaml
 params:
@@ -21,12 +21,12 @@ Change it to your own word, or remove the line for no greeting at all.
 
 ## The site title
 
-Also in `hugo/hugo.yaml`: `title: blyant records`. It shows in the header and
+Also in `tools/hugo/hugo.yaml`: `title: blyant records`. It shows in the header and
 in the browser tab.
 
 ## A different color
 
-The theme's colors and greeting font also live in `hugo/hugo.yaml`, under
+The theme's colors and greeting font also live in `tools/hugo/hugo.yaml`, under
 `params.style`. Change one and rebuild — see [make it awesome](awesome.md).
 
 ## Writing records

@@ -1,5 +1,5 @@
 public/
-hugo/resources/
+tools/hugo/resources/
 *.local.md
 .hugo_build.lock
 
@@ -15,10 +15,10 @@ records/testfolder/
 **/.mem/*
 !**/.mem/.gitkeep
 
-# others/ plugins — build artifacts (subproject .gitignores cover most; catch stragglers)
-others/**/node_modules/
-others/**/out/
-others/**/*.vsix
-others/**/__pycache__/
-others/**/.pytest_cache/
-others/**/*.egg-info/
+# tools/others/ plugins — build artifacts (subproject .gitignores cover most; catch stragglers)
+tools/others/**/node_modules/
+tools/others/**/out/
+tools/others/**/*.vsix
+tools/others/**/__pycache__/
+tools/others/**/.pytest_cache/
+tools/others/**/*.egg-info/

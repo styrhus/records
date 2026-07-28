@@ -1,4 +1,4 @@
-# blyant records Without AI (`others/`)
+# blyant records Without AI (`tools/others/`)
 
 <!-- werden: 0.1.19 fuglekasse-scorpion -->
 
@@ -7,7 +7,7 @@ This directory contains the **no-AI engine and plugins** for the blyant records 
 ## Architecture
 
 ```
-others/
+tools/others/
 ├── python/              # recordkit: stateless library + CLI (JSON I/O)
 │   ├── recordkit/       # modules: config, naming, create, stick, commit, mucke, werden, etc.
 │   ├── tests/           # 77 unit tests (config discovery, frontmatter, ollama, etc.)

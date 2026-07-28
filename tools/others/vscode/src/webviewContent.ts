@@ -562,11 +562,11 @@ export function getWebviewContent(commandsJson: string): string {
       div.appendChild(body);
 
       const pip = document.createElement("code");
-      pip.textContent = "pip install -e others/python";
+      pip.textContent = "pip install -e tools/others/python";
       div.appendChild(pip);
 
       const pipx = document.createElement("code");
-      pipx.textContent = "pipx install ./others/python";
+      pipx.textContent = "pipx install ./tools/others/python";
       div.appendChild(pipx);
 
       const hint = document.createElement("div");

@@ -156,7 +156,7 @@ Set `params.pdf` to a filename — `pdf: records.pdf` — and the footer shows a
 **Get PDF** link to that file at the site root. It is **unset by default**: the
 theme only renders the link; the file itself is built by the
 [blyant records](https://codeberg.org/blyant/records) repo's Pages workflow with the
-tooling in `pandoc/`, which turns the whole site into one PDF book — cover
+tooling in `tools/pandoc/`, which turns the whole site into one PDF book — cover
 (greeting and title), table of contents with page numbers, loose records first,
 then chapters ascending, each record under its display title, in the site's
 light palette and typography (`params.style.light`, syntax colours included).
@@ -171,7 +171,7 @@ contents, record titles, tags, dates, chapters or per-record page breaks.
 Set `params.epub` the same way — `epub: records.epub` — for a **Get EPUB**
 footer link. The same workflow step and tooling build it from the same
 assembled book (same content, order and exclusions), but styled structurally
-(`pandoc/epub.css`): e-readers override fonts and render grayscale, so the
+(`tools/pandoc/epub.css`): e-readers override fonts and render grayscale, so the
 site palette does not carry over. Also unset by default; the two params are
 independent — set either or both. In `single-flowing` mode the EPUB is one
 continuous chapter — no table of contents or per-record file split.

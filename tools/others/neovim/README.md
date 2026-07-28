@@ -9,7 +9,7 @@ Using `lazy.nvim`:
 ```lua
 {
   "blyant/records",
-  dir = "~/path/to/records/others/neovim",
+  dir = "~/path/to/records/tools/others/neovim",
   config = function()
     require("records").setup({
       bin = "records",          -- path to recordkit CLI
@@ -24,7 +24,7 @@ Or install manually:
 ```bash
 git clone https://codeberg.org/blyant/records.git
 mkdir -p ~/.config/nvim/pack/manual/start
-cp -r records/others/neovim ~/.config/nvim/pack/manual/start/records
+cp -r records/tools/others/neovim ~/.config/nvim/pack/manual/start/records
 ```
 
 Then in your `init.lua`:

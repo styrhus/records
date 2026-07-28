@@ -27,7 +27,7 @@ Works in VS Code and VSCodium alike.
 The extension drives the `recordkit` CLI. Install it from the repo root:
 
 ```bash
-pip install -e others/python     # or: pipx install ./others/python
+pip install -e tools/others/python     # or: pipx install ./tools/others/python
 ```
 
 If the `records` command isn't on your PATH, set `records.binaryPath` to its full path.
@@ -37,7 +37,7 @@ If the `records` command isn't on your PATH, set `records.binaryPath` to its ful
 Build the extension package once, then install the `.vsix` permanently:
 
 ```bash
-cd others/vscode
+cd tools/others/vscode
 npm install
 npm run package          # produces records-chat-0.5.0.vsix
 codium --install-extension records-chat-0.5.0.vsix   # VSCodium
@@ -66,7 +66,7 @@ hello world             ← free text is appended as a Human turn
 
 ## Development
 
-Open `others/vscode/` in the editor, `npm install`, then press F5 to launch the
+Open `tools/others/vscode/` in the editor, `npm install`, then press F5 to launch the
 Extension Development Host (`npm run watch` for incremental compiles).
 
 ## Publishing (later)

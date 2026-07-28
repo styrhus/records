@@ -22,7 +22,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 ROOT="$(cd -- "$SCRIPT_DIR/../../.." && pwd)"
 
-NAMING="$ROOT/others/naming"
+NAMING="$ROOT/tools/others/naming"
 STATE="$ROOT/CURRENT"
 ANIMALS_JSON="$NAMING/dyr.json"
 STRUCTURES_JSON="$NAMING/strukturer.json"
@@ -106,7 +106,7 @@ printf '%s %s\n' "$NUM" "$NEW" > "$STATE"
 updated=()
 while IFS= read -r f; do
   # Skip the skill's own dir and the recordkit mirror — both hold the marker as literal text.
-  case "$f" in "$SCRIPT_DIR"/*|*/skills/werden/*|"$ROOT"/others/python/*) continue ;; esac
+  case "$f" in "$SCRIPT_DIR"/*|*/skills/werden/*|"$ROOT"/tools/others/python/*) continue ;; esac
   sed -i -E "s/<!-- werden:[^>]*-->/<!-- werden: $NUM $NEW -->/g" "$f"
   updated+=("${f#"$ROOT"/}")
 done < <(grep -rlIF --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=public --exclude-dir=.mem -- '<!-- werden:' "$ROOT" 2>/dev/null || true)

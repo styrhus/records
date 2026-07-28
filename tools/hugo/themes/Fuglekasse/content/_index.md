@@ -37,7 +37,7 @@ drafts-only recording, commit variants, diff summaries, spelling corrections, an
 owner and repository name are derived from the push itself.
 
 The look is the <img src="fuglekasse.svg" width="20" height="20" alt="" style="vertical-align:-4px"> **Fuglekasse** theme;
-its colors, greeting font and the tiny footer links all live in `hugo/hugo.yaml` — `repoURL` is the codeberg door.
+its colors, greeting font and the tiny footer links all live in `tools/hugo/hugo.yaml` — `repoURL` is the codeberg door.
 
 > If you want a license link in the footer, add your own `records/LICENSE.md`. Its `title:` becomes the link text (defaults to "License").
 

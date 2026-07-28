@@ -20,13 +20,13 @@ The user invoked /record: create the transcript file, then stay silent. **Do not
 
 - Current date+time: !`date +%Y-%m-%d_%H-%M`
 - ISO timestamp (for frontmatter): !`date -Iseconds`
-- Records-site configs with their contentDir, cwd and below (empty = none): !`find . -maxdepth 4 \( -path '*/.*' -o -path '*/node_modules' \) -prune -o -path '*/hugo/hugo.yaml' -print -exec grep -m1 '^contentDir:' {} \; 2>/dev/null; true`
+- Records-site configs with their contentDir, cwd and below (empty = none): !`find . -maxdepth 5 \( -path '*/.*' -o -path '*/node_modules' \) -prune -o -path '*/hugo/hugo.yaml' -print -exec grep -m1 '^contentDir:' {} \; 2>/dev/null; true`
 - Existing docs-like dirs, cwd and one level down (empty = none): !`find . -mindepth 1 -maxdepth 2 -type d \( -name docs -o -name doc -o -name documentation -o -name notes -o -name records \) -not -path '*/.*' -not -path '*/node_modules/*' 2>/dev/null; true`
 
 ## Setup (this turn)
 
 1. **Pick the records directory**, in this priority order:
-   - a records-site config was found above → resolve its `contentDir` against the `hugo/` dir holding the config and use that path (e.g. `./notes/site/hugo/hugo.yaml` + `contentDir: ../records` → `notes/site/records/`); a match with no `contentDir:` line means `../records`; several matches → the shallowest path wins. Skip the rest.
+   - a records-site config was found above → resolve its `contentDir` against the `hugo/` dir holding the config and use that path (e.g. `./notes/site/tools/hugo/hugo.yaml` + `contentDir: ../../records` → `notes/site/records/`); a match with no `contentDir:` line means `../records`; several matches → the shallowest path wins. Skip the rest.
    - `records/` already exists at the root → use it (skip the rest)
    - `docs/` exists at the root → use `docs/records/`
    - another docs-like dir exists at the root (`doc/`, `documentation/`, `notes/`) → use `<that>/records/`

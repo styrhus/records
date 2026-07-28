@@ -2,13 +2,13 @@ baseURL: https://blyant.codeberg.page/records/
 locale: en-no
 title: blyant records
 
-# The default branding theme; all design lives in hugo/themes/Fuglekasse/.
+# The default branding theme; all design lives in tools/hugo/themes/Fuglekasse/.
 theme: Fuglekasse
 
 # records/ is the single source of truth for content.
-contentDir: ../records
+contentDir: ../../records
 # OR
-# contentDir: ../docs/records
+# contentDir: ../../docs/records
 
 # The explicit date: field is authoritative (ordering follows it, not the
 # filename); timestamp-named records without a date: fall back to the filename.

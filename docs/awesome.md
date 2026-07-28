@@ -1,12 +1,12 @@
 # Make it awesome
 
 Want the site to look like *you*? The quickest changes are in
-`hugo/hugo.yaml`; the full design lives in the **Fuglekasse** theme under
-`hugo/themes/Fuglekasse/`.
+`tools/hugo/hugo.yaml`; the full design lives in the **Fuglekasse** theme under
+`tools/hugo/themes/Fuglekasse/`.
 
 ## The layouts
 
-They live in `hugo/themes/Fuglekasse/layouts/`:
+They live in `tools/hugo/themes/Fuglekasse/layouts/`:
 
 - `baseof.html` — the frame: head, all the CSS, header, footer
 - `home.html` — the front page: greeting, intro, the list of records
@@ -16,7 +16,7 @@ They live in `hugo/themes/Fuglekasse/layouts/`:
 
 ## Colors
 
-Set the palette from `hugo/hugo.yaml` — no need to open the theme.
+Set the palette from `tools/hugo/hugo.yaml` — no need to open the theme.
 Fuglekasse ships Tokyo Night Light (light mode) and Dracula (dark); override
 any key under `params.style`:
 
@@ -34,7 +34,7 @@ the top of `baseof.html` if you want to go deeper.
 ## Fonts
 
 The greeting uses Architects Daughter. Point `params.style.font` at another
-family, or drop a `.woff2` into `hugo/themes/Fuglekasse/static/fonts/` and set
+family, or drop a `.woff2` into `tools/hugo/themes/Fuglekasse/static/fonts/` and set
 `params.style.fontfile` to it.
 
 ## Chapters
@@ -57,7 +57,7 @@ and the chapter just shows its number.
 
 ## The footer
 
-The small links at the bottom come from `repoURL` in `hugo/hugo.yaml`. Don't
+The small links at the bottom come from `repoURL` in `tools/hugo/hugo.yaml`. Don't
 want your repo linked? Set `showRepoURL: false` under `params:` — the link
 disappears, while `repoURL` keeps rewriting relative links inside records.
 Add a `records/LICENSE.md` and a license link appears too. Its `title:` becomes
@@ -83,7 +83,7 @@ build:
 ## See it while you work
 
 ```sh
-cd hugo
+cd tools/hugo
 hugo server
 ```
 

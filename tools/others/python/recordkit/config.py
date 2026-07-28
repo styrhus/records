@@ -7,12 +7,12 @@ from pathlib import Path
 
 _PRUNE = {"node_modules"}
 _DOCS_NAMES = ["docs", "doc", "documentation", "notes"]
-_MAXDEPTH = 4
+_MAXDEPTH = 5
 _CONTENTDIR = re.compile(r"^contentDir:\s*(.*?)\s*(?:#.*)?$")
 
 
 def find_hugo_configs(start: Path) -> list[Path]:
-    """All */hugo/hugo.yaml under `start` (maxdepth 4, dot-dirs and node_modules pruned), shallowest first."""
+    """All */hugo/hugo.yaml under `start` (maxdepth 5, dot-dirs and node_modules pruned), shallowest first."""
     start = Path(start)
     found: list[Path] = []
 

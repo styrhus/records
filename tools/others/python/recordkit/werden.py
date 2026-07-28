@@ -12,11 +12,11 @@ _FASE = re.compile(r"^> Fase — .*$", re.MULTILINE)
 
 _SKIP_DIRS = {".git", "node_modules", "public", ".mem"}
 # Dirs holding the marker as literal text (this mirror, the skill), repo-relative.
-_SKIP_REL = ("others/python", ".ai/skills/werden", ".claude/skills/werden")
+_SKIP_REL = ("tools/others/python", ".ai/skills/werden", ".claude/skills/werden")
 
 
 def _pools(repo: Path) -> tuple[list[str], list[str]]:
-    naming = repo / "others" / "naming"
+    naming = repo / "tools" / "others" / "naming"
     animals = loads((naming / "dyr.json").read_text(encoding="utf-8"))
     structures = loads((naming / "strukturer.json").read_text(encoding="utf-8"))
     return animals, structures

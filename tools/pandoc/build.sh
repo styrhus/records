@@ -2,11 +2,12 @@
 # Build the site's records into one PDF, EPUB and/or print booklet: book.lua
 # assembles, pandoc renders — HTML printed by WeasyPrint for the PDF and the
 # booklet (A5 pages imposed 2-up on A4 landscape), straight to EPUB otherwise.
-# Usage: pandoc/build.sh [outdir]   (default: hugo/public)
+# Usage: tools/pandoc/build.sh [outdir]   (default: tools/hugo/public)
 # Env overrides: SITE_CONFIG, RECORDS_DIR (testing).
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# ROOT is the tools/ dir, not the repo root — hugo/ lives beside pandoc/.
 ROOT="$(dirname "$SCRIPT_DIR")"
 OUTDIR="${1:-$ROOT/hugo/public}"
 SITE_CONFIG="${SITE_CONFIG:-$ROOT/hugo/hugo.yaml}"
@@ -21,7 +22,7 @@ PDF_NAME="$(yaml_value '[[:space:]]*pdf')"
 EPUB_NAME="$(yaml_value '[[:space:]]*epub')"
 BOOKLET_NAME="$(yaml_value '[[:space:]]*booklet')"
 if [ -z "$PDF_NAME" ] && [ -z "$EPUB_NAME" ] && [ -z "$BOOKLET_NAME" ]; then
-  echo "pandoc/build.sh: params.pdf/epub/booklet unset in $SITE_CONFIG — skipping book build"
+  echo "tools/pandoc/build.sh: params.pdf/epub/booklet unset in $SITE_CONFIG — skipping book build"
   exit 0
 fi
 
@@ -35,6 +36,8 @@ if [ "$PAGE_MODE" = "single-flowing" ]; then
 fi
 
 # contentDir as Hugo reads it, resolved relative to the config's directory.
+# The ../records fallback presumes an old hugo/-at-root layout; this repo's
+# config always sets contentDir explicitly.
 CONTENT_DIR="$(yaml_value 'contentDir')"
 RECORDS_DIR="${RECORDS_DIR:-$(cd "$(dirname "$SITE_CONFIG")/${CONTENT_DIR:-../records}" && pwd)}"
 
@@ -51,7 +54,7 @@ if [ -n "$PDF_NAME" ]; then
     --highlight-style "$SCRIPT_DIR/highlight.theme" \
     -o "$TMP/book.html"
   weasyprint "$TMP/book.html" "$OUTDIR/$PDF_NAME"
-  echo "pandoc/build.sh: built $OUTDIR/$PDF_NAME from $RECORDS_DIR"
+  echo "tools/pandoc/build.sh: built $OUTDIR/$PDF_NAME from $RECORDS_DIR"
 fi
 
 # Print booklet: the same book at A5 on white (booklet.css), imposed two-up
@@ -73,9 +76,9 @@ if [ -n "$BOOKLET_NAME" ]; then
       -o "$TMP/booklet.html"
     weasyprint "$TMP/booklet.html" "$TMP/booklet-a5.pdf"
     python3 "$SCRIPT_DIR/impose.py" "${IMPOSE_ARGS[@]}" "$TMP/booklet-a5.pdf" "$OUTDIR/$BOOKLET_NAME"
-    echo "pandoc/build.sh: built $OUTDIR/$BOOKLET_NAME from $RECORDS_DIR"
+    echo "tools/pandoc/build.sh: built $OUTDIR/$BOOKLET_NAME from $RECORDS_DIR"
   else
-    echo "pandoc/build.sh: params.booklet set but pypdf is missing — skipping booklet" >&2
+    echo "tools/pandoc/build.sh: params.booklet set but pypdf is missing — skipping booklet" >&2
   fi
 fi
 
@@ -90,5 +93,5 @@ if [ -n "$EPUB_NAME" ]; then
     -c "$SCRIPT_DIR/epub.css" \
     --highlight-style "$SCRIPT_DIR/highlight.theme" \
     -o "$OUTDIR/$EPUB_NAME"
-  echo "pandoc/build.sh: built $OUTDIR/$EPUB_NAME from $RECORDS_DIR"
+  echo "tools/pandoc/build.sh: built $OUTDIR/$EPUB_NAME from $RECORDS_DIR"
 fi

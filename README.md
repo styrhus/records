@@ -13,7 +13,7 @@ The front page explains the rest: <https://blyant.codeberg.page/records/>.
 ## Make it yours
 
 It ships with **Fuglekasse**, a small default theme you restyle from
-`hugo/hugo.yaml` or replace. Some like it [simple](docs/simple.md), some like
+`tools/hugo/hugo.yaml` or replace. Some like it [simple](docs/simple.md), some like
 it [awesome](docs/awesome.md) — [Hugo has it all](docs/hugo.md).
 
 ## Record from your projects
@@ -28,7 +28,7 @@ git clone https://codeberg.org/<you>/records.git
 echo records/ >> .gitignore   # or track it as a submodule
 ```
 
-Nothing to configure: `contentDir` in the clone's `hugo/hugo.yaml` is the
+Nothing to configure: `contentDir` in the clone's `tools/hugo/hugo.yaml` is the
 one source of truth, shared by Hugo and the skills.
 
 ## Record together
@@ -43,9 +43,9 @@ together.
 
 ## Record on your own
 
-The skills also run without big-tech AI: a small [engine](others/README.md)
+The skills also run without big-tech AI: a small [engine](tools/others/README.md)
 drives the mechanical ones from a VSCode chat sidebar, a Neovim split, or
-plain shell — no model needed. Add [Ollama](others/ollama/README.md) and
+plain shell — no model needed. Add [Ollama](tools/others/ollama/README.md) and
 `/record` talks back: your own local model, your records, your machine.
 
 ---

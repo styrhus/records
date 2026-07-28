@@ -14,8 +14,8 @@ demoMode = false     # true: render theme-shipped demo records (front matter dem
 # datePostFormat = "02. January 2006 15:04"  # show the record date bottom-right in each post; unset shows none
 showTags = true      # show front-matter tags as dim #labels under each post; a page opts out with showTags: false
 showRepoURL = true   # footer link to params.repoURL; false hides it (repoURL still rewrites record links)
-# pdf = "records.pdf"  # footer "Get PDF" link to the pandoc-built site PDF (see pandoc/ in the records repo); unset shows none
-# epub = "records.epub"  # footer "Get EPUB" link to the pandoc-built site EPUB (see pandoc/ in the records repo); unset shows none
+# pdf = "records.pdf"  # footer "Get PDF" link to the pandoc-built site PDF (see tools/pandoc/ in the records repo); unset shows none
+# epub = "records.epub"  # footer "Get EPUB" link to the pandoc-built site EPUB (see tools/pandoc/ in the records repo); unset shows none
 # booklet = "records-booklet.pdf"  # footer "Get booklet" link to the print booklet (A5 pages two-up on A4 landscape, folding order); unset shows none
 # logo = "fuglekasse.svg"  # brand mark fixed to the bottom-right corner; unset shows none
 # favicon = "fuglekasse.svg"  # <link rel="icon"> file in static/; unset falls back to the shipped fuglekasse.svg

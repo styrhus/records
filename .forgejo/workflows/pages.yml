@@ -1,4 +1,4 @@
-# Build the Hugo site (hugo/ config, records/ as content) and deploy to
+# Build the Hugo site (tools/hugo/ config, records/ as content) and deploy to
 # Codeberg Pages at https://<owner>.codeberg.page/<repo>/ — owner, repo
 # and repo URL are derived from the push, so forks publish their own
 # site with zero edits. hugo-runner (node + git + Hugo + pandoc/WeasyPrint)
@@ -10,9 +10,9 @@ on:
   push:
     branches: [main]
     paths:
-      - 'hugo/**'
+      - 'tools/hugo/**'
       - 'records/**'
-      - 'pandoc/**'
+      - 'tools/pandoc/**'
       - '.forgejo/workflows/pages.yml'
   workflow_dispatch:
 
@@ -37,22 +37,22 @@ jobs:
           NAME="${GITHUB_REPOSITORY#*/}"
           PAGES_URL="https://${OWNER}.codeberg.page/${NAME}/"
           echo "PAGES_URL=${PAGES_URL}" >> "$GITHUB_ENV"
-          cd hugo
+          cd tools/hugo
           HUGO_PARAMS_REPOURL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
             hugo --minify --baseURL "${PAGES_URL}" --destination "$GITHUB_WORKSPACE/public"
 
       # Renders the records into public/<params.pdf>, public/<params.epub>
-      # and/or public/<params.booklet> with the tooling in pandoc/ (pandoc +
+      # and/or public/<params.booklet> with the tooling in tools/pandoc/ (pandoc +
       # WeasyPrint are baked into the runner image; the booklet also needs
       # pypdf there, else build.sh skips it); a no-op when all params are unset.
       - name: Build PDF, EPUB and booklet
         run: |
-          if ! grep -Eq '^[[:space:]]*(pdf|epub|booklet):' hugo/hugo.yaml; then
+          if ! grep -Eq '^[[:space:]]*(pdf|epub|booklet):' tools/hugo/hugo.yaml; then
             echo "params.pdf/epub/booklet unset — skipping book build"
             exit 0
           fi
           HUGO_PARAMS_REPOURL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
-            ./pandoc/build.sh "$GITHUB_WORKSPACE/public"
+            ./tools/pandoc/build.sh "$GITHUB_WORKSPACE/public"
 
       - name: Deploy to Codeberg Pages
         uses: https://codeberg.org/git-pages/action@v2

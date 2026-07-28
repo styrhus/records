@@ -19,6 +19,14 @@ def test_content_dir_default_when_absent(tmp_path):
     assert config.resolve_records_dir(tmp_path) == (tmp_path / "records").resolve()
 
 
+def test_resolve_nested_tools_hugo_layout(tmp_path):
+    hugo = tmp_path / "project" / "site" / "tools" / "hugo"
+    _mk(hugo)
+    (hugo / "hugo.yaml").write_text("contentDir: ../../records\n")
+    assert config.resolve_records_dir(tmp_path) == \
+        (tmp_path / "project" / "site" / "records").resolve()
+
+
 def test_fallback_records_dir(tmp_path):
     _mk(tmp_path / "records")
     assert config.resolve_records_dir(tmp_path) == (tmp_path / "records").resolve()
