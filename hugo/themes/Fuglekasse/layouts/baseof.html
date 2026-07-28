@@ -169,9 +169,11 @@
     .filter-body fieldset { border: none; margin: 0 0 0.5rem; padding: 0; }
     .filter-body legend { font-weight: 600; padding: 0; }
     .filter-body label { display: block; }
+    .filter-body input[type="search"] { width: 100%; box-sizing: border-box; font: inherit; }
     .filter-clear { font: inherit; color: var(--fg); background: var(--card); border: none; border-radius: 6px; padding: 0.15rem 0.6rem; cursor: pointer; }
     .filter-clear:hover { color: var(--accent); }
     .filter-hidden { display: none; }
+    ::highlight(word-match) { background-color: color-mix(in srgb, var(--accent) 30%, transparent); }
     /* Architects Daughter by Kimberly Geswein — SIL OFL 1.1, see fonts/OFL.txt. */
     @font-face {
       font-family: "{{ $s.font | safeCSS }}";
@@ -301,18 +303,21 @@
             tags: splitCSV(q.get('tags')),
             langs: splitCSV(q.get('language')),
             from: q.get('from') || '',
-            to: q.get('to') || ''
+            to: q.get('to') || '',
+            word: q.get('word') || ''
           };
         }
 
         function stateFromForm() {
-          var st = { tags: [], langs: [], from: '', to: '' };
+          var st = { tags: [], langs: [], from: '', to: '', word: '' };
           filter.querySelectorAll('input:checked[name="tags"]').forEach(function (i) { st.tags.push(i.value); });
           filter.querySelectorAll('input:checked[name="language"]').forEach(function (i) { st.langs.push(i.value); });
           var from = filter.querySelector('input[name="from"]');
           var to = filter.querySelector('input[name="to"]');
+          var word = filter.querySelector('input[name="word"]');
           st.from = from ? from.value : '';
           st.to = to ? to.value : '';
+          st.word = word ? word.value : '';
           return st;
         }
 
@@ -321,8 +326,10 @@
           filter.querySelectorAll('input[name="language"]').forEach(function (i) { i.checked = st.langs.indexOf(i.value) !== -1; });
           var from = filter.querySelector('input[name="from"]');
           var to = filter.querySelector('input[name="to"]');
+          var word = filter.querySelector('input[name="word"]');
           if (from) from.value = st.from;
           if (to) to.value = st.to;
+          if (word) word.value = st.word;
         }
 
         // Hand-built query string keeps the commas literal.
@@ -332,12 +339,19 @@
           if (st.langs.length) parts.push('language=' + st.langs.map(encodeURIComponent).join(','));
           if (st.from) parts.push('from=' + st.from);
           if (st.to) parts.push('to=' + st.to);
+          if (st.word) parts.push('word=' + encodeURIComponent(st.word));
           var qs = parts.join('&');
           history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
         }
 
         function applyFilter(st) {
-          var active = !!(st.tags.length || st.langs.length || st.from || st.to);
+          var active = !!(st.tags.length || st.langs.length || st.from || st.to || st.word);
+          // Word input compiles as a case-insensitive regex; invalid syntax falls back to literal text.
+          var wordRe = null;
+          if (st.word) {
+            try { wordRe = new RegExp(st.word, 'i'); }
+            catch (e) { wordRe = new RegExp(st.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'); }
+          }
           // [data-date] skips the metadata-less _index intro card.
           document.querySelectorAll('main.mode-single article.record-page[data-date]').forEach(function (card) {
             var show = true;
@@ -348,6 +362,11 @@
             if (show && st.langs.length) show = st.langs.indexOf(card.getAttribute('lang') || 'none') !== -1;
             if (show && st.from) show = card.dataset.date >= st.from;
             if (show && st.to) show = card.dataset.date <= st.to;
+            if (show && wordRe) {
+              // Whole visible card text, whitespace-collapsed, cached once — cards never change.
+              if (card.wordText === undefined) card.wordText = card.textContent.replace(/\s+/g, ' ');
+              show = wordRe.test(card.wordText);
+            }
             card.classList.toggle('filter-hidden', active && !show);
           });
           document.querySelectorAll('details.chapter').forEach(function (ch) {
@@ -362,18 +381,50 @@
               delete ch.dataset.filterOpen;
             }
           });
+          highlightWord(wordRe);
         }
 
-        filter.addEventListener('change', function () {
+        // Tint word matches in visible cards (Custom Highlight API; browsers without it just filter).
+        function highlightWord(re) {
+          if (typeof Highlight === 'undefined' || !CSS.highlights) return;
+          if (!re) { CSS.highlights.delete('word-match'); return; }
+          var g = new RegExp(re.source, 'gi');
+          var hl = new Highlight();
+          var any = false;
+          document.querySelectorAll('main.mode-single article.record-page[data-date]:not(.filter-hidden)').forEach(function (card) {
+            var walk = document.createTreeWalker(card, NodeFilter.SHOW_TEXT);
+            for (var node = walk.nextNode(); node; node = walk.nextNode()) {
+              g.lastIndex = 0;
+              for (var m = g.exec(node.data); m; m = g.exec(node.data)) {
+                if (m[0]) {
+                  var r = document.createRange();
+                  r.setStart(node, m.index);
+                  r.setEnd(node, m.index + m[0].length);
+                  hl.add(r);
+                  any = true;
+                }
+                // Zero-length match: step forward so exec can't loop in place.
+                if (m.index === g.lastIndex) g.lastIndex++;
+              }
+            }
+          });
+          if (any) CSS.highlights.set('word-match', hl); else CSS.highlights.delete('word-match');
+        }
+
+        function onFilterChange() {
           var st = stateFromForm();
           writeURL(st);
           applyFilter(st);
-        });
+        }
+        filter.addEventListener('change', onFilterChange);
+        // The word input filters live per keystroke; change alone would fire only on blur/Enter.
+        var wordInput = filter.querySelector('input[name="word"]');
+        if (wordInput) wordInput.addEventListener('input', onFilterChange);
 
         var clear = filter.querySelector('.filter-clear');
         if (clear) clear.addEventListener('click', function () {
           filter.querySelectorAll('input[type="checkbox"]').forEach(function (i) { i.checked = false; });
-          filter.querySelectorAll('input[type="date"]').forEach(function (i) { i.value = ''; });
+          filter.querySelectorAll('input[type="date"], input[type="search"]').forEach(function (i) { i.value = ''; });
           writeURL(stateFromForm());
           applyFilter(stateFromForm());
         });

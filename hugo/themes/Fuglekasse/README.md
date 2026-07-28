@@ -125,19 +125,28 @@ honoured only in `single` mode; in every other page mode the param is ignored
 The panel offers the tags actually used across your records (a card matches if
 it carries *any* checked tag), the languages set in front matter plus a
 `(none)` bucket for records without one (the language section only appears once
-some record sets a `language:`), and an inclusive from/to date range. The
-groups combine: a card must pass every active group to stay visible. Chapters
-whose cards are all filtered away hide too; chapters holding matches open
-automatically while a filter is active and return to their `chapterState` fold
-when it clears.
+some record sets a `language:`), an inclusive from/to date range, and a **Word**
+field. The groups combine: a card must pass every active group to stay visible.
+Chapters whose cards are all filtered away hide too; chapters holding matches
+open automatically while a filter is active and return to their `chapterState`
+fold when it clears.
+
+The Word field searches everything visible on a card — title, conversation
+text, tags, date line — as you type. The input is tried as a case-insensitive
+regular expression (`foo|bar`, `\bword\b`); invalid regex syntax falls back to
+a plain case-insensitive text search, so `c++(` and friends still find their
+literal selves. Whitespace is collapsed before matching, so a phrase matches
+across line breaks. In browsers with the CSS Custom Highlight API the matched
+words are tinted in the visible cards; elsewhere the filtering works the same
+without the tint.
 
 The filter state lives in the URL query string —
-`?tags=a,b&language=nb,none&from=2026-01-01&to=2026-12-31` — kept in sync as
-you click, so a filtered view is a shareable link and survives reload. A `#`
-anchor pointing at a filtered-out record does not scroll anywhere until the
-filter clears. Tags containing a comma cannot be filtered (the comma is the
-list separator). Without JavaScript the panel still opens and closes as a
-plain `<details>`, but the controls do nothing.
+`?tags=a,b&language=nb,none&from=2026-01-01&to=2026-12-31&word=foo%7Cbar` —
+kept in sync as you click and type, so a filtered view is a shareable link and
+survives reload. A `#` anchor pointing at a filtered-out record does not scroll
+anywhere until the filter clears. Tags containing a comma cannot be filtered
+(the comma is the list separator). Without JavaScript the panel still opens and
+closes as a plain `<details>`, but the controls do nothing.
 
 ## Get PDF
 
