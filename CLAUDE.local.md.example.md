@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-A publish-your-conversations site: Markdown transcripts in `records/` are built by Hugo and deployed to Codeberg Pages (`https://<owner>.codeberg.page/<repo>/`). Forks publish their own site with zero edits — owner/repo/URL are derived from the push in `.forgejo/workflows/pages.yml`.
+**blyant records** (`codeberg.org/blyant/records`) — a publish-your-conversations site: Markdown transcripts in `records/` are built by Hugo and deployed to Codeberg Pages (`https://<owner>.codeberg.page/<repo>/`). Forks publish their own site with zero edits — owner/repo/URL are derived from the push in `.forgejo/workflows/pages.yml`.
 
 ## Layout
 

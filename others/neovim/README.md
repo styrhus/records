@@ -1,6 +1,6 @@
 # records.nvim — Neovim Integration
 
-A Lua plugin for the records site's mechanical skills in Neovim.
+A Lua plugin for the blyant records site's mechanical skills in Neovim.
 
 ## Installation
 
@@ -8,7 +8,7 @@ Using `lazy.nvim`:
 
 ```lua
 {
-  "tb4/records",
+  "blyant/records",
   dir = "~/path/to/records/others/neovim",
   config = function()
     require("records").setup({
@@ -22,7 +22,7 @@ Using `lazy.nvim`:
 Or install manually:
 
 ```bash
-git clone https://path/to/records.git
+git clone https://codeberg.org/blyant/records.git
 mkdir -p ~/.config/nvim/pack/manual/start
 cp -r records/others/neovim ~/.config/nvim/pack/manual/start/records
 ```

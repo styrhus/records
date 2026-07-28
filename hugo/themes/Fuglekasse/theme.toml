@@ -1,8 +1,8 @@
 name = "Fuglekasse"
 license = "MIT"
-licenselink = "https://codeberg.org/tb4/records/src/branch/main/LICENSE.md"
-description = "The default theme for records — a minimal, config-driven Hugo theme for publishing conversation transcripts."
-homepage = "https://codeberg.org/tb4/records"
+licenselink = "https://codeberg.org/blyant/records/src/branch/main/LICENSE.md"
+description = "The default theme for blyant records — a minimal, config-driven Hugo theme for publishing conversation transcripts."
+homepage = "https://codeberg.org/blyant/records"
 min_version = "0.146.0"
 tags = ["minimal", "blog", "transcripts"]
 

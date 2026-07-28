@@ -2,7 +2,7 @@
 
 <!-- werden: 0.1.19 fuglekasse-scorpion -->
 
-The default theme for [records](https://codeberg.org/tb4/records) — Norwegian for
+The default theme for [blyant records](https://codeberg.org/blyant/records) — Norwegian for
 *nesting box*. A deliberately small, config-driven Hugo theme for publishing
 conversation transcripts: four templates, one web font, no build step.
 
@@ -155,7 +155,7 @@ closes as a plain `<details>`, but the controls do nothing.
 Set `params.pdf` to a filename — `pdf: records.pdf` — and the footer shows a
 **Get PDF** link to that file at the site root. It is **unset by default**: the
 theme only renders the link; the file itself is built by the
-[records](https://codeberg.org/tb4/records) repo's Pages workflow with the
+[blyant records](https://codeberg.org/blyant/records) repo's Pages workflow with the
 tooling in `pandoc/`, which turns the whole site into one PDF book — cover
 (greeting and title), table of contents with page numbers, loose records first,
 then chapters ascending, each record under its display title, in the site's
@@ -205,7 +205,7 @@ Dates without a UTC offset — front matter `date:` values and filename
 timestamps — are interpreted in the site's `timeZone`, so CI builds on UTC
 machines keep your wall-clock times. It's a root `hugo.yaml` key, not a param:
 Hugo ignores root keys in theme configs, so Fuglekasse can't ship a default —
-the records repo's `hugo.yaml` sets `timeZone: Europe/Oslo`; point it at your
+the blyant records repo's `hugo.yaml` sets `timeZone: Europe/Oslo`; point it at your
 own zone.
 
 ## Tags

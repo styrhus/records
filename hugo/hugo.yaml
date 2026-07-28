@@ -1,6 +1,6 @@
-baseURL: https://tb4.codeberg.page/records/
+baseURL: https://blyant.codeberg.page/records/
 locale: en-no
-title: Records
+title: blyant records
 
 # The default branding theme; all design lives in hugo/themes/Fuglekasse/.
 theme: Fuglekasse
@@ -53,7 +53,7 @@ cascade:
 # Repo URL for raw-link rewrites in page.html; pages.yml overrides this
 # per-fork via HUGO_PARAMS_REPOURL. This value is the local-dev default.
 params:
-  repoURL: https://codeberg.org/tb4/records
+  repoURL: https://codeberg.org/blyant/records
   # Set to false to hide the footer repo link; repoURL keeps rewriting
   # relative records/ links either way. Fuglekasse defaults to true.
   # showRepoURL: false
@@ -137,12 +137,12 @@ params:
   # The whole site as one PDF, built by the Pages workflow with the tooling in
   # pandoc/ and served from the site root; the footer shows a "Get PDF" link.
   # The value is the filename. Uncomment to enable both build and link.
-  # pdf: tb4.pdf
+  # pdf: blyant.pdf
 
   # The whole site as one EPUB, built by the same workflow step and served from
   # the site root; the footer shows a "Get EPUB" link. The value is the
   # filename. Uncommend to enable both build and link.
-  # epub: tb4.epub
+  # epub: blyant.epub
 
   # The book as a paper-saving print booklet: A5 pages on a white (ink-saving)
   # background, two-up on A4 landscape sheets in folding order — print
@@ -153,7 +153,7 @@ params:
   # outer sheet with forside as the folded book's back cover.
   # Built by the same workflow step (needs pypdf next to WeasyPrint); the
   # footer shows a "Get booklet" link. The value is the filename.
-  # booklet: tb4-booklet.pdf
+  # booklet: blyant-booklet.pdf
 
   # Brand mark pinned to the bottom-right corner of every page. Point it at a
   # file in the theme's static/ (or your own static/); remove to show none.

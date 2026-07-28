@@ -21,7 +21,7 @@ Change it to your own word, or remove the line for no greeting at all.
 
 ## The site title
 
-Also in `hugo/hugo.yaml`: `title: Records`. It shows in the header and
+Also in `hugo/hugo.yaml`: `title: blyant records`. It shows in the header and
 in the browser tab.
 
 ## A different color

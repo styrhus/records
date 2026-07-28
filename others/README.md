@@ -1,8 +1,8 @@
-# Records Without AI (`others/`)
+# blyant records Without AI (`others/`)
 
 <!-- werden: 0.1.19 fuglekasse-scorpion -->
 
-This directory contains the **no-AI engine and plugins** for the Records site — letting you run the mechanical slash-commands without a model. Optionally add Ollama for the AI-driven skills.
+This directory contains the **no-AI engine and plugins** for the blyant records site — letting you run the mechanical slash-commands without a model. Optionally add Ollama for the AI-driven skills.
 
 ## Architecture
 
@@ -35,7 +35,7 @@ pip install -e .
 
 The `records` command is now available system-wide.
 
-### 2. Try it (from the records repo)
+### 2. Try it (from the blyant records repo)
 
 ```bash
 # Create a record
@@ -189,7 +189,7 @@ No build step — copy the plugin to your runtimepath or manage with a package m
 
 ## Next Steps
 
-- **Test both plugins** against the real records site (create a record, append, feature, commit).
+- **Test both plugins** against the real blyant records site (create a record, append, feature, commit).
 - **Wire Ollama in Neovim** (the CLI's `ollama-reply` does the HTTP work; VSCode is done) and add the voice skills as system-prompt presets.
 - **Expand to other editors** (Emacs, Vim, etc.) — the CLI is editor-agnostic, so the pattern is straightforward.
 - **Package and ship** — make the engine installable via PyPI/Homebrew/Cargo, plugins via official registries.

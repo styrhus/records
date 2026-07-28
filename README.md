@@ -1,12 +1,12 @@
-# records
+# blyant records
 
 Your records, published. Drop Markdown into `records/`, get a website —
-**records** is your own publishing _datamaskineri_.
+**blyant records** is your own publishing _datamaskineri_.
 
 Fork, enable Actions, push — your words appear at
 `https://<you>.codeberg.page/records/` (or your own domain name).
 
-The front page explains the rest: <https://tb4.codeberg.page/records/>.
+The front page explains the rest: <https://blyant.codeberg.page/records/>.
 
 ## Make it yours
 
@@ -31,7 +31,7 @@ one source of truth, shared by Hugo and the skills.
 
 ## Record together
 
-Teams, friends and lovers can share one **records** instance. Add them as
+Teams, friends and lovers can share one **blyant records** instance. Add them as
 collaborators on your fork, and they clone, they write, they commit — commit
 to it. Every push publishes to the same site.
 

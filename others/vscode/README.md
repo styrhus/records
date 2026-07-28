@@ -1,6 +1,6 @@
 # Records Chat — VSCode Extension
 
-A sidebar chat view for the records site's mechanical skills, with optional Ollama support.
+A sidebar chat view for the blyant records site's mechanical skills, with optional Ollama support.
 Works in VS Code and VSCodium alike.
 
 ## Features
