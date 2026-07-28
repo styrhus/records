@@ -22,6 +22,10 @@
   {{ end }}
 
   {{ $all := where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" }}
+  {{/* demoMode: theme-shipped demo records (demo: true) render only while the
+       site has no real records; demoMode false never shows them. */}}
+  {{ $real := where $all "Params.demo" "!=" true }}
+  {{ if or $real (not site.Params.demoMode) }}{{ $all = $real }}{{ end }}
   {{/* chapterState "latest": the chapter holding the newest record stays open. */}}
   {{ $latestSection := "" }}
   {{ if $all }}{{ $latestSection = (index (sort $all "Date" "desc") 0).Section }}{{ end }}

@@ -273,6 +273,24 @@ override it (useful when the site is served under a custom domain the build
 does not know about). **Unset by default** — no links are rendered, and the
 PDF/EPUB books never include them.
 
+## Demo mode
+
+`params.demoMode` (default `false`) renders the theme-shipped demo records —
+content files carrying `demo: true` in their front matter (the theme ships one,
+`content/example/example-recording.md`) — but only while the site has no real
+records: the first record of your own hides them automatically, nothing to
+edit. `false` never shows them. The blyant records site ships `demoMode: true`
+so a fresh fork is a working site out of the box.
+
+The theme also ships the default front page (`content/_index.md`, the welcome
+text). Like the 404 page below, it is shadowed by your own: create
+`records/_index.md` and it replaces the theme's, independent of `demoMode`.
+
+Two limitations, by design: hidden demo records still exist at their direct
+URLs and in the sitemap (they are only unlisted), and demo content never
+appears in the PDF/EPUB/booklet builds (those read the records directory from
+disk, never theme content). `demo` is thereby a reserved front-matter key.
+
 ## 404 page
 
 Fuglekasse ships a default error page (`content/404.md`), built to `/404.html`

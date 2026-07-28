@@ -72,6 +72,13 @@ params:
   # Loud hand-written greeting atop the home page; set your own word or remove.
   greeting: Velkommen
 
+  # Demo content: the theme ships an example record (and the default front
+  # page) so a fresh fork is a working site out of the box. true shows the
+  # demo records only while records/ has no real records — your first record
+  # hides them automatically, nothing to edit. false never shows them.
+  # Fuglekasse defaults to false.
+  demoMode: true
+
   # Home page layout — Fuglekasse defaults to "basic"; uncomment to change.
   #   basic  — link index (default)
   #   posts  — latest N records as an excerpt feed (postsCount sets N, default 3)

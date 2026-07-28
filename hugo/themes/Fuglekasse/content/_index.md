@@ -14,6 +14,10 @@ with your own local one; the
 No helpers required, though: write or drop `.md` files into `records/` by
 hand and they publish just the same.
 
+Until your first record lands, an example recording below shows what a
+published conversation looks like — it disappears automatically the moment
+you add a record of your own.
+
 ## The helpers
 
 The essentials:
@@ -37,5 +41,6 @@ its colors, greeting font and the tiny footer links all live in `hugo/hugo.yaml`
 
 > If you want a license link in the footer, add your own `records/LICENSE.md`. Its `title:` becomes the link text (defaults to "License").
 
-When you have found your footing, rewrite this page — it is
-`records/_index.md`, the front page itself.
+When you have found your footing, write your own front page: create
+`records/_index.md` and it replaces this default one, which ships with the
+theme.

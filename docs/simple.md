@@ -4,8 +4,8 @@ Small changes, big difference — mostly one file, one edit.
 
 ## Your own words on the front page
 
-The front page is `records/_index.md`. Open it, delete what is there,
-write what you want. It is a normal Markdown file.
+Create `records/_index.md` and write what you want — it replaces the theme's
+default welcome page. It is a normal Markdown file.
 
 ## The big greeting
 

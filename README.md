@@ -4,7 +4,9 @@ Your records, published. Drop Markdown into `records/`, get a website —
 **blyant records** is your own publishing _datamaskineri_.
 
 Fork, enable Actions, push — your words appear at
-`https://<you>.codeberg.page/records/` (or your own domain name).
+`https://<you>.codeberg.page/records/` (or your own domain name). A fresh
+fork starts as a working demo site; your first record replaces the demo
+automatically.
 
 The front page explains the rest: <https://blyant.codeberg.page/records/>.
 

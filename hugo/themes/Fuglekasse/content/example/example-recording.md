@@ -2,6 +2,7 @@
 title: Example recording
 date: 2026-07-07T20:42:12+02:00
 tags: [example, demo]
+demo: true
 ---
 
 ## Human
