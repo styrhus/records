@@ -10,6 +10,10 @@ contentDir: ../../records
 # OR
 # contentDir: ../../docs/records
 
+# Repo-root static/ holds your own assets (logo, favicon, images) — like
+# records/, it is fork-owned: upstream never ships or moves files there.
+staticDir: [static, ../../static]
+
 # The explicit date: field is authoritative (ordering follows it, not the
 # filename); timestamp-named records without a date: fall back to the filename.
 frontmatter:
@@ -163,10 +167,10 @@ params:
   # booklet: blyant-booklet.pdf
 
   # Brand mark pinned to the bottom-right corner of every page. Point it at a
-  # file in the theme's static/ (or your own static/); remove to show none.
+  # file in the repo-root static/ (or the theme's); remove to show none.
   logo: fuglekasse.svg
 
-  # Browser-tab icon (<link rel="icon">). Point it at a file in static/;
+  # Browser-tab icon (<link rel="icon">). Point it at a file in the repo-root static/;
   # unset falls back to the shipped fuglekasse.svg. Kept separate from logo
   # since favicons are square and logos are often not.
   # favicon: fuglekasse.svg

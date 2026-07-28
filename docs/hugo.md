@@ -8,6 +8,8 @@ or replace. Anything Hugo can do, your records home can do.
 
 - `tools/hugo/hugo.yaml` — the configuration and the brand knobs; content comes from
   `../records`
+- `static/` (repo root) — your own assets: logo, favicon, images. Fork-owned
+  like `records/`; upstream never ships or moves files there
 - `tools/hugo/themes/Fuglekasse/` — the default theme: three templates and one font,
   the entire design
 - `.forgejo/workflows/pages.yml` — builds and publishes on every push to
