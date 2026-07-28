@@ -211,6 +211,7 @@
     {{ partial "record.html" (dict "content" .Content "prefix" $id "voice" .Params.voiceRecorded) }}
     {{ if and site.Params.showTags (ne .Params.showTags false) .Params.tags }}<p class="post-tags">{{ range .Params.tags }}<span>#{{ . }}</span> {{ end }}</p>{{ end }}
     {{ if and site.Params.datePostFormat (ne .Params.showDate false) }}<p class="post-date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format site.Params.datePostFormat .Date }}</time></p>{{ end }}
+    {{ partial "comment-link.html" . }}
   </article>
 {{ end }}
 

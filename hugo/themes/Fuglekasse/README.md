@@ -250,6 +250,18 @@ load would render the compact layout). Works without JavaScript via a
 `noscript` fallback that loads the player with the page. Unset, no logo is
 shown.
 
+## Comment links
+
+Set `params.commentURL` to your forge's new-issue endpoint —
+`commentURL: https://codeberg.org/you/yourrepo/issues/new` — and every record
+gets a small **Comment** link (bottom-right, styled like the post date) that
+opens a prefilled issue titled `[<site> - #<record-slug>]: `. The link appears
+on record pages and on the single-mode cards; `LICENSE.md` is skipped. The
+`<site>` label defaults to your `baseURL` host; set `params.commentSite` to
+override it (useful when the site is served under a custom domain the build
+does not know about). **Unset by default** — no links are rendered, and the
+PDF/EPUB books never include them.
+
 ## 404 page
 
 Fuglekasse ships a default error page (`content/404.md`), built to `/404.html`

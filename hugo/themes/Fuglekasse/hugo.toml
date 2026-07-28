@@ -19,6 +19,8 @@ showRepoURL = true   # footer link to params.repoURL; false hides it (repoURL st
 # logo = "fuglekasse.svg"  # brand mark fixed to the bottom-right corner; unset shows none
 # favicon = "fuglekasse.svg"  # <link rel="icon"> file in static/; unset falls back to the shipped fuglekasse.svg
 # spotify = "https://open.spotify.com/playlist/…"  # Spotify logo pinned bottom-left that opens an embedded player; share or embed URL; unset shows none
+# commentURL = "https://codeberg.org/you/yourrepo/issues/new"  # per-record "Comment" link opening a prefilled issue; unset shows none
+# commentSite = "example.com"  # site label in the prefilled issue title ([site - #slug]); unset uses the baseURL host
 # cdnURL = "https://example.b-cdn.net/"  # CDN prefix for static assets (favicon, font, logo, pdf/epub/booklet) in production builds; unset serves them from the site
 
 [params.style]

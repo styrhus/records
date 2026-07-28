@@ -1,0 +1,5 @@
+{{- /* Comment link (params.commentURL): opens a prefilled issue titled [site - #slug] for this record. */ -}}
+{{- if and site.Params.commentURL (ne .File.ContentBaseName "LICENSE") -}}
+{{- $site := or site.Params.commentSite (urls.Parse site.BaseURL).Host -}}
+<p class="post-date"><a href="{{ site.Params.commentURL }}?{{ querify "title" (printf "[%s - #%s]: " $site (path.Base .RelPermalink)) | safeURL }}">Comment</a></p>
+{{- end -}}

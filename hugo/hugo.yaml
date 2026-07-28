@@ -171,6 +171,14 @@ params:
   # spotify: https://open.spotify.com/playlist/<id>
   spotify: https://open.spotify.com/playlist/4O49cydRwgT8wBITSY2Zgn?si=3bd2ea5ec828431b
 
+  # Per-record "Comment" link (record pages and single-mode cards): points at
+  # your forge's new-issue endpoint and prefills the title with
+  # "[<site> - #<record-slug>]: ". commentSite overrides the site label
+  # (defaults to the baseURL host — set it when serving under a custom
+  # domain). Unset shows no Comment links.
+  # commentURL: https://codeberg.org/you/yourrepo/issues/new
+  # commentSite: example.com
+
   # Look & feel — Fuglekasse ships these defaults; uncomment a line to override.
   # style:
   #   font: Architects Daughter
