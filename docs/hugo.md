@@ -12,6 +12,8 @@ or replace. Anything Hugo can do, your records home can do.
   like `records/`; upstream never ships or moves files there
 - `tools/hugo/themes/Fuglekasse/` — the default theme: three templates and one font,
   the entire design
+- `bin/build.sh` — the one build path: resolves the site URL, runs Hugo and
+  the book build; CI calls it, and so can you
 - `.forgejo/workflows/pages.yml` — builds and publishes on every push to
   `main`; forks publish to their own address with zero edits
 

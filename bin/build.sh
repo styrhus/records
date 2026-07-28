@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# The one build path: site + books into a single output dir, used identically
+# by CI, `records publish` and manual runs.
+# Usage: bin/build.sh [outdir]   (default: <repo-root>/public, gitignored)
+# Site URL precedence: $BASE_URL > Codeberg CI derivation > $CI_PAGES_URL > error.
+# When $GITHUB_ENV is set, appends PAGES_URL=<resolved> for the deploy step.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+OUTDIR="${1:-$ROOT/public}"
+case "$OUTDIR" in /*) ;; *) OUTDIR="$(pwd)/$OUTDIR" ;; esac
+
+if ! command -v hugo >/dev/null 2>&1; then
+  echo "bin/build.sh: hugo not found — install it: https://gohugo.io/installation/" >&2
+  exit 1
+fi
+
+resolve_url() {
+  if [ -n "${BASE_URL:-}" ]; then
+    echo "$BASE_URL"
+    return 0
+  fi
+  if [ -n "${GITHUB_REPOSITORY:-}" ]; then
+    case "${GITHUB_SERVER_URL:-}" in
+      https://codeberg.org | https://codeberg.org/)
+        local owner="${GITHUB_REPOSITORY%%/*}" name="${GITHUB_REPOSITORY#*/}"
+        # A repo literally named "pages" serves at the domain root on Codeberg.
+        if [ "$name" = pages ]; then
+          echo "https://${owner}.codeberg.page/"
+        else
+          echo "https://${owner}.codeberg.page/${name}/"
+        fi
+        return 0
+        ;;
+    esac
+  fi
+  if [ -n "${CI_PAGES_URL:-}" ]; then
+    echo "$CI_PAGES_URL"
+    return 0
+  fi
+  return 1
+}
+
+if ! PAGES_URL="$(resolve_url)"; then
+  echo "bin/build.sh: cannot resolve the site URL — pass BASE_URL or run in Codeberg/GitLab CI" >&2
+  exit 1
+fi
+PAGES_URL="${PAGES_URL%/}/"
+
+if [ -n "${GITHUB_ENV:-}" ]; then
+  echo "PAGES_URL=${PAGES_URL}" >>"$GITHUB_ENV"
+fi
+
+# repoURL for raw-link rewrites: honour the caller's, else derive from CI env.
+if [ -z "${HUGO_PARAMS_REPOURL:-}" ] && [ -n "${GITHUB_SERVER_URL:-}" ] && [ -n "${GITHUB_REPOSITORY:-}" ]; then
+  export HUGO_PARAMS_REPOURL="${GITHUB_SERVER_URL%/}/${GITHUB_REPOSITORY}"
+fi
+
+(cd "$ROOT/tools/hugo" && hugo --minify --baseURL "$PAGES_URL" --destination "$OUTDIR")
+
+# Books: tools/pandoc/build.sh self-gates on params.pdf/epub/booklet; when the
+# toolchain is missing (stock CI runners, laptops) skip with a note instead.
+BOOKS="$(grep -E '^[[:space:]]*(pdf|epub|booklet):' "$ROOT/tools/hugo/hugo.yaml" || true)"
+if [ -n "$BOOKS" ]; then
+  if ! command -v pandoc >/dev/null 2>&1; then
+    echo "bin/build.sh: book params set but pandoc is missing — skipping book build" >&2
+  elif printf '%s\n' "$BOOKS" | grep -Eq '^[[:space:]]*(pdf|booklet):' && ! command -v weasyprint >/dev/null 2>&1; then
+    echo "bin/build.sh: params.pdf/booklet need weasyprint — skipping book build" >&2
+  else
+    "$ROOT/tools/pandoc/build.sh" "$OUTDIR"
+  fi
+fi
