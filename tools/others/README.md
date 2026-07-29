@@ -9,8 +9,8 @@ This directory contains the **no-AI engine and plugins** for the blyant records 
 ```
 tools/others/
 ├── python/              # recordkit: stateless library + CLI (JSON I/O)
-│   ├── recordkit/       # modules: config, naming, create, stick, commit, mucke, werden, etc.
-│   ├── tests/           # 77 unit tests (config discovery, frontmatter, ollama, etc.)
+│   ├── recordkit/       # modules: config, naming, create, stick, commit, publish, mucke, werden, etc.
+│   ├── tests/           # 102 unit tests (config discovery, frontmatter, ollama, publish, etc.)
 │   ├── pyproject.toml   # pip-installable package
 │   └── .gitignore       # __pycache__, .pytest_cache, build artifacts
 ├── naming/              # werden-cycle name pools (dyr.json, strukturer.json) + scheme doc
@@ -53,6 +53,10 @@ records stick --slug how-to
 
 # Commit it
 records commit -m "docs: add linux hardware notes" --push
+
+# Build and deliver the site without CI (params.publishTarget in hugo.yaml)
+records publish --dry-run
+records publish
 
 # Advance the werden cycle (or --stamp to re-stamp without advancing)
 records werden
@@ -155,7 +159,7 @@ context chip. See `ollama/README.md` for details.
 
 ```bash
 cd python && python -m pytest -q
-# 77 tests, ~0.2s
+# 102 tests, ~0.3s
 ```
 
 ### VSCode

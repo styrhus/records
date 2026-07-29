@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 from . import commit as commit_mod
-from . import config, create, mucke, myname, ollama, stick, werden, writer
+from . import config, create, mucke, myname, ollama, publish, stick, werden, writer
 
 
 def _stdin_or(value: str) -> str:
@@ -82,6 +82,10 @@ def _build_parser() -> argparse.ArgumentParser:
     cm.add_argument("--deploy", action="store_true")
     cm.add_argument("--repo", default=".")
 
+    pb = sub.add_parser("publish", help="build and deliver the site per params.publishTarget")
+    pb.add_argument("--repo", default=".")
+    pb.add_argument("--dry-run", action="store_true", help="build, then report without delivering")
+
     mn = sub.add_parser("myname", help="save the user's name (/myname)")
     mn.add_argument("name")
     mn.add_argument("--memory-dir")
@@ -146,6 +150,8 @@ def main(argv: list[str] | None = None) -> int:
         elif args.cmd == "commit":
             _emit(commit_mod.commit(Path(args.repo), args.message,
                                     push=args.push, deploy=args.deploy))
+        elif args.cmd == "publish":
+            _emit(publish.publish(Path(args.repo), dry_run=args.dry_run))
         elif args.cmd == "myname":
             _emit(myname.save(args.name, Path(args.memory_dir) if args.memory_dir else None))
         elif args.cmd == "mucke":

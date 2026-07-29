@@ -48,6 +48,8 @@ def commit(repo: Path, message: str | None, push: bool = False, deploy: bool = F
 
 
 def _deploy(repo: Path) -> dict:
+    """deployCommand first — so `deployCommand: records publish` beats the shipped
+    workflow dirs and is the no-CI publish hook — then workflow presence, then none."""
     configs = find_hugo_configs(repo)
     if configs:
         for line in configs[0].read_text(encoding="utf-8").splitlines():
@@ -62,5 +64,8 @@ def _deploy(repo: Path) -> dict:
         if d.is_dir() and any(d.iterdir()):
             return {"method": "workflow", "ran": False,
                     "note": f"push triggers the {wf} workflow; nothing to run locally"}
+    if (repo / ".gitlab-ci.yml").is_file():
+        return {"method": "workflow", "ran": False,
+                "note": "push triggers the .gitlab-ci.yml pipeline; nothing to run locally"}
     return {"method": None, "ran": False,
             "note": "no deploy method found (set params.deployCommand in hugo.yaml)"}
