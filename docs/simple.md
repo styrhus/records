@@ -52,3 +52,6 @@ second file — see [make it awesome](awesome.md).
 
 Push to `main`. The workflow builds and publishes the site — nothing
 else to do.
+
+No CI where you host? `records publish` delivers the site from your own
+machine — see [publish anywhere](publish.md).

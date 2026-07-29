@@ -16,6 +16,17 @@ It ships with **Fuglekasse**, a small default theme you restyle from
 `tools/hugo/hugo.yaml` or replace. Some like it [simple](docs/simple.md), some like
 it [awesome](docs/awesome.md) — [Hugo has it all](docs/hugo.md).
 
+## Publish anywhere
+
+- **Codeberg** — fork, enable Actions, push. Zero edits.
+- **GitHub** — enable Pages once (Source: GitHub Actions), push.
+- **GitLab** — push.
+- **Your own machine, VPS or homelab** — `records publish` delivers to a
+  `pages` branch or any webroot over rsync; no CI at all.
+
+One build path behind all of them — details in
+[publish anywhere](docs/publish.md).
+
 ## Record from your projects
 
 Clone your fork inside any project — anywhere, under any name — and the
