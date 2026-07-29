@@ -2,7 +2,7 @@
 # The one build path: site + books into a single output dir, used identically
 # by CI, `records publish` and manual runs.
 # Usage: bin/build.sh [outdir]   (default: <repo-root>/public, gitignored)
-# Site URL precedence: $BASE_URL > Codeberg CI derivation > $CI_PAGES_URL > error.
+# Site URL precedence: $BASE_URL > $PAGES_HOST derivation > Codeberg CI derivation > $CI_PAGES_URL > error.
 # When $GITHUB_ENV is set, appends PAGES_URL=<resolved> for the deploy step.
 set -euo pipefail
 
@@ -25,6 +25,18 @@ resolve_url() {
   fi
   if [ -n "${BASE_URL:-}" ]; then
     echo "$BASE_URL"
+    return 0
+  fi
+  # PAGES_HOST (a git-pages domain, set via instance Actions vars) generalizes
+  # the Codeberg derivation to any forge.
+  if [ -n "${PAGES_HOST:-}" ] && [ -n "${GITHUB_REPOSITORY:-}" ]; then
+    local owner="${GITHUB_REPOSITORY%%/*}" name="${GITHUB_REPOSITORY#*/}"
+    # git-pages convention: a repo literally named "pages" serves at the domain root.
+    if [ "$name" = pages ]; then
+      echo "https://${owner}.${PAGES_HOST}/"
+    else
+      echo "https://${owner}.${PAGES_HOST}/${name}/"
+    fi
     return 0
   fi
   if [ -n "${GITHUB_REPOSITORY:-}" ]; then

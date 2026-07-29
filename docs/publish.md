@@ -10,6 +10,12 @@ params. No Windows — the build path is bash.
 
 - **Codeberg** — fork, enable Actions in the fork's settings, push to
   `main`. Zero edits: the workflow derives your address.
+- **Self-hosted Forgejo + git-pages** — the instance admin sets two
+  Actions variables once (Site administration → Actions → Variables):
+  `PAGES_HOST` (the domain your git-pages server serves, e.g.
+  `p.example.org`) and `PAGES_RUNNER` (your runner's label, e.g. `docker`).
+  Every repo on the instance then publishes on push with zero edits, at
+  `https://<owner>.<PAGES_HOST>/<repo>/`.
 - **GitHub** — enable Pages once (Settings → Pages → Source: GitHub
   Actions), push to `main`. The shipped `.github/workflows/pages.yml` does
   the rest.
@@ -68,8 +74,8 @@ The no-CI flow is then: write → `/cpd` → commit, push, publish. `/cpd` runs
 
 ## Homelab: self-hosted Forgejo
 
-Forgejo with Actions but no Pages service — publish from CI to your
-webroot:
+Forgejo with Actions but no Pages service (running git-pages? see Hosted
+forges above) — publish from CI to your webroot:
 
 1. Put an SSH deploy key in the repo's Actions secrets.
 2. Give the runner `rsync` and `openssh-client`.

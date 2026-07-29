@@ -3,7 +3,7 @@ title: Roadmap
 date: 2026-07-29T13:47:55+01:00
 tags: [developers, roadmap]
 ---
-<!-- werden: 0.2.1 postkasse-flue -->
+<!-- werden: 0.2.2 postkasse-beetle -->
 
 # Roadmap
 
