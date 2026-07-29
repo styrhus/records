@@ -1,7 +1,7 @@
 # GitLab Pages shim: the same build path as every other provider —
 # bin/build.sh reads CI_PAGES_URL and builds into public/.
 pages:
-  image: hugomods/hugo:debian-exts-0.154.5
+  image: hugomods/hugo:debian-0.164.0
   script:
     - ./bin/build.sh public
   artifacts:
