@@ -1,8 +1,10 @@
 # Build the Hugo site (tools/hugo/ config, records/ as content) and deploy to
 # a git-pages server: Codeberg Pages by default, or a self-hosted instance
-# whose admin sets the Actions variables PAGES_HOST (pages domain) and
-# PAGES_RUNNER (runner label) — owner, repo and repo URL are derived from
-# the push by bin/build.sh, so forks publish their own site with zero edits.
+# whose admin sets the Actions variables PAGES_HOST (pages domain),
+# PAGES_RUNNER (runner label) and optionally PAGES_SERVER (deploy target when
+# the pages domain isn't directly reachable, e.g. in-cluster runners) — owner,
+# repo and repo URL are derived from the push by bin/build.sh, so forks
+# publish their own site with zero edits.
 # hugo-runner (node + git + Hugo + pandoc/WeasyPrint) is maintained in its
 # own repo; :latest so deploys pick up runner updates without edits here.
 name: Deploy to Pages
@@ -39,10 +41,20 @@ jobs:
         env:
           PAGES_HOST: ${{ vars.PAGES_HOST }}
 
+      # PAGES_SERVER deploys go plain-HTTP straight to that host:port; the
+      # site URL's scheme sets the request scheme, so swap https for http.
+      - name: Derive deploy URL
+        run: |
+          DEPLOY_URL="$PAGES_URL"
+          [ -n "$PAGES_SERVER" ] && DEPLOY_URL="http://${DEPLOY_URL#*://}"
+          echo "DEPLOY_URL=$DEPLOY_URL" >>"$GITHUB_ENV"
+        env:
+          PAGES_SERVER: ${{ vars.PAGES_SERVER }}
+
       - name: Deploy to Pages
         uses: https://codeberg.org/git-pages/action@v2
         with:
-          site: ${{ env.PAGES_URL }}
-          server: ${{ vars.PAGES_HOST || 'codeberg.page' }}
+          site: ${{ env.DEPLOY_URL }}
+          server: ${{ vars.PAGES_SERVER || vars.PAGES_HOST || 'codeberg.page' }}
           token: ${{ forge.token }}
           source: public/
