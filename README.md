@@ -62,3 +62,5 @@ plain shell — no model needed. Add [Ollama](tools/others/ollama/README.md) and
 ---
 
 > Fase — 0.2.1 postkasse-flue
+
+[blyant](https://snl.no/blyant)
