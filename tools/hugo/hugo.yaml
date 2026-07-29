@@ -1,4 +1,8 @@
-baseURL: https://blyant.codeberg.page/records/
+# Site URL — uncomment to make it authoritative everywhere (bin/build.sh
+# stops deriving and uses it as-is; needed for custom domains and rsync/VPS).
+# Commented out: CI derives the URL per fork (zero-edit forks); manual
+# bin/build.sh runs then need BASE_URL set or fail with a pointer here.
+# baseURL: https://blyant.codeberg.page/records/
 locale: en-no
 title: blyant records
 
@@ -67,6 +71,17 @@ params:
   # Point it at your own mechanism, also further up the file tree, e.g.
   # "./deploy.sh", "../deploy.sh" or "make -C ../.. deploy".
   # deployCommand: ./deploy.sh
+
+  # Local publishing via `records publish` (no CI needed): build, then deliver.
+  #   pages-branch — force-push the built site to publishBranch on publishRemote
+  #                  (Codeberg serves branch "pages" natively; GitHub: Settings
+  #                  → Pages → Deploy from a branch)
+  #   rsync        — rsync -az --delete to publishDest (any static webroot)
+  # Unset = CI publishes on push; nothing to run locally.
+  # publishTarget: pages-branch
+  # publishBranch: pages
+  # publishRemote: origin
+  # publishDest: user@host:/var/www/site/
 
   # Serve static assets (favicon, font, logo, pdf/epub/booklet) from a CDN pull zone
   # that fetches from this site's URL. Production builds only — local dev

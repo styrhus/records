@@ -16,6 +16,13 @@ if ! command -v hugo >/dev/null 2>&1; then
 fi
 
 resolve_url() {
+  # Uncommented baseURL in the site config is authoritative everywhere.
+  local config_url
+  config_url="$(sed -n 's/^baseURL:[[:space:]]*//p' "$ROOT/tools/hugo/hugo.yaml" | head -1 | sed "s/[[:space:]]*#.*\$//; s/[\"']//g")"
+  if [ -n "$config_url" ]; then
+    echo "$config_url"
+    return 0
+  fi
   if [ -n "${BASE_URL:-}" ]; then
     echo "$BASE_URL"
     return 0
@@ -42,7 +49,7 @@ resolve_url() {
 }
 
 if ! PAGES_URL="$(resolve_url)"; then
-  echo "bin/build.sh: cannot resolve the site URL — pass BASE_URL or run in Codeberg/GitLab CI" >&2
+  echo "bin/build.sh: cannot resolve the site URL — set baseURL in tools/hugo/hugo.yaml, pass BASE_URL, or run in Codeberg/GitLab CI" >&2
   exit 1
 fi
 PAGES_URL="${PAGES_URL%/}/"
