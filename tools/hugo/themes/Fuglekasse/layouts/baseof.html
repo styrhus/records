@@ -194,7 +194,7 @@
     {{ with site.Params.epub }}<a href="{{ partial "static-url.html" . }}">Get EPUB</a>{{ end }}
     {{ with site.Params.booklet }}<a href="{{ partial "static-url.html" . }}">Get booklet</a>{{ end }}
     {{ if site.Params.showRepoURL }}
-    {{ with site.Params.insidesBranch }}<sup><a href="{{ site.Params.repoURL }}/src/branch/{{ . }}">{{ . }}</a></sup>{{ end }}
+    {{ with site.Params.insidesBranch }}<sup><a href="{{ partial "repo-link.html" (dict "kind" "tree" "branch" .) }}">{{ . }}</a></sup>{{ end }}
     {{ with site.Params.repoURL }}<sup><a href="{{ . }}">{{ replaceRE `^https?://` "" . }}</a></sup>{{ end }}
     {{ end }}
   </footer>

@@ -59,6 +59,15 @@ local flowing = str(params.pageMode) == "single-flowing"
 local bookLook = boolOr(params.bookLook, false)
 local showTags = boolOr(params.showTags, true)
 local repoURL = os.getenv("HUGO_PARAMS_REPOURL") or str(params.repoURL) or ""
+-- Raw-link URL shape per forge; auto/unknown = detect from the repoURL host (mirrors repo-link.html).
+local repoLinkStyle = str(params.repoLinkStyle) or "auto"
+local repoBranch = str(params.repoBranch) or "main"
+local rawShapes = { forgejo = "raw/branch", github = "raw", gitlab = "-/raw" }
+if rawShapes[repoLinkStyle] == nil then
+  local host = repoURL:match("^https?://([^/]+)") or ""
+  repoLinkStyle = host == "github.com" and "github" or host == "gitlab.com" and "gitlab" or "forgejo"
+end
+local rawPrefix = repoURL .. "/" .. rawShapes[repoLinkStyle] .. "/" .. repoBranch
 
 local styleParams = params.style or {}
 local lightParams = styleParams.light or {}
@@ -405,7 +414,7 @@ local function contentFilter(recDir)
       if not hasScheme(l.target) and not l.target:match("^#") then
         local rest = l.target:match("records/(.+)$")
         if rest and repoURL ~= "" then
-          l.target = repoURL .. "/raw/branch/main/records/" .. rest
+          l.target = rawPrefix .. "/records/" .. rest
           return l
         end
       end

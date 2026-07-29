@@ -1,0 +1,51 @@
+# GitHub Pages shim: the same build path as every other provider
+# (bin/build.sh), delivered via the official pages artifact flow.
+# Enable once in the fork: Settings → Pages → Source: GitHub Actions.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/hugo/**'
+      - 'records/**'
+      - 'static/**'
+      - 'tools/pandoc/**'
+      - 'bin/build.sh'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-deploy:
+    # GitHub only — Forgejo/Gitea read .github/workflows as a fallback.
+    if: github.server_url == 'https://github.com'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: 'latest'
+          extended: true
+      - id: pages
+        uses: actions/configure-pages@v5
+      # configure-pages hands us the exact site URL (project page, user
+      # site or custom domain); bin/build.sh normalizes and builds.
+      - name: Build
+        run: BASE_URL="${{ steps.pages.outputs.base_url }}" ./bin/build.sh "$GITHUB_WORKSPACE/public"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+      - id: deployment
+        uses: actions/deploy-pages@v4

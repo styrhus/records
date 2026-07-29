@@ -233,6 +233,13 @@ conversation as spoken rather than typed. Absent or `false`, nothing changes.
 `params.showRepoURL: false` to hide both — `repoURL` itself stays useful, as it
 also rewrites relative `records/` links to raw forge URLs. On by default.
 
+Those rewritten links (and the footer branch link) follow your forge's URL
+shape: `params.repoLinkStyle` is `auto` by default — a github.com or gitlab.com
+`repoURL` gets the GitHub/GitLab shapes, everything else the Forgejo/Gitea
+shape — or set `forgejo` | `github` | `gitlab` explicitly (say, for
+self-hosted GitLab). `params.repoBranch` (default `main`) is the branch those
+links point at. The PDF/EPUB raw links follow the same rules.
+
 ## Logo
 
 Set `params.logo` to a file in `static/` (the theme ships `fuglekasse.svg`, or

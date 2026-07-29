@@ -1,0 +1,12 @@
+{{- /* URL prefix for repo links. Takes {kind: "raw"|"tree", branch?}; style from params.repoLinkStyle (auto = by repoURL host), branch defaults to params.repoBranch. */ -}}
+{{- $style := site.Params.repoLinkStyle | default "auto" -}}
+{{- $shapes := dict "forgejo" (dict "raw" "raw/branch" "tree" "src/branch") "github" (dict "raw" "raw" "tree" "tree") "gitlab" (dict "raw" "-/raw" "tree" "-/tree") -}}
+{{- if eq $style "auto" -}}
+{{- $host := (urls.Parse (site.Params.repoURL | default "")).Host -}}
+{{- $style = cond (eq $host "github.com") "github" (cond (eq $host "gitlab.com") "gitlab" "forgejo") -}}
+{{- else if not (index $shapes $style) -}}
+{{- warnf "Fuglekasse: unknown repoLinkStyle %q — falling back to forgejo" $style -}}
+{{- $style = "forgejo" -}}
+{{- end -}}
+{{- $branch := .branch | default (site.Params.repoBranch | default "main") -}}
+{{- printf "%s/%s/%s" site.Params.repoURL (index (index $shapes $style) .kind) $branch -}}
