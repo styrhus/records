@@ -2,7 +2,8 @@
 # a git-pages server: Codeberg Pages by default, or a self-hosted instance
 # whose admin sets the Actions variables PAGES_HOST (pages domain),
 # PAGES_RUNNER (runner label) and optionally PAGES_SERVER (deploy target when
-# the pages domain isn't directly reachable, e.g. in-cluster runners) — owner,
+# the pages domain isn't directly reachable, e.g. in-cluster runners) and
+# RUNNER_IMAGE (job container override, e.g. a local registry cache) — owner,
 # repo and repo URL are derived from the push by bin/build.sh, so forks
 # publish their own site with zero edits.
 # hugo-runner (node + git + Hugo + pandoc/WeasyPrint) is maintained in its
@@ -30,7 +31,7 @@ jobs:
     if: github.server_url == 'https://codeberg.org' || github.server_url == 'https://codeberg.org/' || vars.PAGES_HOST != ''
     runs-on: ${{ vars.PAGES_RUNNER || 'codeberg-tiny-lazy' }}
     container:
-      image: codeberg.org/tb4/hugo-runner:latest
+      image: ${{ vars.RUNNER_IMAGE || 'codeberg.org/tb4/hugo-runner:latest' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -51,8 +52,9 @@ jobs:
         env:
           PAGES_SERVER: ${{ vars.PAGES_SERVER }}
 
+      # g.xil.no mirrors codeberg.org/git-pages/action; survives codeberg outages
       - name: Deploy to Pages
-        uses: https://codeberg.org/git-pages/action@v2
+        uses: https://g.xil.no/git-pages/action@v2
         with:
           site: ${{ env.DEPLOY_URL }}
           server: ${{ vars.PAGES_SERVER || vars.PAGES_HOST || 'codeberg.page' }}
