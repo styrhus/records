@@ -61,4 +61,4 @@ plain shell — no model needed. Add [Ollama](tools/others/ollama/README.md) and
 
 ---
 
-> Fase — 0.1.19 fuglekasse-scorpion
+> Fase — 0.2.1 postkasse-flue

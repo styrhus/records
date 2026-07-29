@@ -1,6 +1,6 @@
 # blyant records Without AI (`tools/others/`)
 
-<!-- werden: 0.1.19 fuglekasse-scorpion -->
+<!-- werden: 0.2.1 postkasse-flue -->
 
 This directory contains the **no-AI engine and plugins** for the blyant records site — letting you run the mechanical slash-commands without a model. Optionally add Ollama for the AI-driven skills.
 
