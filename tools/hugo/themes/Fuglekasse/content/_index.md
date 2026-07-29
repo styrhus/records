@@ -44,3 +44,5 @@ its colors, greeting font and the tiny footer links all live in `tools/hugo/hugo
 When you have found your footing, write your own front page: create
 `records/_index.md` and it replaces this default one, which ships with the
 theme.
+
+---
