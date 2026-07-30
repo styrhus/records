@@ -21,6 +21,9 @@ params. No Windows — the build path is bash.
   isn't reachable from the runner) and `FORGE_URL` (the forge's public URL,
   e.g. `https://git.example.org` — used for the site's repo links, which
   would otherwise be derived from the internal server URL the runner sees).
+  A third optional variable, `PAGES_ACTION`, points the deploy step at an
+  instance-local mirror of the git-pages action (unset = the upstream at
+  `codeberg.org/git-pages/action`).
 - **GitHub** — enable Pages once (Settings → Pages → Source: GitHub
   Actions), push to `main`. The shipped `.github/workflows/pages.yml` does
   the rest.
@@ -42,6 +45,7 @@ Set your site URL and a delivery target in `tools/hugo/hugo.yaml`:
 ```yaml
 baseURL: https://example.org/            # uncommented = authoritative
 params:
+  repoURL: https://example.org/you/records  # footer + raw links; unset = no footer link
   publishTarget: rsync                   # or: pages-branch
   publishDest: you@host:/var/www/site/   # rsync target
 ```

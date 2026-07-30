@@ -58,10 +58,10 @@ cascade:
       render: never
       list: never
 
-# Repo URL for raw-link rewrites in page.html; pages.yml overrides this
-# per-fork via HUGO_PARAMS_REPOURL. This value is the local-dev default.
+# Repo URL for the footer link and raw-link rewrites. Commented out = CI
+# derives it per fork (like baseURL); uncommented = authoritative everywhere.
 params:
-  repoURL: https://codeberg.org/blyant/records
+  # repoURL: https://codeberg.org/blyant/records
   # Set to false to hide the footer repo link; repoURL keeps rewriting
   # relative records/ links either way. Fuglekasse defaults to true.
   # showRepoURL: false

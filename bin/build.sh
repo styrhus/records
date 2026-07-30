@@ -70,14 +70,19 @@ if [ -n "${GITHUB_ENV:-}" ]; then
   echo "PAGES_URL=${PAGES_URL}" >>"$GITHUB_ENV"
 fi
 
-# repoURL for raw-link rewrites: honour the caller's, else derive from CI env.
-# FORGE_URL (instance Actions var) wins over GITHUB_SERVER_URL, which
-# in-cluster runners see as an internal address.
-if [ -z "${HUGO_PARAMS_REPOURL:-}" ] && [ -n "${GITHUB_REPOSITORY:-}" ]; then
-  if [ -n "${FORGE_URL:-}" ]; then
+# repoURL for raw-link rewrites: an uncommented repoURL in the site config is
+# authoritative (as with baseURL); else honour the caller's env, else derive
+# from CI env. FORGE_URL (instance Actions var) wins over GITHUB_SERVER_URL,
+# which in-cluster runners see as an internal address; CI_PROJECT_URL covers
+# GitLab.
+CONFIG_REPOURL="$(sed -n 's/^[[:space:]]*repoURL:[[:space:]]*//p' "$ROOT/tools/hugo/hugo.yaml" | head -1 | sed "s/[[:space:]]*#.*\$//; s/[\"']//g")"
+if [ -z "$CONFIG_REPOURL" ] && [ -z "${HUGO_PARAMS_REPOURL:-}" ]; then
+  if [ -n "${GITHUB_REPOSITORY:-}" ] && [ -n "${FORGE_URL:-}" ]; then
     export HUGO_PARAMS_REPOURL="${FORGE_URL%/}/${GITHUB_REPOSITORY}"
-  elif [ -n "${GITHUB_SERVER_URL:-}" ]; then
+  elif [ -n "${GITHUB_REPOSITORY:-}" ] && [ -n "${GITHUB_SERVER_URL:-}" ]; then
     export HUGO_PARAMS_REPOURL="${GITHUB_SERVER_URL%/}/${GITHUB_REPOSITORY}"
+  elif [ -n "${CI_PROJECT_URL:-}" ]; then
+    export HUGO_PARAMS_REPOURL="$CI_PROJECT_URL"
   fi
 fi
 

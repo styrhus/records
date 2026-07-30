@@ -3,9 +3,10 @@
 # whose admin sets the Actions variables PAGES_HOST (pages domain),
 # PAGES_RUNNER (runner label) and optionally PAGES_SERVER (deploy target when
 # the pages domain isn't directly reachable, e.g. in-cluster runners) and
-# RUNNER_IMAGE (job container override, e.g. a local registry cache) and
+# RUNNER_IMAGE (job container override, e.g. a local registry cache),
 # FORGE_URL (public forge URL for repo links when the runner sees an internal
-# server URL) — owner, repo and repo URL are derived from the push by
+# server URL) and PAGES_ACTION (instance-local mirror of the git-pages
+# action) — owner, repo and repo URL are derived from the push by
 # bin/build.sh, so forks publish their own site with zero edits.
 # hugo-runner (node + git + Hugo + pandoc/WeasyPrint) is maintained in its
 # own repo; :latest so deploys pick up runner updates without edits here.
@@ -54,9 +55,11 @@ jobs:
         env:
           PAGES_SERVER: ${{ vars.PAGES_SERVER }}
 
-      # g.xil.no mirrors codeberg.org/git-pages/action; survives codeberg outages
+      # PAGES_ACTION points at an instance-local mirror of the action
+      # (outage resilience); unset = upstream. Forgejo evaluates
+      # expressions in step uses (unlike GitHub).
       - name: Deploy to Pages
-        uses: https://g.xil.no/git-pages/action@v2
+        uses: ${{ vars.PAGES_ACTION || 'https://codeberg.org/git-pages/action' }}@v2
         with:
           site: ${{ env.DEPLOY_URL }}
           server: ${{ vars.PAGES_SERVER || vars.PAGES_HOST || 'codeberg.page' }}
