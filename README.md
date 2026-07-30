@@ -29,18 +29,9 @@ One build path behind all of them — details in
 
 ## Record from your projects
 
-Clone your fork inside any project — anywhere, under any name — and the
-recording skills follow: invoked from the project workspace, they find the
-clone and file transcripts there. `/cpd` commits and pushes the clone
-itself, and the push publishes.
-
-```bash
-git clone https://codeberg.org/<you>/records.git
-echo records/ >> .gitignore   # or track it as a submodule
-```
-
-Nothing to configure: `contentDir` in the clone's `tools/hugo/hugo.yaml` is the
-one source of truth, shared by Hugo and the skills.
+Clone your fork inside any project — the recording skills follow, transcripts
+land in the clone, and `/cpd` pushes it home. Nothing to configure —
+[home is where the clone is](docs/records/developers/home-is-where-the-clone-is.md).
 
 ## Record together
 
