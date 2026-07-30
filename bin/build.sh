@@ -71,8 +71,14 @@ if [ -n "${GITHUB_ENV:-}" ]; then
 fi
 
 # repoURL for raw-link rewrites: honour the caller's, else derive from CI env.
-if [ -z "${HUGO_PARAMS_REPOURL:-}" ] && [ -n "${GITHUB_SERVER_URL:-}" ] && [ -n "${GITHUB_REPOSITORY:-}" ]; then
-  export HUGO_PARAMS_REPOURL="${GITHUB_SERVER_URL%/}/${GITHUB_REPOSITORY}"
+# FORGE_URL (instance Actions var) wins over GITHUB_SERVER_URL, which
+# in-cluster runners see as an internal address.
+if [ -z "${HUGO_PARAMS_REPOURL:-}" ] && [ -n "${GITHUB_REPOSITORY:-}" ]; then
+  if [ -n "${FORGE_URL:-}" ]; then
+    export HUGO_PARAMS_REPOURL="${FORGE_URL%/}/${GITHUB_REPOSITORY}"
+  elif [ -n "${GITHUB_SERVER_URL:-}" ]; then
+    export HUGO_PARAMS_REPOURL="${GITHUB_SERVER_URL%/}/${GITHUB_REPOSITORY}"
+  fi
 fi
 
 (cd "$ROOT/tools/hugo" && hugo --minify --baseURL "$PAGES_URL" --destination "$OUTDIR")

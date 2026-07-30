@@ -15,7 +15,12 @@ params. No Windows — the build path is bash.
   `PAGES_HOST` (the domain your git-pages server serves, e.g.
   `p.example.org`) and `PAGES_RUNNER` (your runner's label, e.g. `docker`).
   Every repo on the instance then publishes on push with zero edits, at
-  `https://<owner>.<PAGES_HOST>/<repo>/`.
+  `https://<owner>.<PAGES_HOST>/<repo>/`. Two more variables cover runners
+  that reach the forge over an internal address (e.g. in-cluster):
+  `PAGES_SERVER` (internal `host:port` to deploy to when the pages domain
+  isn't reachable from the runner) and `FORGE_URL` (the forge's public URL,
+  e.g. `https://git.example.org` — used for the site's repo links, which
+  would otherwise be derived from the internal server URL the runner sees).
 - **GitHub** — enable Pages once (Settings → Pages → Source: GitHub
   Actions), push to `main`. The shipped `.github/workflows/pages.yml` does
   the rest.

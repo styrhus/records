@@ -3,9 +3,10 @@
 # whose admin sets the Actions variables PAGES_HOST (pages domain),
 # PAGES_RUNNER (runner label) and optionally PAGES_SERVER (deploy target when
 # the pages domain isn't directly reachable, e.g. in-cluster runners) and
-# RUNNER_IMAGE (job container override, e.g. a local registry cache) — owner,
-# repo and repo URL are derived from the push by bin/build.sh, so forks
-# publish their own site with zero edits.
+# RUNNER_IMAGE (job container override, e.g. a local registry cache) and
+# FORGE_URL (public forge URL for repo links when the runner sees an internal
+# server URL) — owner, repo and repo URL are derived from the push by
+# bin/build.sh, so forks publish their own site with zero edits.
 # hugo-runner (node + git + Hugo + pandoc/WeasyPrint) is maintained in its
 # own repo; :latest so deploys pick up runner updates without edits here.
 name: Deploy to Pages
@@ -41,6 +42,7 @@ jobs:
         run: ./bin/build.sh "$GITHUB_WORKSPACE/public"
         env:
           PAGES_HOST: ${{ vars.PAGES_HOST }}
+          FORGE_URL: ${{ vars.FORGE_URL }}
 
       # PAGES_SERVER deploys go plain-HTTP straight to that host:port; the
       # site URL's scheme sets the request scheme, so swap https for http.
