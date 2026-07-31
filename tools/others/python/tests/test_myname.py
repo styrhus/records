@@ -21,3 +21,12 @@ def test_save_pointer_is_idempotent(tmp_path):
 def test_empty_name_rejected(tmp_path):
     with pytest.raises(ValueError):
         myname.save("   ", memory_dir=tmp_path)
+
+
+def test_load_roundtrip(tmp_path):
+    myname.save("Ada Lovelace", memory_dir=tmp_path)
+    assert myname.load(memory_dir=tmp_path) == "Ada Lovelace"
+
+
+def test_load_missing_returns_none(tmp_path):
+    assert myname.load(memory_dir=tmp_path) is None

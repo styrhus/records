@@ -22,6 +22,7 @@ The user invoked /record: create the transcript file, then stay silent. **Do not
 - ISO timestamp (for frontmatter): !`date -Iseconds`
 - Records-site configs with their contentDir, cwd and below (empty = none): !`find . -maxdepth 5 \( -path '*/.*' -o -path '*/node_modules' \) -prune -o -path '*/hugo/hugo.yaml' -print -exec grep -m1 '^contentDir:' {} \; 2>/dev/null; true`
 - Existing docs-like dirs, cwd and one level down (empty = none): !`find . -mindepth 1 -maxdepth 2 -type d \( -name docs -o -name doc -o -name documentation -o -name notes -o -name records \) -not -path '*/.*' -not -path '*/node_modules/*' 2>/dev/null; true`
+- Saved /myname name (empty = unnamed): !`find . -maxdepth 6 -path '*/.mem/user-name.md' -exec grep -hm1 "name is" {} \; 2>/dev/null; true`
 
 ## Setup (this turn)
 
@@ -86,6 +87,7 @@ On **each** of your turns while recording:
 Rules:
 
 - **Verbatim means verbatim**: no paraphrasing, no trimming, no fixing typos, no omitting parts of either message.
+- **Named turns**: if Context shows a saved /myname name (`The user's name is <name>.`), head every Human entry `## Human (<name>)` instead of `## Human`.
 - **Sign every Assistant entry** with your exact model ID (as stated in your system prompt, e.g. `qwen2.5-coder:14b`) on a final `— <model-id>` line. The signature goes in the file only — never include it in the response you show the user.
 - If the text contains the heredoc delimiter, pick a different delimiter.
 - Never skip a turn "because it was short" or "just a tool run" — every user message and every response you give gets appended.

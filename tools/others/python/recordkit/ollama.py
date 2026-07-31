@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import socket
 import urllib.error
 import urllib.request
@@ -18,6 +19,12 @@ MAX_DIR_ENTRIES = 500
 _DIR_IGNORE = {"node_modules", "__pycache__", ".git"}
 
 _HEADINGS = {"## Human": "user", "## User": "user", "## Assistant": "assistant"}
+_NAMED_HUMAN = re.compile(r"^## (?:Human|User) \(.+\)$")
+
+
+def _role_for(line: str) -> str | None:
+    """Heading -> chat role; named turns (## Human (name)) are user turns too."""
+    return _HEADINGS.get(line) or ("user" if _NAMED_HUMAN.match(line) else None)
 
 
 def parse_turns(text: str) -> list[dict]:
@@ -41,7 +48,7 @@ def parse_turns(text: str) -> list[dict]:
         role, lines = None, []
 
     for line in text.splitlines():
-        heading = _HEADINGS.get(line.strip())
+        heading = _role_for(line.strip())
         if heading:
             flush()
             role = heading
@@ -147,7 +154,8 @@ def ephemeral_reply(endpoint: str, model: str, human: str, history: list,
 
 
 def reply(file: Path, endpoint: str, model: str, human: str,
-          timeout: float = DEFAULT_TIMEOUT, context: str | None = None) -> dict:
+          timeout: float = DEFAULT_TIMEOUT, context: str | None = None,
+          name: str | None = None) -> dict:
     """Generate + append one signed turn; nothing is written when generation fails."""
     human = human.strip()
     if not human:
@@ -159,5 +167,5 @@ def reply(file: Path, endpoint: str, model: str, human: str,
         messages.insert(0, {"role": "system", "content": context})
     messages.append({"role": "user", "content": human})
     assistant = chat(endpoint, model, messages, timeout)
-    append_turn(file, human, assistant, model)
+    append_turn(file, human, assistant, model, name=name)
     return {"file": str(file), "model": model, "reply": assistant, "appended": True}

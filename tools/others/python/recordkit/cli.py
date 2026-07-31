@@ -46,6 +46,7 @@ def _build_parser() -> argparse.ArgumentParser:
     at.add_argument("--human", required=True, help="text, or '-' to read stdin")
     at.add_argument("--assistant", required=True, help="text, or '-' to read stdin")
     at.add_argument("--model", required=True, help="model tag for the signature line")
+    at.add_argument("--name", help="human name for the heading; default: the saved /myname name")
 
     ol = sub.add_parser("ollama-reply", help="two-sided /record turn via a local Ollama model")
     ol.add_argument("--endpoint", required=True, help="Ollama base URL, e.g. http://localhost:11434")
@@ -57,6 +58,7 @@ def _build_parser() -> argparse.ArgumentParser:
                     help="file whose contents go to the model only, never the record (repeatable)")
     ol.add_argument("--context-dir", action="append", default=[], dest="context_dirs",
                     help="directory whose file listing goes to the model only (repeatable)")
+    ol.add_argument("--name", help="human name for the heading; default: the saved /myname name")
 
     oc = sub.add_parser("ollama-chat", help="ephemeral chat turn via a local Ollama model — no file")
     oc.add_argument("--endpoint", required=True, help="Ollama base URL, e.g. http://localhost:11434")
@@ -116,14 +118,16 @@ def main(argv: list[str] | None = None) -> int:
             _emit({"file": args.file, "appended": True})
         elif args.cmd == "append-turn":
             writer.append_turn(Path(args.file), _stdin_or(args.human),
-                               _stdin_or(args.assistant), args.model)
+                               _stdin_or(args.assistant), args.model,
+                               name=args.name or myname.load())
             _emit({"file": args.file, "appended": True})
         elif args.cmd == "ollama-reply":
             context = ollama.build_context([Path(p) for p in args.context_files],
                                            [Path(p) for p in args.context_dirs])
             _emit(ollama.reply(Path(args.file), args.endpoint, args.model,
                                _stdin_or(args.human), timeout=args.timeout,
-                               context=context or None))
+                               context=context or None,
+                               name=args.name or myname.load()))
         elif args.cmd == "ollama-chat":
             context = ollama.build_context([Path(p) for p in args.context_files],
                                            [Path(p) for p in args.context_dirs])

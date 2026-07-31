@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from .config import resolve_records_dir
@@ -33,6 +34,15 @@ def save(name: str, memory_dir: Path | None = None) -> dict:
     (d / "user-name.md").write_text(_NOTE.format(name=name), encoding="utf-8")
     _upsert_pointer(d / "MEMORY.md", name)
     return {"name": name, "memory_dir": str(d)}
+
+
+def load(memory_dir: Path | None = None) -> str | None:
+    """The saved name, or None when /myname has not run."""
+    note = (Path(memory_dir) if memory_dir else default_memory_dir()) / "user-name.md"
+    if not note.is_file():
+        return None
+    m = re.search(r"^The user's name is (.+)\.$", note.read_text(encoding="utf-8"), re.M)
+    return m.group(1) if m else None
 
 
 def _upsert_pointer(memory_md: Path, name: str) -> None:

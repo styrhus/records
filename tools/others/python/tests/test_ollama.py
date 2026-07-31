@@ -26,6 +26,14 @@ def test_parse_turns_round_trip(tmp_path):
     ]
 
 
+def test_parse_turns_named_human(tmp_path):
+    f = tmp_path / "r.md"
+    f.write_text("---\ntitle: X\n---\n")
+    writer.append_turn(f, "hi", "yo", "qwen2.5:14b", name="Ada Lovelace")
+    turns = ollama.parse_turns(f.read_text())
+    assert turns == [{"role": "user", "content": "hi"}, {"role": "assistant", "content": "yo"}]
+
+
 def test_parse_turns_ignores_plain_blocks(tmp_path):
     f = tmp_path / "r.md"
     f.write_text("---\ntitle: X\n---\n")
