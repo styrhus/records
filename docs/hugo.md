@@ -7,10 +7,10 @@ or replace. Anything Hugo can do, your records home can do.
 ## How it is wired
 
 - `tools/hugo/hugo.yaml` — the configuration and the brand knobs; content comes from
-  `../records`
+  `../../records`
 - `static/` (repo root) — your own assets: logo, favicon, images. Fork-owned
   like `records/`; upstream never ships or moves files there
-- `tools/hugo/themes/Fuglekasse/` — the default theme: three templates and one font,
+- `tools/hugo/themes/Fuglekasse/` — the default theme: four templates and one font,
   the entire design
 - `bin/build.sh` — the one build path: resolves the site URL, runs Hugo and
   the book build; CI calls it, and so can you
