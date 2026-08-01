@@ -16,8 +16,19 @@ def append_user(file: Path, message: str) -> None:
     append_block(file, message)
 
 
+def append_human(file: Path, text: str, name: str | None = None) -> None:
+    """One human side. A name (from /myname) heads it as `## Human (name)`."""
+    heading = f"## Human ({name})" if name else "## Human"
+    append_block(file, f"{heading}\n\n{text}")
+
+
+def append_assistant(file: Path, text: str, model: str | None = None) -> None:
+    """One assistant side, signed with the model tag when the model is known."""
+    append_block(file, f"## Assistant\n\n{text}" + (f"\n\n— {model}" if model else ""))
+
+
 def append_turn(file: Path, human: str, assistant: str, model: str, name: str | None = None) -> None:
     """Ollama-backed /record — a full Human/Assistant turn signed with the model tag.
     A name (from /myname) heads the human side as `## Human (name)`."""
-    heading = f"## Human ({name})" if name else "## Human"
-    append_block(file, f"{heading}\n\n{human}\n\n## Assistant\n\n{assistant}\n\n— {model}")
+    append_human(file, human, name=name)
+    append_assistant(file, assistant, model=model)

@@ -2,16 +2,69 @@
 
 from __future__ import annotations
 
+import re
 
-def build(title: str, date_iso: str, tags: list[str] | None = None, draft: bool = False) -> str:
-    """Frontmatter block: title, date, optional draft (before tags), optional tags. Trailing newline."""
-    lines = ["---", f"title: {title}", f"date: {date_iso}"]
+# A YAML plain scalar may not open with an indicator, nor hold ': '. Titles come from people and
+# from imports, so both cases are real: `Chapter 1: Beginnings`, `@readme.md#30-43`.
+_YAML_INDICATORS = "-?:,[]{}#&*!|>'\"%@`"
+
+
+def quote(value: str) -> str:
+    """A YAML scalar: bare when it can be, double-quoted when a plain scalar would not parse.
+    A ' #' inside a value also needs quoting, but the PWA's byte contract mirrors the bare form —
+    parser-derived titles neutralise it in sources.py instead."""
+    text = str(value)
+    if (not text or text[0] in _YAML_INDICATORS or text.endswith(":")
+            or ": " in text or text.strip() != text):
+        return '"' + text.replace("\\", "\\\\").replace('"', '\\"') + '"'
+    return text
+
+
+def unquote(value: str) -> str:
+    """The inverse of quote() for the simple scalars this module writes."""
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+        inner = value[1:-1]
+        return re.sub(r"\\(.)", r"\1", inner) if value[0] == '"' else inner
+    return value
+
+
+def build(title: str, date_iso: str, tags: list[str] | None = None, draft: bool = False,
+          extra: dict | None = None) -> str:
+    """Frontmatter block: title, date, optional draft (before tags), optional tags, then any
+    extra `key: value` lines (the importer's source/sourceId pair). Trailing newline."""
+    lines = ["---", f"title: {quote(title)}", f"date: {date_iso}"]
     if draft:
         lines.append("draft: true")
     if tags:
         lines.append("tags: [" + ", ".join(tags) + "]")
+    lines.extend(f"{k}: {quote(v)}" for k, v in (extra or {}).items())
     lines.append("---")
     return "\n".join(lines) + "\n"
+
+
+def read(text: str) -> dict:
+    """Top-level `key: value` lines of the frontmatter block, quoted scalars unquoted.
+    Not a YAML parser — nested keys and multi-line values are skipped, by design (stdlib only)."""
+    lines = text.split("\n")
+    if not lines or lines[0].strip() != "---":
+        return {}
+    out: dict = {}
+    for line in lines[1:]:
+        if line.strip() == "---":
+            break
+        key, sep, value = line.partition(":")
+        if sep and key and not key[0].isspace():
+            out[key.strip()] = unquote(value.strip())
+    return out
+
+
+def body(text: str) -> str:
+    """Everything after the frontmatter block; the whole text when there is no block."""
+    lines = text.split("\n")
+    if not lines or lines[0].strip() != "---":
+        return text
+    close = next((i for i in range(1, len(lines)) if lines[i].strip() == "---"), None)
+    return text if close is None else "\n".join(lines[close + 1:])
 
 
 def feature(text: str) -> str:
