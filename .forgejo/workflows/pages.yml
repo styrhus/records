@@ -20,6 +20,7 @@ on:
       - 'records/**'
       - 'static/**'
       - 'tools/pandoc/**'
+      - 'tools/pwa/**'
       - 'bin/build.sh'
       - '.forgejo/workflows/pages.yml'
   workflow_dispatch:

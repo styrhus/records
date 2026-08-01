@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Byte check</title>
+<style>
+  :root { --bg:#fdfdfd; --fg:#24283b; --dim:#6a6f8a; --line:#e2e2ea; --bad:#a5323f; --good:#33635c; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#1a1b26; --fg:#c0caf5; --dim:#7a81a8; --line:#2c2f44; --bad:#f7768e; --good:#73daca; }
+  }
+  body {
+    margin:0; padding:1rem; max-width:48rem; margin-inline:auto; background:var(--bg); color:var(--fg);
+    font:16px/1.5 system-ui, -apple-system, sans-serif;
+  }
+  h1 { font-size:1.1rem; }
+  p.lede { color:var(--dim); font-size:.9rem; }
+  #tally { font-weight:600; margin:1rem 0; }
+  #tally.pass { color:var(--good); }
+  #tally.fail { color:var(--bad); }
+  ol { padding-left:1.2rem; }
+  li { padding:.25rem 0; border-top:1px solid var(--line); }
+  li.pass::marker { color:var(--good); }
+  li.fail { color:var(--bad); }
+  pre {
+    background:rgba(128,128,128,.12); padding:.5rem; border-radius:6px; overflow-x:auto;
+    font-size:.8rem; white-space:pre-wrap; word-break:break-all;
+  }
+</style>
+</head>
+<body>
+<h1>Byte check</h1>
+<p class="lede">
+  Every case in <code>fixtures.json</code>, run through <code>record.js</code>. The engine
+  runs the same file in <code>tests/test_phone_fixtures.py</code>. Both must be green for
+  a record written here to match one <code>records new</code> writes.
+</p>
+<p id="tally">Running…</p>
+<ol id="results"></ol>
+
+<script type="module">
+import { newRecord, appendBlock, humanBlock } from "./record.js";
+
+const results = document.getElementById("results");
+const tally = document.getElementById("tally");
+let passed = 0, failed = 0;
+
+// Escaped so a difference in whitespace or line endings is visible, not invisible.
+const show = (value) => JSON.stringify(value);
+
+function report(name, ok, detail) {
+  const li = document.createElement("li");
+  li.className = ok ? "pass" : "fail";
+  li.textContent = name;
+  if (!ok) {
+    const pre = document.createElement("pre");
+    pre.textContent = detail;
+    li.append(pre);
+  }
+  results.append(li);
+  ok ? passed++ : failed++;
+}
+
+function compare(name, got, want) {
+  const lines = [];
+  for (const key of Object.keys(want)) {
+    const a = JSON.stringify(got[key]);
+    const b = JSON.stringify(want[key]);
+    if (a !== b) lines.push(`${key}\n  got  ${a}\n  want ${b}`);
+  }
+  report(name, lines.length === 0, lines.join("\n"));
+}
+
+try {
+  const data = await (await fetch("fixtures.json")).json();
+
+  for (const c of data.cases) {
+    const existing = new Set(c.existing || []);
+    const got = newRecord({
+      argumentString: c.argumentString,
+      draft: c.draft || false,
+      wall: c.wall,
+      taken: (path) => existing.has(path),
+    });
+    compare(c.name, got, c.expect);
+  }
+
+  for (const c of data.appends) {
+    const block = c.kind === "human" ? humanBlock(c.message, c.who || null) : c.message;
+    const got = appendBlock(c.before, block);
+    report(c.name, got === c.expect,
+           `got  ${show(got)}\nwant ${show(c.expect)}`);
+  }
+
+  tally.textContent = failed === 0
+    ? `All ${passed} cases match the engine.`
+    : `${failed} of ${passed + failed} cases differ from the engine.`;
+  tally.className = failed === 0 ? "pass" : "fail";
+} catch (e) {
+  tally.textContent = `Could not run: ${e.message} — serve this over http, not file://.`;
+  tally.className = "fail";
+}
+</script>
+</body>
+</html>

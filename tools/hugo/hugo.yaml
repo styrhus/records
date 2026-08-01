@@ -86,6 +86,13 @@ params:
   # publishRemote: origin
   # publishDest: user@host:/var/www/site/
 
+  # Ship tools/pwa/ — a page that composes a record and commits it through your
+  # forge's API — at this path segment, e.g. https://your.site/skriv/. It keeps a
+  # forge access token in the browser's local storage, so it is off unless named.
+  # Needs CORS on your forge: Codeberg has it, self-hosted Forgejo ships without.
+  # See docs/app.md.
+  # phoneApp: skriv
+
   # Serve static assets (favicon, font, logo, pdf/epub/booklet) from a CDN pull zone
   # that fetches from this site's URL. Production builds only — local dev
   # stays site-relative. Unset serves everything from the site itself.

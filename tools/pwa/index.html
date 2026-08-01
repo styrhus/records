@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Write a record</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1a1b26">
+<style>
+  :root {
+    --bg: #fdfdfd; --fg: #24283b; --dim: #6a6f8a; --line: #e2e2ea;
+    --surface: #f4f4f8; --accent: #34548a; --bad: #a5323f; --good: #33635c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1b26; --fg: #c0caf5; --dim: #7a81a8; --line: #2c2f44;
+      --surface: #21222e; --accent: #7aa2f7; --bad: #f7768e; --good: #73daca;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 1rem; background: var(--bg); color: var(--fg);
+    font: 16px/1.5 system-ui, -apple-system, sans-serif;
+    max-width: 44rem; margin-inline: auto;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  h1 { font-size: 1.1rem; margin: 0; font-weight: 600; }
+  header { display: flex; align-items: center; gap: .5rem; margin-bottom: 1rem; }
+  header .spacer { flex: 1; }
+  label { display: block; font-size: .8rem; color: var(--dim); margin: .6rem 0 .15rem; }
+  input, textarea, select, button {
+    font: inherit; color: var(--fg); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 6px; padding: .5rem .6rem; width: 100%;
+  }
+  textarea { min-height: 9rem; resize: vertical; font-family: inherit; }
+  button {
+    background: var(--accent); color: var(--bg); border-color: transparent;
+    font-weight: 600; cursor: pointer; width: auto; padding: .55rem 1rem;
+  }
+  button.quiet { background: transparent; color: var(--fg); border-color: var(--line); font-weight: 400; }
+  button:disabled { opacity: .5; cursor: default; }
+  .row { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin-top: .9rem; }
+  .row .spacer { flex: 1; }
+  .check { display: flex; align-items: center; gap: .4rem; font-size: .85rem; color: var(--dim); }
+  .check input { width: auto; }
+  details { border: 1px solid var(--line); border-radius: 8px; padding: .6rem .8rem; margin-bottom: 1rem; }
+  details[open] { padding-bottom: 1rem; }
+  summary { cursor: pointer; font-size: .85rem; color: var(--dim); }
+  .warn {
+    font-size: .8rem; color: var(--dim); border-left: 2px solid var(--bad);
+    padding-left: .7rem; margin: .8rem 0 0;
+  }
+  #where { font-size: .8rem; color: var(--dim); margin: .9rem 0 0; word-break: break-all; }
+  #where b { color: var(--fg); font-weight: 600; }
+  #log { list-style: none; padding: 0; margin: 1rem 0 0; font-size: .8rem; }
+  #log li { padding: .2rem 0; color: var(--dim); border-top: 1px solid var(--line); }
+  #log li.bad { color: var(--bad); }
+  #log li.good { color: var(--good); }
+  footer { margin-top: 2rem; font-size: .75rem; color: var(--dim); }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Write a record</h1>
+  <span class="spacer"></span>
+  <span id="pending" hidden></span>
+</header>
+
+<details id="settings">
+  <summary>Forge and token</summary>
+
+  <label for="url">Forge URL</label>
+  <input id="url" inputmode="url" autocomplete="off" placeholder="https://codeberg.org">
+
+  <div class="row" style="gap:.5rem;flex-wrap:nowrap">
+    <div style="flex:1"><label for="owner">Owner</label><input id="owner" autocomplete="off"></div>
+    <div style="flex:1"><label for="repo">Repo</label><input id="repo" autocomplete="off"></div>
+  </div>
+
+  <div class="row" style="gap:.5rem;flex-wrap:nowrap">
+    <div style="flex:1"><label for="branch">Branch</label><input id="branch" autocomplete="off" placeholder="main"></div>
+    <div style="flex:1"><label for="dir">Records dir</label><input id="dir" autocomplete="off" placeholder="records"></div>
+  </div>
+
+  <label for="name">Your name — heads Human turns, blank for none</label>
+  <input id="name" autocomplete="off">
+
+  <label for="token">Access token — repository write scope</label>
+  <input id="token" type="password" autocomplete="off">
+
+  <p class="warn">
+    The token is kept in this browser's local storage on this device, and is sent
+    to your forge and nowhere else. This page has no backend and no account. Anyone
+    who unlocks your phone can read it — use a token scoped to this one repository,
+    and revoke it in your forge settings if the phone goes missing.
+  </p>
+
+  <div class="row">
+    <button id="save">Save</button>
+    <button id="test" class="quiet">Test connection</button>
+  </div>
+</details>
+
+<label for="args">New record — <code>#tag Title</code>, or leave blank for a timestamp</label>
+<input id="args" autocomplete="off" placeholder="#linux A walk in the rain">
+
+<label for="body">Message</label>
+<textarea id="body" placeholder="Write here."></textarea>
+
+<div class="row">
+  <button id="send">Start record</button>
+  <button id="finish" class="quiet" hidden>Finish</button>
+  <span class="spacer"></span>
+  <span class="check">
+    <input type="checkbox" id="headings">
+    <label for="headings" style="margin:0">## Human headings</label>
+  </span>
+</div>
+
+<p id="where">No record open. Writing starts a new one.</p>
+
+<ul id="log"></ul>
+
+<footer>
+  A record is a Markdown file in your repo. This page only commits one —
+  <a href="selftest.html">byte-check</a>.
+</footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

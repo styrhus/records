@@ -43,6 +43,13 @@ Who is who? It's all in git. Each record carries its author in the history —
 `git log records/` never forgets. One site, many voices, and git is init
 together.
 
+## Record from your phone
+
+A record is a Markdown file in `records/`, so anything that can commit one
+can publish one — your forge's web editor, or git in your pocket. No app
+required, though there is a small one if you want it —
+[record from your phone](docs/phone.md).
+
 ## Record on your own
 
 The skills also run without big-tech AI: a small [engine](tools/others/README.md)

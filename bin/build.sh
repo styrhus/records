@@ -88,6 +88,18 @@ fi
 
 (cd "$ROOT/tools/hugo" && hugo --minify --baseURL "$PAGES_URL" --destination "$OUTDIR")
 
+# Phone app: tools/pwa/ is copied in only when params.phoneApp names the path
+# segment to serve it at. Unset = not shipped, because the page holds a forge
+# token and no fork should publish one it did not ask for.
+APP="$(sed -n 's/^[[:space:]]*phoneApp:[[:space:]]*//p' "$ROOT/tools/hugo/hugo.yaml" | head -1 | sed "s/[[:space:]]*#.*\$//; s/[\"']//g; s#/*\$##")"
+if [ -n "$APP" ]; then
+  case "$APP" in
+    */*|.*) echo "bin/build.sh: params.phoneApp must be a single path segment, got '$APP'" >&2; exit 1 ;;
+  esac
+  mkdir -p "$OUTDIR/$APP"
+  cp -R "$ROOT/tools/pwa/." "$OUTDIR/$APP/"
+fi
+
 # Books: tools/pandoc/build.sh self-gates on params.pdf/epub/booklet; when the
 # toolchain is missing (stock CI runners, laptops) skip with a note instead.
 BOOKS="$(grep -E '^[[:space:]]*(pdf|epub|booklet):' "$ROOT/tools/hugo/hugo.yaml" || true)"

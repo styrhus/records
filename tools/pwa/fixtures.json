@@ -1,0 +1,156 @@
+{
+  "note": "The byte contract between recordkit (Python) and record.js (browser). Checked by tools/others/python/tests/test_phone_fixtures.py and by selftest.html. Change one side without the other and both fail.",
+  "timezone": "Europe/Oslo",
+  "cases": [
+    {
+      "name": "timestamp fallback, no tags",
+      "wall": { "y": 2026, "mo": 8, "d": 1, "h": 16, "mi": 20, "s": 41, "offsetMinutes": 120 },
+      "argumentString": "",
+      "expect": {
+        "path": "2026-08-01_16-20.md",
+        "title": "2026-08-01_16-20",
+        "tags": [],
+        "text": "---\ntitle: 2026-08-01_16-20\ndate: 2026-08-01T16:20:41+02:00\n---\n"
+      }
+    },
+    {
+      "name": "tags route by the first, winter offset",
+      "wall": { "y": 2026, "mo": 1, "d": 15, "h": 9, "mi": 5, "s": 3, "offsetMinutes": 60 },
+      "argumentString": "#linux #hw How To",
+      "expect": {
+        "path": "linux/how-to.md",
+        "title": "How To",
+        "tags": ["linux", "hw"],
+        "text": "---\ntitle: How To\ndate: 2026-01-15T09:05:03+01:00\ntags: [linux, hw]\n---\n"
+      }
+    },
+    {
+      "name": "draft sits before tags",
+      "wall": { "y": 2026, "mo": 1, "d": 15, "h": 9, "mi": 5, "s": 3, "offsetMinutes": 60 },
+      "argumentString": "#note Draft One",
+      "draft": true,
+      "expect": {
+        "path": "note/draft-one.md",
+        "title": "Draft One",
+        "tags": ["note"],
+        "text": "---\ntitle: Draft One\ndate: 2026-01-15T09:05:03+01:00\ndraft: true\ntags: [note]\n---\n"
+      }
+    },
+    {
+      "name": "collision gets -1 before the extension",
+      "wall": { "y": 2026, "mo": 8, "d": 1, "h": 16, "mi": 20, "s": 41, "offsetMinutes": 120 },
+      "argumentString": "Dup",
+      "existing": ["dup.md"],
+      "expect": {
+        "path": "dup-1.md",
+        "title": "Dup",
+        "tags": [],
+        "text": "---\ntitle: Dup\ndate: 2026-08-01T16:20:41+02:00\n---\n"
+      }
+    },
+    {
+      "name": "tag keeps only letters, digits and hyphens",
+      "wall": { "y": 2026, "mo": 8, "d": 1, "h": 16, "mi": 20, "s": 41, "offsetMinutes": 120 },
+      "argumentString": "#C++ x",
+      "expect": {
+        "path": "c/x.md",
+        "title": "x",
+        "tags": ["c"],
+        "text": "---\ntitle: x\ndate: 2026-08-01T16:20:41+02:00\ntags: [c]\n---\n"
+      }
+    },
+    {
+      "name": "a hash after the tag run belongs to the title",
+      "wall": { "y": 2026, "mo": 8, "d": 1, "h": 16, "mi": 20, "s": 41, "offsetMinutes": 120 },
+      "argumentString": "#a Title #b",
+      "expect": {
+        "path": "a/title-#b.md",
+        "title": "Title #b",
+        "tags": ["a"],
+        "text": "---\ntitle: Title #b\ndate: 2026-08-01T16:20:41+02:00\ntags: [a]\n---\n"
+      }
+    },
+    {
+      "name": "a tag that cleans to nothing is dropped entirely",
+      "wall": { "y": 2026, "mo": 8, "d": 1, "h": 16, "mi": 20, "s": 41, "offsetMinutes": 120 },
+      "argumentString": "#!!! Title",
+      "expect": {
+        "path": "title.md",
+        "title": "Title",
+        "tags": [],
+        "text": "---\ntitle: Title\ndate: 2026-08-01T16:20:41+02:00\n---\n"
+      }
+    },
+    {
+      "name": "slugify touches case and whitespace only — the apostrophe survives",
+      "wall": { "y": 2026, "mo": 8, "d": 1, "h": 16, "mi": 20, "s": 41, "offsetMinutes": 120 },
+      "argumentString": "Scalar at it's best",
+      "expect": {
+        "path": "scalar-at-it's-best.md",
+        "title": "Scalar at it's best",
+        "tags": [],
+        "text": "---\ntitle: Scalar at it's best\ndate: 2026-08-01T16:20:41+02:00\n---\n"
+      }
+    },
+    {
+      "name": "inner whitespace collapses in the slug but not in the title",
+      "wall": { "y": 2026, "mo": 8, "d": 1, "h": 16, "mi": 20, "s": 41, "offsetMinutes": 120 },
+      "argumentString": "  spaced   out ",
+      "expect": {
+        "path": "spaced-out.md",
+        "title": "spaced   out",
+        "tags": [],
+        "text": "---\ntitle: spaced   out\ndate: 2026-08-01T16:20:41+02:00\n---\n"
+      }
+    },
+    {
+      "name": "non-ASCII survives the slug and the frontmatter",
+      "wall": { "y": 2026, "mo": 8, "d": 1, "h": 16, "mi": 20, "s": 41, "offsetMinutes": 120 },
+      "argumentString": "#språk Ærlig Talt Å",
+      "expect": {
+        "path": "sprk/ærlig-talt-å.md",
+        "title": "Ærlig Talt Å",
+        "tags": ["sprk"],
+        "text": "---\ntitle: Ærlig Talt Å\ndate: 2026-08-01T16:20:41+02:00\ntags: [sprk]\n---\n"
+      }
+    }
+  ],
+  "appends": [
+    {
+      "name": "verbatim message — the /me and /all shape",
+      "before": "---\ntitle: X\n---\n",
+      "kind": "verbatim",
+      "message": "hello",
+      "expect": "---\ntitle: X\n---\n\nhello\n"
+    },
+    {
+      "name": "two verbatim blocks keep exactly one blank line between them",
+      "before": "---\ntitle: X\n---\n\nfirst\n",
+      "kind": "verbatim",
+      "message": "second",
+      "expect": "---\ntitle: X\n---\n\nfirst\n\nsecond\n"
+    },
+    {
+      "name": "human heading, unnamed",
+      "before": "head\n",
+      "kind": "human",
+      "message": "hi",
+      "expect": "head\n\n## Human\n\nhi\n"
+    },
+    {
+      "name": "human heading, named by /myname",
+      "before": "head\n",
+      "kind": "human",
+      "message": "hi",
+      "who": "Ada",
+      "expect": "head\n\n## Human (Ada)\n\nhi\n"
+    },
+    {
+      "name": "a multi-line message is written verbatim, blank lines and all",
+      "before": "head\n",
+      "kind": "verbatim",
+      "message": "one\n\ntwo\n   indented",
+      "expect": "head\n\none\n\ntwo\n   indented\n"
+    }
+  ]
+}

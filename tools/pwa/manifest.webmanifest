@@ -1,0 +1,13 @@
+{
+  "name": "Write a record",
+  "short_name": "Record",
+  "description": "Compose a record and commit it to your repo through the forge API.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#1a1b26",
+  "theme_color": "#1a1b26",
+  "icons": [
+    { "src": "icon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" }
+  ]
+}
