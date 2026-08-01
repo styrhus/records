@@ -240,6 +240,14 @@ shape — or set `forgejo` | `github` | `gitlab` explicitly (say, for
 self-hosted GitLab). `params.repoBranch` (default `main`) is the branch those
 links point at. The PDF/EPUB raw links follow the same rules.
 
+## CDN
+
+Set `params.cdnURL` to a CDN pull-zone URL that fetches from this site, and
+production builds serve static assets — favicon, the greeting font,
+`params.logo`, and the PDF/EPUB/booklet — from there instead of the site
+itself. Local development (`hugo server`) always stays site-relative. Unset
+serves everything from the site, as usual.
+
 ## Logo
 
 Set `params.logo` to a file in `static/` (the theme ships `fuglekasse.svg`, or
