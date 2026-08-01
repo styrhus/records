@@ -48,10 +48,11 @@ Four of five walked, 2026-08-01. Item 3 waits for real export files.
 
 Deviations from the plan, all deliberate:
 
-- **`cli.py` is untouched.** Parallel sessions were running, so the subparser is a ready-to-paste
-  `TODO(cli)` block at the foot of `importer.py`. Until it is wired, `records import` is reachable
-  as `importer.run(source, path, records_dir)`. Same reason `CLAUDE.local.md` and
-  `tools/others/README.md` are unedited — see the handoff notes in the session report.
+- **`cli.py` was left untouched** while parallel sessions ran, with the subparser as a ready-to-paste
+  `TODO(cli)` block at the foot of `importer.py`. **That block has since been applied**: `records
+  import --source <s> --path <p>` is a real subcommand, and `tools/others/README.md` now documents
+  it. Verified on a `markdown` import — two files in, a re-run writing nothing and reporting both as
+  skipped, which is the idempotency rule doing its job through the CLI.
 - **Date order for `markdown` is frontmatter → filename timestamp → mtime**, not the plan's
   frontmatter → mtime → filename: mtime always exists, so the filename branch would be dead code.
 - **Parsers live in `sources.py`, tests in `tests/test_sources.py`** rather than all inside

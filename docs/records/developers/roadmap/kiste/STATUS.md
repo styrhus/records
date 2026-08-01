@@ -8,11 +8,11 @@ tags: [developers, roadmap, kiste, status]
 
 Road: **Reading** · [plan](ROADMAP.md) · [protocol](../README.md)
 
-Unwalked.
+The house is built and empty. Item 1 landed 2026-08-01; 2–6 are the rooms, all still open.
 
 | # | Animal | Item | State | Owner | Verify |
 |---|---|---|---|---|---|
-| 1 | flue | Postkasse theme skeleton | open | — | `theme: Postkasse` builds clean; Fuglekasse output unchanged |
+| 1 | flue | Postkasse theme skeleton | done | `032c102` | `theme: Postkasse` builds clean; Fuglekasse output unchanged |
 | 2 | beetle | Site-wide search | open | — | query over 1 000 records + index size reported |
 | 3 | cricket | Backlinks computed at build | open | — | two records link a third, both listed under it |
 | 4 | moth | RSS with signatures stripped | open | — | validated feed, no `— model` lines |
@@ -23,7 +23,17 @@ Unwalked.
 
 ## Notes
 
-- **1 · flue gates 2–5.** They all live inside the new theme.
+- **1 · flue is done and 2–5 are now unblocked.** `tools/hugo/themes/Postkasse/` ships with an
+  assets pipeline (`assets/css`, `assets/js`), the mirrored partial contract
+  (`record.html`, `repo-link.html`, `comment-link.html`, `asset-url.html`, `static-url.html`,
+  `lang-badge.html`) and its own README. Both halves of the acceptance were re-run during
+  consolidation: `theme: Postkasse` builds 14 pages with **no WARN and no ERROR** lines, and the
+  default Fuglekasse build is untouched.
+- **The skeleton is deliberately only a skeleton.** Its README says so in as many words — search,
+  build-time backlinks, RSS and reading chrome are "planned on top of that foundation". Nothing in
+  items 2–5 has been started; do not read the theme's existence as a head start on them.
+- **1 · flue also unblocked [booth item 4](../booth/ROADMAP.md)** (cards as Open Graph images), which
+  was waiting on exactly this. `card.py` already renders at the Open Graph size.
 - **Preferred after suitcase** — search over eleven records is a demo, search over an imported
   archive is the feature.
 - **2 · beetle** should reuse badstu item 6's synthetic corpus rather than generating its own.

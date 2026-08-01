@@ -7,23 +7,6 @@ the manifest's `created` stamp — set SOURCE_DATE_EPOCH to pin it.
 
 zipfile and hashlib, both stdlib. No compression library, no external checksum tool.
 
-WIRING (deferred — parallel-session rule, see docs/records/developers/roadmap/README.md):
-
-    ar = sub.add_parser("archive", help="bundle records, assets, config and a checksum manifest")
-    ar.add_argument("--repo", default=".")
-    ar.add_argument("--out", help="archive path; default ./records-<timestamp>.zip")
-    ar.add_argument("--dry-run", action="store_true", help="list what would go in, and what would not")
-    ar.add_argument("--check", action="store_true", help="cron mode: silent unless something is wrong")
-
-    elif args.cmd == "archive":
-        if args.check:
-            report = archive.check(Path(args.repo), Path(args.out) if args.out else None)
-            if not report["ok"]:
-                _emit(report)
-                return 1
-            return 0                      # deliberate silence — cron mails what it prints
-        _emit(archive.archive(Path(args.repo), Path(args.out) if args.out else None,
-                              dry_run=args.dry_run))
 """
 
 from __future__ import annotations

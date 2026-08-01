@@ -106,17 +106,3 @@ def run(source: str, path: Path, records_dir: Path, tags: list | None = None,
             "dry_run": dry_run, "written": written, "skipped": skipped,
             "count": {"written": len(written), "skipped": len(skipped)}}
 
-
-# TODO(cli): deferred per the parallel-session protocol — register in cli.py's _build_parser():
-#   im = sub.add_parser("import", help="import conversations from an export into records")
-#   im.add_argument("--source", required=True, help="claude-code | llm | markdown")
-#   im.add_argument("--path", required=True, help="the export file or directory")
-#   im.add_argument("--dir")
-#   im.add_argument("--tags", help="comma-separated; routes every record into the first tag")
-#   im.add_argument("--dry-run", action="store_true", help="report what would land, write nothing")
-#   im.add_argument("--name", help="human name for the headings; default: the saved /myname name")
-# and in main():
-#   elif args.cmd == "import":
-#       tags = [t.strip() for t in args.tags.split(",") if t.strip()] if args.tags else None
-#       _emit(importer.run(args.source, Path(args.path), _records_dir(args), tags=tags,
-#                          name=args.name or myname.load(), dry_run=args.dry_run))

@@ -7,16 +7,6 @@ blocks, and emphasis markers go away.
 
 If this output needs this repo to make sense, it has failed.
 
-WIRING (deferred — parallel-session rule, see docs/records/developers/roadmap/README.md):
-
-    ex = sub.add_parser("export", help="write the whole corpus as plain text")
-    ex.add_argument("--repo", default=".")
-    ex.add_argument("--format", default="text", choices=["text"])
-    ex.add_argument("--out", required=True, help="directory for the tree, or the file with --single")
-    ex.add_argument("--single", action="store_true", help="one concatenated file with a contents list")
-
-    elif args.cmd == "export":
-        _emit(export.export(Path(args.repo), Path(args.out), single=args.single))
 """
 
 from __future__ import annotations

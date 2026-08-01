@@ -127,6 +127,11 @@ hello world             plain text is appended as a Human turn
 
 The first word of a title may be a `#tag`; the record is then filed under that tag's folder.
 
+The CLI carries ten more commands that no editor panel exposes — `import`, `archive`, `verify`,
+`export`, `attach`, `pack`, `card`, `booth`, `doctor` and `watch`. `records doctor` is the one to
+run first if anything here misbehaves; it says what is wrong and what to do about it. They are all
+listed in [the engine's README](../tools/others/README.md#the-engines-own-commands).
+
 ## 4. Ollama is optional
 
 This is the only place that sentence needs to live.

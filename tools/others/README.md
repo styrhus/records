@@ -103,6 +103,26 @@ All of these work without a model:
 
 The AI-only skills (`/poet`, `/pirate`, `/eq`, `/bff`, `/spellcorrect`, `/diff-*`, `/review`, `/phil-gc`) remain in `.ai/skills/` and are available in Claude Code.
 
+## The Engine's Own Commands
+
+These have no slash-command counterpart — they are the CLI's, and they need no model either:
+
+| Command | What it does |
+|---------|-------------|
+| `records import --source <s> --path <p>` | Import conversations from an export: `claude-code`, `llm`, `markdown`. Idempotent — a second run writes nothing. |
+| `records archive [--check]` | One zip holding records, referenced assets, the site config and a SHA-256 manifest. Deterministic. `--check` is cron mode: silent when healthy. |
+| `records verify [<archive>]` | Recompute an archive's checksums, or — with no argument — check that every reference in every record still resolves. |
+| `records export --out <path> [--single]` | The whole corpus as plain text that needs no tooling at all. |
+| `records attach <record> <files…>` | Copy files into a record, converting it to a Hugo leaf bundle. The URL does not change. |
+| `records pack [--out <file>]` | The built site collapsed into one offline HTML file. Post-processes `public/`; never builds. Needs `pageMode: single` or `single-flowing`. |
+| `records card <record> [--turn N]` | One turn as an SVG quote card in the site's own palette. |
+| `records booth` | A stdlib-curses composing screen. Writes byte-identically to `records new` + `append`. |
+| `records doctor` | Report what will fail in this checkout — reporting only, never fixing. |
+| `records watch` | Rebuild when a record changes. Never commits, never pushes, never publishes. |
+
+`doctor` and `watch` print human-readable text and own their flags (`--json` for machine output);
+every other command emits JSON on stdout like the rest of the CLI.
+
 ## Honest Degradations
 
 - **No AI `/record`**: falls back to `/all` (user-only). Two-sided recording returns when Ollama is configured.

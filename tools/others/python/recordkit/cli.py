@@ -8,8 +8,15 @@ import sys
 from pathlib import Path
 
 from . import __version__
+from . import archive as archive_mod
 from . import commit as commit_mod
-from . import config, create, mucke, myname, ollama, publish, stick, werden, writer
+from . import export as export_mod
+from . import pack as pack_mod
+from . import attach, booth, card, config, create, doctor, importer, mucke, myname, ollama
+from . import publish, stick, verify, watch, werden, writer
+
+
+_PASSTHROUGH = {"doctor": doctor, "watch": watch}  # own parser, own output — not JSON-on-stdout
 
 
 def _stdin_or(value: str) -> str:
@@ -107,13 +114,74 @@ def _build_parser() -> argparse.ArgumentParser:
     cf = sub.add_parser("config", help="print the resolved records directory")
     cf.add_argument("--dir")
 
-    # TODO(schrank): register archive/verify/export/attach — parsers and dispatch branches are
-    # written out in the WIRING docstring of each module (recordkit/{archive,verify,export,attach}.py).
-    # Deferred per the parallel-session rule in docs/records/developers/roadmap/README.md.
+    im = sub.add_parser("import", help="import conversations from an export into records")
+    im.add_argument("--source", required=True, help="claude-code | llm | markdown")
+    im.add_argument("--path", required=True, help="the export file or directory")
+    im.add_argument("--dir")
+    im.add_argument("--tags", help="comma-separated; routes every record into the first tag")
+    im.add_argument("--dry-run", action="store_true", help="report what would land, write nothing")
+    im.add_argument("--name", help="human name for the headings; default: the saved /myname name")
+
+    ar = sub.add_parser("archive", help="bundle records, assets, config and a checksum manifest")
+    ar.add_argument("--repo", default=".")
+    ar.add_argument("--out", help="archive path; default ./records-<timestamp>.zip")
+    ar.add_argument("--dry-run", action="store_true", help="list what would go in, and what would not")
+    ar.add_argument("--check", action="store_true", help="cron mode: silent unless something is wrong")
+
+    vf = sub.add_parser("verify", help="check an archive's checksums, or a checkout's references")
+    vf.add_argument("archive", nargs="?", help="archive to check; omit to check a checkout")
+    vf.add_argument("--repo", default=".")
+
+    ex = sub.add_parser("export", help="write the whole corpus as plain text")
+    ex.add_argument("--repo", default=".")
+    ex.add_argument("--format", default="text", choices=["text"])
+    ex.add_argument("--out", required=True, help="directory for the tree, or the file with --single")
+    ex.add_argument("--single", action="store_true", help="one concatenated file with a contents list")
+
+    an = sub.add_parser("attach", help="attach files to a record, converting it to a bundle")
+    an.add_argument("record", help="the record's .md path, or its bundle folder")
+    an.add_argument("files", nargs="+")
+    an.add_argument("--title", help="link text; default: the attachment's name")
+    an.add_argument("--append", action="store_true", help="write the links into the record")
+    an.add_argument("--dry-run", action="store_true", help="show the conversion and the copies")
+
+    pk = sub.add_parser("pack", help="collapse the built site into one offline HTML file")
+    pk.add_argument("--repo", default=".")
+    pk.add_argument("--out")
+    pk.add_argument("--no-images", action="store_true")
+    pk.add_argument("--with-books", action="store_true")
+    pk.add_argument("--outdir", help="built site to post-process (default: <repo>/public)")
+
+    cd = sub.add_parser("card", help="render one turn as an SVG quote card")
+    cd.add_argument("record", help="the record to draw from")
+    cd.add_argument("--turn", type=int, help="1-based turn number; default: the last assistant turn")
+    cd.add_argument("--out", help="SVG path; default: next to the record")
+    cd.add_argument("--url", help="footer URL; default: derived from the site's baseURL")
+    cd.add_argument("--repo", default=".")
+
+    bo = sub.add_parser("booth", help="open the composing screen (curses; no model required)")
+    bo.add_argument("arguments", nargs="*", default=[], help="'#tags title' as typed to /record")
+    bo.add_argument("--dir")
+    bo.add_argument("--draft", action="store_true")
+    bo.add_argument("--file", help="continue an existing record instead of creating one")
+    bo.add_argument("--endpoint", help="Ollama base URL; omit for a user-only booth")
+    bo.add_argument("--model", help="model tag; omit for a user-only booth")
+    bo.add_argument("--timeout", type=float, default=ollama.DEFAULT_TIMEOUT)
+    bo.add_argument("--name", help="human name for the headings; default: the saved /myname name")
+
+    # Registered for the help listing only — main() hands these two straight to their own module,
+    # which owns its flags and its human-readable rendering (see _PASSTHROUGH).
+    for name, helptext in (("doctor", "report what will fail in this checkout"),
+                           ("watch", "rebuild when a record changes — never commits or publishes")):
+        sub.add_parser(name, help=helptext, add_help=False)
+
     return p
 
 
 def main(argv: list[str] | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] in _PASSTHROUGH:
+        return _PASSTHROUGH[argv[0]].main(argv[1:])  # their flags, their rendering, their exit code
     args = _build_parser().parse_args(argv)
     try:
         if args.cmd == "new":
@@ -171,6 +239,42 @@ def main(argv: list[str] | None = None) -> int:
             _emit(werden.cycle(Path(args.repo), args.structure, stamp=args.stamp))
         elif args.cmd == "config":
             _emit({"records_dir": str(_records_dir(args))})
+        elif args.cmd == "import":
+            tags = [t.strip() for t in args.tags.split(",") if t.strip()] if args.tags else None
+            _emit(importer.run(args.source, Path(args.path), _records_dir(args), tags=tags,
+                               name=args.name or myname.load(), dry_run=args.dry_run))
+        elif args.cmd == "archive":
+            if args.check:
+                report = archive_mod.check(Path(args.repo), Path(args.out) if args.out else None)
+                if not report["ok"]:
+                    _emit(report)
+                    return 1
+                return 0                  # deliberate silence — cron mails what it prints
+            _emit(archive_mod.archive(Path(args.repo), Path(args.out) if args.out else None,
+                                      dry_run=args.dry_run))
+        elif args.cmd == "verify":
+            report = (verify.verify_archive(Path(args.archive)) if args.archive
+                      else verify.verify_repo(Path(args.repo)))
+            _emit(report)
+            return 0 if report["ok"] else 1
+        elif args.cmd == "export":
+            _emit(export_mod.export(Path(args.repo), Path(args.out), single=args.single))
+        elif args.cmd == "attach":
+            _emit(attach.attach(Path(args.record), [Path(f) for f in args.files],
+                                title=args.title, append=args.append, dry_run=args.dry_run))
+        elif args.cmd == "pack":
+            _emit(pack_mod.pack(Path(args.repo), Path(args.out) if args.out else None,
+                                images=not args.no_images, with_books=args.with_books,
+                                outdir=Path(args.outdir) if args.outdir else None))
+        elif args.cmd == "card":
+            _emit(card.build(Path(args.record), turn=args.turn,
+                             out=Path(args.out) if args.out else None,
+                             url=args.url, repo=Path(args.repo)))
+        elif args.cmd == "booth":
+            _emit(booth.run(_records_dir(args), arguments=" ".join(args.arguments),
+                            draft=args.draft, file=Path(args.file) if args.file else None,
+                            endpoint=args.endpoint, model=args.model, timeout=args.timeout,
+                            name=args.name or myname.load()))
     except Exception as e:  # surface as JSON so the plugins can render it
         _emit({"error": str(e)})
         return 1

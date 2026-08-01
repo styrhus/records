@@ -4,8 +4,6 @@ The dog: it notices and it reports. It never commits, never pushes, never
 publishes — not behind a flag, not behind a config key. Polling, not inotify:
 stdlib only, and a second of latency is cheaper than a dependency.
 
-TODO(parallel): register `records watch [--repo .] [--interval N]` in cli.py as
-a delegation to main(); until then `python -m recordkit.watch` is the entry.
 """
 
 from __future__ import annotations

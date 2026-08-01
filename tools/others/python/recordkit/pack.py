@@ -470,12 +470,3 @@ def pack(repo: Path, out: Path | None = None, images: bool = True,
         result["warnings"] = warnings
     return result
 
-
-# TODO(cli): register the subparser in cli.py once the parallel roads have landed —
-#   pk = sub.add_parser("pack", help="collapse the built site into one offline HTML file")
-#   pk.add_argument("--repo", default="."); pk.add_argument("--out")
-#   pk.add_argument("--no-images", action="store_true"); pk.add_argument("--with-books", action="store_true")
-#   pk.add_argument("--outdir", help="built site to post-process (default: <repo>/public)")
-#   ... elif args.cmd == "pack": _emit(pack_mod.pack(Path(args.repo), Path(args.out) if args.out else None,
-#                                                    images=not args.no_images, with_books=args.with_books,
-#                                                    outdir=Path(args.outdir) if args.outdir else None))

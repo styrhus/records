@@ -8,30 +8,44 @@ tags: [developers, roadmap, booth, status]
 
 Road: **The booth** · [plan](ROADMAP.md) · [protocol](../README.md)
 
-Unwalked. New road, defined 2026-08-01.
+Three of four walked, 2026-08-01. Item 4 was unblocked the same day by kiste 1 landing.
 
 | # | Animal | Item | State | Owner | Verify |
 |---|---|---|---|---|---|
-| 1 | flue | `records card` — a turn as SVG | open | — | card opened in a browser, palette matches the site |
-| 2 | beetle | `records booth` — stdlib curses composer | open | — | record byte-identical to `records new` + `append` |
-| 3 | cricket | The booth talks back (Ollama) | open | — | two-sided session + user-only fallback with Ollama stopped |
-| 4 | moth | Cards as Open Graph images (Postkasse) | blocked | — | link-preview tool shows the record's card |
+| 1 | flue | `records card` — a turn as SVG | done | `a5c6e82` | card opened in a browser, palette matches the site |
+| 2 | beetle | `records booth` — stdlib curses composer | done | `a3dd0ce` | record byte-identical to `records new` + `append` |
+| 3 | cricket | The booth talks back (Ollama) | done | `a3dd0ce` | two-sided session + user-only fallback with Ollama stopped |
+| 4 | moth | Cards as Open Graph images (Postkasse) | open | — | link-preview tool shows the record's card |
 
 `State` ∈ `open` · `wip` · `done` · `blocked`
 
 ## Notes
 
-- **4 · moth is blocked on [kiste item 1](../kiste/ROADMAP.md)** — Open Graph images are theme work
-  and Fuglekasse does not grow. It waits for the Postkasse theme.
-- **3 · cricket** reuses `ollama.reply` directly. Do not write a second Ollama path; the sidebar's
-  code is the reference implementation.
-- Streaming in the booth is nicer if [postkasse item 2](../postkasse/ROADMAP.md) has landed, but is
-  not a blocker — a spinner is acceptable.
-- **1 · flue**: SVG only. PNG conversion would mean a dependency, and anyone can convert an SVG.
-  Text metrics without a font library are approximate; pick a monospace assumption and accept the
-  imprecision rather than reaching for a library.
-- **2 · beetle**: keep the logic separable from `curses` so it can be tested without a terminal.
-- The booth must work with nothing installed but Python. No model, no config, no plugin.
+- **4 · moth is no longer blocked.** It waited on [kiste item 1](../kiste/ROADMAP.md), which landed
+  in `032c102` — the Postkasse theme exists, so the Open Graph work has a house to live in. The
+  border stands: this belongs to Postkasse, not Fuglekasse. `card.py` already renders at 1200×630,
+  the Open Graph size, precisely so this item can reuse it unchanged.
+- **The wiring the road left behind is done.** All three landed commands were written but never
+  registered in `cli.py` (the parallel-session deferral rule). `records card` and `records booth` are
+  now real subcommands — verified, not assumed.
+- **3 · cricket** reused `ollama.reply` directly, as required — no second Ollama path was written.
+  `Session.submit` appends the human's words first and falls back to a user-only turn when the model
+  is unreachable ("a dead model never costs a sentence"), covered by
+  `test_a_dead_model_never_costs_a_sentence` and `test_two_sided_session_over_real_http_then_fallback`.
+- Streaming in the booth is still nicer if [postkasse item 2](../postkasse/ROADMAP.md) lands; the
+  booth ships with a busy state instead, which the road allowed.
+- **1 · flue** stayed SVG-only, as the border required — no PNG conversion, no font library, a
+  monospace advance assumption for text metrics.
+- **2 · beetle**: `Buffer` and `Session` hold the logic and `curses` only draws, so 17 of the road's
+  tests run with no terminal at all.
+- The booth works with nothing installed but Python. No model, no config, no plugin.
+
+## What landed
+
+`recordkit/card.py` (23 tests) and `recordkit/booth.py` (17 tests). Cards read the site's own
+palette out of `hugo.yaml`, so a fork's colours carry into its cards. Records written in the booth go
+through `create.py` and `writer.py` like every other path, which is what makes the byte-identity
+claim true by construction rather than by comparison.
 
 ## Picking one up
 

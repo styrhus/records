@@ -4,7 +4,6 @@ stdlib curses only. Buffer and Session hold the logic, so everything but the dra
 tests without a terminal. Records go through create.py and writer.py like every other
 path, so what the booth writes is byte-identical to `records new` + `records append`.
 """
-# TODO(cli.py): register the `booth` subparser — deferred while parallel road sessions run.
 
 from __future__ import annotations
 

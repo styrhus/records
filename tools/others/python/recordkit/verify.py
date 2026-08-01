@@ -8,17 +8,6 @@ broken image on the site and a missing figure in the PDF, silently, today.
 The roadmap asked for a --json flag. There is none: the CLI emits JSON on stdout for every command
 by design (cli._emit), so `records verify` is already machine-readable.
 
-WIRING (deferred — parallel-session rule, see docs/records/developers/roadmap/README.md):
-
-    vf = sub.add_parser("verify", help="check an archive's checksums, or a checkout's references")
-    vf.add_argument("archive", nargs="?", help="archive to check; omit to check a checkout")
-    vf.add_argument("--repo", default=".")
-
-    elif args.cmd == "verify":
-        report = (verify.verify_archive(Path(args.archive)) if args.archive
-                  else verify.verify_repo(Path(args.repo)))
-        _emit(report)
-        return 0 if report["ok"] else 1
 """
 
 from __future__ import annotations

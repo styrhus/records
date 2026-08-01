@@ -5,8 +5,6 @@ rsync, deploy, git, branch), each with a level (ok/warn/error) and a remedy.
 Only build-stoppers are errors; git state never is, since CI checks out a
 detached HEAD.
 
-TODO(parallel): register `records doctor [--repo .] [--json]` in cli.py as a
-delegation to main(); until then `python -m recordkit.doctor` is the entry.
 """
 
 from __future__ import annotations

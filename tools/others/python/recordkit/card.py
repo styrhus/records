@@ -3,7 +3,6 @@
 Stdlib only: the SVG is a template string, text metrics are a monospace assumption.
 No PNG conversion — anyone can convert an SVG, a converter would be a dependency.
 """
-# TODO(cli.py): register the `card` subparser — deferred while parallel road sessions run.
 
 from __future__ import annotations
 

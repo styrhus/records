@@ -17,14 +17,30 @@ The answer has a shape: eleven roads, from the mailbox to the sauna, each one a 
 
 `CURRENT` reads **`0.12.1 badstu-flue`** — the road under our feet.
 
-Behind it, nine roads stand open and unwalked. They are not a queue. The werden major is a position
-in the name pool, not a percentage of anything, and a road is claimed by whoever arrives with time
-for it. Walk them in the order that suits the week.
+Behind it the roads are no longer unwalked. They are still not a queue: the werden major is a
+position in the name pool, not a percentage of anything, and a road is claimed by whoever arrives
+with time for it. Walk them in the order that suits the week.
+
+Where each one stands, as of 2026-08-01:
+
+| Road | Walked | Left |
+|------|--------|------|
+| 2 · postkasse | — | all five: Ollama in Neovim, streaming, voice presets, `/stick` checkout-awareness, the walkthrough |
+| 3 · bikube | 3 of 5 | two uploads, both needing the human's tokens (PyPI, Open VSX) |
+| 4 · suitcase | 4 of 5 | ChatGPT + Claude export JSON, blocked for want of a real export file |
+| 5 · kiste | 1 of 6 | the theme exists and is empty: search, backlinks, RSS, reading chrome, attachment rendering |
+| 6 · akvarium | 1 of 3 | two rungs waiting on a real phone |
+| 7 · hundehus | 2 of 4 | the bark's editor half, and the doctor's trip to CI |
+| 8 · schrank | **6 of 6** | — |
+| 9 · booth | 3 of 4 | Open Graph cards, unblocked by kiste 1 |
+| 10 · portaloo | 2 of 4 | books travelling, and the USB story walked on a borrowed machine |
+| 11 · utedo | — | all five |
+| 12 · badstu | 1 of 6 | CI truth, the runner image, the audit, the theme review, the weight test |
 
 What is already built: one build path (`bin/build.sh`) behind every provider, forks publishing with
-zero edits, an AI-free engine (`recordkit` 0.5.0, 102 tests) driving the mechanical commands from a
-VSCode sidebar, a Neovim split, or plain shell — and Ollama bringing the AI back, locally, when
-wanted.
+zero edits, an AI-free engine (`recordkit` 0.12.1, 416 tests) driving the mechanical commands from a
+VSCode sidebar, a Neovim split, an Emacs buffer, or plain shell — and Ollama bringing the AI back,
+locally, when wanted. Twenty-two CLI commands now, ten of them from the roads above.
 
 And the sentence that sets the course: everyone's conversations are locked away in other people's
 apps, and nobody publishes them well. That is the whole gap we exist in.

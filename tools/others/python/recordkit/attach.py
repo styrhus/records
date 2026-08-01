@@ -6,18 +6,6 @@ leaves the record's URL unchanged, because Hugo resolves a leaf bundle to its fo
 
 The source file is copied, never moved: what you attached stays where it was.
 
-WIRING (deferred — parallel-session rule, see docs/records/developers/roadmap/README.md):
-
-    an = sub.add_parser("attach", help="attach files to a record, converting it to a bundle")
-    an.add_argument("record", help="the record's .md path, or its bundle folder")
-    an.add_argument("files", nargs="+")
-    an.add_argument("--title", help="link text; default: the attachment's name")
-    an.add_argument("--append", action="store_true", help="write the links into the record")
-    an.add_argument("--dry-run", action="store_true", help="show the conversion and the copies")
-
-    elif args.cmd == "attach":
-        _emit(attach.attach(Path(args.record), [Path(f) for f in args.files],
-                            title=args.title, append=args.append, dry_run=args.dry_run))
 """
 
 from __future__ import annotations

@@ -31,10 +31,14 @@ and `postkasse-beetle` before turning to badstu. The items below are what remain
   lines is part of the item.
 - The animal names here are already partly spent: `postkasse-flue` and `postkasse-beetle` have
   turned. Item numbering follows the pool for planning; it does not re-issue names.
-- **Parallel-session collisions:** **4 · moth** and [schrank 3](../schrank/ROADMAP.md) both rewrite
-  `recordkit/stick.py` — checkout-awareness and bundle-awareness in the same function. Do not run
-  them concurrently. **1 · flue** shares `neovim/lua/records/init.lua` with
-  [hundehus 3](../hundehus/ROADMAP.md).
+- **4 · moth — half its ground is already taken.** [schrank 3](../schrank/ROADMAP.md) landed, and
+  with it `find_record` became bundle-aware and gained the `tests/test_stick.py` this item was going
+  to create (7 tests, covering both record shapes and the attach→stick regression). What remains for
+  this item is the part schrank did not touch: **checkout-awareness**, making `/stick` resolve its
+  records dir the way `/record`, `/all`, `/me` and `/cpd` already do instead of assuming `$PWD`.
+  Extend the existing function and test file; do not replace them.
+- **Parallel-session collisions:** **1 · flue** shares `neovim/lua/records/init.lua` with
+  [hundehus 3](../hundehus/ROADMAP.md), which is still open — coordinate before touching it.
 
 ## Picking one up
 
