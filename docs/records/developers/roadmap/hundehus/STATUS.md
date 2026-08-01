@@ -31,6 +31,9 @@ Unwalked. New road, defined 2026-08-01.
   silently). Follow its shape in item 3.
 - **4 · moth** must keep the shims working with no Python present, the same way `bin/build.sh`
   skip-notes a missing pandoc.
+- **Parallel-session collisions:** **3 · cricket** shares `neovim/lua/records/init.lua` with
+  [postkasse 1](../postkasse/ROADMAP.md); **4 · moth** shares the CI shims with
+  [badstu 2](../badstu/ROADMAP.md).
 
 ## Picking one up
 

@@ -19,6 +19,8 @@ whose `State` is `open` and whose dependencies are `done`.
 
 1. **Claim it.** In the road's `STATUS.md`, set the item's `State` to `wip` and put something in
    `Owner` — a handle, a model name, a date. An unclaimed `wip` row older than a session is fair game.
+   *In parallel mode this step belongs to the human — see [running several sessions at
+   once](#running-several-sessions-at-once).*
 2. **Read the sibling `ROADMAP.md`.** The item section names the files, the command, and the border
    it must not cross. Read it before the code.
 3. **Do the work.** Test-first where there are tests to write; the engine has them, the templates
@@ -38,6 +40,59 @@ item, not a follow-up.
 
 Nothing is done because it looks done. If the acceptance check could not be run, the item stays
 `wip` and the reason goes in the notes.
+
+## Running several sessions at once
+
+The roads are open, not queued, so several sessions can run in parallel. Not naively, though —
+three things bite.
+
+### One workspace per session
+
+Two sessions in the same checkout stomp each other regardless of which files they touch: each sees
+the other's half-finished edits, tests run against a mixed tree, and `git status` shows everyone's
+work at once. Give each session its own worktree:
+
+```bash
+git worktree add ../records-hundehus
+git worktree add ../records-schrank
+```
+
+**`CLAUDE.local.md` is gitignored, so a fresh worktree will not have it.** That file is the project's
+instructions; a session without it is working blind. Either copy it in, or point the session at the
+tracked mirror `CLAUDE.local.md.example.md`. Same for `.mem/`, which is also gitignored.
+
+### The human assigns; the table is the ledger
+
+The claim step above assumes everyone can see the same `STATUS.md`. In separate worktrees each
+session has its own copy, so claims are invisible to the others and two sessions will happily take
+the same item.
+
+**In parallel mode, assign items up front and keep the `STATUS.md` rows yourself.** Sessions read
+their road, do their item, and report; they do not claim. A session told to work alone in the main
+checkout still claims normally.
+
+### Defer the `cli.py` registration
+
+`recordkit/cli.py` is the one genuine chokepoint — seven roads add a subparser to the same function.
+The conflict is trivial but universal.
+
+**A session adding a command writes its module and leaves a one-line `TODO` where the subparser
+would go, rather than editing `cli.py`.** Wiring them all up afterwards is a single small pass with
+no conflicts at all. The same applies to the shared prose: if several sessions are running, they
+note what `CLAUDE.local.md` and `tools/others/README.md` need rather than editing those files.
+
+### What does not parallelize
+
+- **Items with a stated dependency.** Each `STATUS.md` names them in its notes — `schrank 3` before
+  `kiste 6`, `kiste 1` before `booth 4`, `bikube 1` before `portaloo 1`, `suitcase 1` before the
+  rest of its road.
+- **Two items on the same file.** Beyond `cli.py`, the known pairs are `recordkit/stick.py`
+  (`postkasse 4` and `schrank 3` change the same function for different reasons), the Neovim plugin
+  (`postkasse 1` and `hundehus 3`), and the CI shims (`badstu 2` and `hundehus 4`).
+- **`badstu 4`, the audit.** It reads and corrects the whole repo by definition. Run it alone.
+
+Items that create new files and touch nothing shared are the ones to fan out on. Anything under
+`docs/` is free.
 
 ## The borders
 

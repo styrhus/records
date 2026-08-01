@@ -31,6 +31,10 @@ and `postkasse-beetle` before turning to badstu. The items below are what remain
   lines is part of the item.
 - The animal names here are already partly spent: `postkasse-flue` and `postkasse-beetle` have
   turned. Item numbering follows the pool for planning; it does not re-issue names.
+- **Parallel-session collisions:** **4 · moth** and [schrank 3](../schrank/ROADMAP.md) both rewrite
+  `recordkit/stick.py` — checkout-awareness and bundle-awareness in the same function. Do not run
+  them concurrently. **1 · flue** shares `neovim/lua/records/init.lua` with
+  [hundehus 3](../hundehus/ROADMAP.md).
 
 ## Picking one up
 

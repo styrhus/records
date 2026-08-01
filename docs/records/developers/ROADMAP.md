@@ -34,6 +34,10 @@ apps, and nobody publishes them well. That is the whole gap we exist in.
 Each road has a folder. The folder holds the elaborate plan and a handoff table where items are
 claimed one at a time. The protocol is one page: [how a road is walked](roadmap/README.md).
 
+Several sessions can run at once — one worktree each, items assigned up front, and the shared files
+left alone until the end. That has its own rules, on the same page:
+[running several sessions at once](roadmap/README.md#running-several-sessions-at-once).
+
 Agents pick up items. Humans turn the cycle.
 
 ---

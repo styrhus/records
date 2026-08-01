@@ -36,6 +36,8 @@ Unwalked. New road, defined 2026-08-01.
     attachments) and [akvarium item 3](../akvarium/ROADMAP.md) (audio).
   - The rendering half is **not here** — see [kiste item 6](../kiste/ROADMAP.md). In single and
     single-flowing modes every record renders on `/`, so a relative `image.png` 404s. Theme fix.
+- **Parallel-session collision:** **3 · cricket** and [postkasse 4](../postkasse/ROADMAP.md) both
+  rewrite `recordkit/stick.py`'s `find_record`. Do not run them concurrently.
 - **6 · snail depends on 3.** `records attach` is the ergonomics of the convention; the convention
   has to exist first. It is also what makes the VSCode `@` picker's two meanings (model context vs.
   recorded attachment) finally distinct.

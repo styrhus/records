@@ -30,6 +30,9 @@ Cycle: this road is **now** (`CURRENT` = `0.12.1 badstu-flue`).
   packages; keep the skip paths in `bin/build.sh` intact so forks on other images still exit 0.
 - **6 · snail** generates its synthetic records outside this repo. Nothing throwaway lands in
   `records/`.
+- **4 · moth does not parallelize.** The audit reads and corrects the whole repo by definition — run
+  it with no other session active. **2 · beetle** also shares the CI shims with
+  [hundehus 4](../hundehus/ROADMAP.md).
 
 ## Picking one up
 
