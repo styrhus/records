@@ -22,3 +22,7 @@ tools/others/**/*.vsix
 tools/others/**/__pycache__/
 tools/others/**/.pytest_cache/
 tools/others/**/*.egg-info/
+
+# Offline artefacts — `records pack` and build-pyz.sh output, built from source
+pack/
+tools/others/python/dist/
