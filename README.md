@@ -53,9 +53,11 @@ required, though there is a small one if you want it —
 ## Record on your own
 
 The skills also run without big-tech AI: a small [engine](tools/others/README.md)
-drives the mechanical ones from a VSCode chat sidebar, a Neovim split, or
-plain shell — no model needed. Add [Ollama](tools/others/ollama/README.md) and
-`/record` talks back: your own local model, your records, your machine.
+drives the mechanical ones from a VSCode chat sidebar, a Neovim split, an Emacs
+window, or plain shell — no model needed. Add
+[Ollama](tools/others/ollama/README.md) and `/record` talks back: your own local
+model, your records, your machine. It's one page from nothing to a written
+record — [install it](docs/install.md).
 
 ---
 
