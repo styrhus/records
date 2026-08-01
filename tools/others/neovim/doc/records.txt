@@ -1,0 +1,121 @@
+*records.txt*   Write your conversations down, and publish them as your own site
+
+==============================================================================
+CONTENTS                                                     *records-contents*
+
+    1. Introduction ......................... |records-introduction|
+    2. Requirements ......................... |records-requirements|
+    3. Installation ......................... |records-installation|
+    4. Configuration ........................ |records-configuration|
+    5. Commands ............................. |records-commands|
+    6. Chat commands ........................ |records-chat-commands|
+    7. Ollama ............................... |records-ollama|
+
+==============================================================================
+1. INTRODUCTION                                          *records-introduction*
+
+records.nvim is the Neovim front end for blyant records — a publish-your-
+conversations site where every record is a Markdown file in your own repo.
+
+The plugin holds no logic of its own. Every action shells out to the `records`
+CLI (recordkit), which does the frontmatter, the naming, the git work and the
+publishing. If Neovim needs something the CLI cannot do, the CLI grows, not
+this plugin.
+
+==============================================================================
+2. REQUIREMENTS                                          *records-requirements*
+
+The recordkit CLI, installed separately: >
+
+    pipx install recordkit
+<
+Neovim 0.9 or newer. No Lua dependencies.
+
+==============================================================================
+3. INSTALLATION                                          *records-installation*
+
+The plugin ships inside the records repository rather than as its own repo, so
+install it by path. With lazy.nvim: >
+
+    {
+      "records.nvim",
+      dir = "~/path/to/records/tools/others/neovim",
+      cmd = "Records",
+      config = function()
+        require("records").setup({ bin = "records" })
+      end,
+    }
+<
+With packer.nvim: >
+
+    use { "~/path/to/records/tools/others/neovim" }
+<
+Or copy it onto your runtimepath: >
+
+    cp -r records/tools/others/neovim \
+      ~/.local/share/nvim/site/pack/manual/start/records
+<
+setup() is optional — |:Records| works unconfigured.
+
+==============================================================================
+4. CONFIGURATION                                        *records-configuration*
+
+                                                              *records.setup()*
+require("records").setup({opts})
+
+    {opts} keys, with their defaults:
+
+    bin              string   "records"
+                     The recordkit CLI to run. Set it to an absolute path if
+                     `records` is not on Neovim's PATH.
+
+    ollama_endpoint  string   nil
+                     Reserved. Two-sided /record in Neovim is not wired yet;
+                     setting this changes nothing today. The plugin is
+                     mechanical only: every command works, and none of them
+                     needs a model.
+
+==============================================================================
+5. COMMANDS                                                  *records-commands*
+
+                                                                    *:Records*
+:Records        Open the chat panel at the bottom of the editor. Type a
+                message or a /command and press <CR> in insert mode. Press
+                `q` in normal mode to close the panel.
+
+==============================================================================
+6. CHAT COMMANDS                                        *records-chat-commands*
+
+Typed into the panel. They mirror the VS Code sidebar and the AI skills one
+for one.
+
+    /record [#tag] [title]   Start recording (user-only in Neovim today)
+    /all [#tag] [title]      Start a user-only recording
+    /me [#tag] [title]       Start a draft recording, kept off the site
+    /esc                     Stop recording
+    /stick <slug>            Feature a record
+    /gc [message]            Commit
+    /gcp [message]           Commit and push
+    /cpd [message]           Commit, push, deploy
+    /myname [name]           Save your name locally
+    /mucke                   Stamp the now-playing track into the record
+    /config                  Show the resolved records directory
+
+A plain message, while a recording is active, is appended to it verbatim as a
+Human turn. With no recording active, nothing is written.
+
+The first word of a /record, /all or /me title may be a #tag; the record is
+then filed under that tag's folder. Tags and spaces are passed to the CLI as a
+single argument, never through a shell.
+
+==============================================================================
+7. OLLAMA                                                      *records-ollama*
+
+A local Ollama model is optional everywhere in this project, and in Neovim it
+is not yet available at all: `records ollama-reply` exists in the CLI, but the
+plugin does not call it. /record therefore behaves like /all here.
+
+Nothing degrades because of this. Every command above is mechanical and
+deterministic, and its output byte-matches what the AI-driven skills produce.
+
+vim:tw=78:ts=8:ft=help:norl:
