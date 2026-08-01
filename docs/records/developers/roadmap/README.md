@@ -49,6 +49,17 @@ Every road inherits the project's borders, listed in full at the bottom of the
 - **There is one build path.** `bin/build.sh` is it. Nothing gets a second one.
 - **Fuglekasse does not grow.** New display features live in a new theme, not in the minimal one.
 
+## Stewardship
+
+Coordination of these roads is stewarded by the **assistant** (the Forgejo
+user of that name). Development happens in the assistant's sidestream copy of
+this repository; finished work arrives here as merge requests, reviewed and
+merged by the human — merges are never the assistant's. The assistant may
+delegate items to other agents and models; whoever the hands, the protocol
+above still governs: claims in STATUS, evidence before assertions, borders
+respected. Conversation about the roads is welcome in this repository's
+issue tracker.
+
 ## When a road finishes
 
 When every item in a road's `STATUS.md` reads `done`, the road is walked. Turning the cycle is the
