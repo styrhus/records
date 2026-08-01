@@ -8,19 +8,23 @@ This directory contains the **no-AI engine and plugins** for the blyant records 
 
 ```
 tools/others/
-├── python/              # recordkit: stateless library + CLI (JSON I/O)
+├── python/              # recordkit: stateless library + CLI (JSON I/O), published to PyPI
 │   ├── recordkit/       # modules: config, naming, create, stick, commit, publish, mucke, werden, etc.
-│   ├── tests/           # 102 unit tests (config discovery, frontmatter, ollama, publish, etc.)
-│   ├── pyproject.toml   # pip-installable package
+│   ├── tests/           # unit tests (config discovery, frontmatter, ollama, publish, version, etc.)
+│   ├── pyproject.toml   # version derived from CURRENT via recordkit.__version__
+│   ├── README.md        # the PyPI landing page
 │   └── .gitignore       # __pycache__, .pytest_cache, build artifacts
 ├── naming/              # werden-cycle name pools (dyr.json, strukturer.json) + scheme doc
-├── vscode/              # Records Chat: VSCode sidebar chat view (installable .vsix)
-│   ├── src/             # extension.ts, chatViewProvider.ts (TypeScript)
+├── vscode/              # Records Chat: VSCode sidebar chat view (Open VSX + Marketplace)
+│   ├── src/             # extension.ts, chatViewProvider.ts, commands.ts, webviewContent.ts
 │   ├── media/           # activity-bar SVG + marketplace icon
 │   ├── package.json     # vsce packaging (npm run package)
 │   └── .gitignore       # node_modules, out/, *.vsix
 ├── neovim/              # records.nvim: Neovim Lua plugin
-│   └── lua/records/     # :Records command, chat split
+│   ├── lua/records/     # the plugin itself
+│   ├── plugin/          # registers :Records without setup()
+│   └── doc/             # :help records
+├── emacs/               # records.el: M-x records, one file, no dependencies
 └── ollama/              # Ollama integration guide (two-sided /record — implemented)
 ```
 
@@ -29,11 +33,12 @@ tools/others/
 ### 1. Install the engine
 
 ```bash
-cd python
-pip install -e .
+pipx install recordkit
 ```
 
-The `records` command is now available system-wide.
+The `records` command is now available system-wide. From a clone: `pipx install ./python`.
+
+Installing the editor plugins is one page: [docs/install.md](../../docs/install.md).
 
 ### 2. Try it (from the blyant records repo)
 
@@ -63,22 +68,10 @@ records werden
 # Output: {"old": "0.1.18 fuglekasse-spider", "new": "0.1.19 fuglekasse-scorpion", …}
 ```
 
-### 3. VSCode Plugin
+### 3. The editors
 
-Package once and install permanently (VS Code and VSCodium):
-
-```bash
-cd vscode
-npm install && npm run package
-codium --install-extension records-chat-0.5.0.vsix   # or: code --install-extension …
-```
-
-Reload the editor and click the birdhouse icon in the activity bar (or `Ctrl/Cmd+Shift+R`,
-`Ctrl/Cmd+Shift+\` — `Ctrl+|` on a US layout — or "Records: Open Chat" in the palette; all
-focus the chat input). For development, F5 from `vscode/` still launches an Extension Dev
-Host instead.
-
-In the chat view, type:
+Install steps for all three live on one page — [docs/install.md](../../docs/install.md). Once a
+plugin is in place the panel is identical everywhere:
 
 ```
 /all #linux How To
@@ -88,16 +81,11 @@ hello world
 /gcp docs: update
 ```
 
-### 4. Neovim Plugin
-
-Install via your package manager (e.g. `lazy.nvim`), then:
-
-```vim
-:Records
-/all #linux How To
-hello world
-/esc
-```
+| Editor | Open it | Notes |
+|---|---|---|
+| VS Code / VSCodium | birdhouse icon, `Ctrl/Cmd+Shift+R`, `Ctrl/Cmd+Shift+\`, or "Records: Open Chat" | the only one with Ollama wired |
+| Neovim | `:Records` | `:help records` |
+| Emacs | `M-x records` | `RET` prompts for a line |
 
 ## Mechanical Skills (No AI Needed)
 
@@ -159,7 +147,6 @@ context chip. See `ollama/README.md` for details.
 
 ```bash
 cd python && python -m pytest -q
-# 102 tests, ~0.3s
 ```
 
 ### VSCode
@@ -169,31 +156,74 @@ cd vscode
 npm install
 npm run compile  # or: npm run watch
 F5               # Launch Extension Dev Host
-npm run package  # Build the installable .vsix (then codium/code --install-extension)
+npm run package  # Build the .vsix (a throwaway artefact — gitignored, never packaged)
 ```
 
-### Neovim
+### Neovim, Emacs
 
-No build step — copy the plugin to your runtimepath or manage with a package manager.
+No build step. Neovim: `lua/`, `plugin/`, `doc/` — the layout a package manager expects.
+Emacs: one file, `records.el`.
+
+## Releasing
+
+Both releases are manual and both need credentials, so they are the human's to run.
+
+### The engine → PyPI
+
+The version is not chosen here — it is the werden cycle number, stamped into
+`recordkit/__init__.py` by `/werden` and read by `pyproject.toml`. A structure step *down* the pool
+derives a lower number; bump the epoch in `CURRENT` by hand first, or the older release stays
+"latest" on PyPI. See [naming/README.md](naming/README.md).
+
+```bash
+cd python
+python -m pytest -q                       # test_version.py checks CURRENT == __version__
+rm -rf dist && pipx run build             # sdist + wheel
+python -m zipfile -l dist/*.whl           # must contain recordkit/ and nothing from tools/
+pipx run twine check dist/*
+
+pipx run twine upload --repository testpypi dist/*
+pipx install --index-url https://test.pypi.org/simple/ recordkit   # in a clean container
+records config                            # against a real checkout
+
+pipx run twine upload dist/*              # then PyPI, for real
+```
+
+### The extension → Open VSX, then the Marketplace
+
+Open VSX first: it is what VSCodium users actually query, and Codeberg-first is deliberate here.
+
+```bash
+cd vscode
+npm install && npm run package            # records-chat-<version>.vsix
+npx vsce ls                               # inspect what is about to ship
+
+npx ovsx create-namespace tb4 -p "$OVSX_TOKEN"     # once, ever
+npx ovsx publish records-chat-<version>.vsix -p "$OVSX_TOKEN"
+
+npx vsce publish -p "$AZURE_TOKEN"        # then the Marketplace
+```
+
+The `publisher` field is `tb4` and must match the namespace claimed on each registry. The extension
+keeps its own npm-semver in `package.json` — it is not the engine, and it is not the werden cycle.
 
 ## Conventions
 
 - **Frontmatter output** byte-matches the `.ai/skills/` records (ordering, omitted `tags:` when no tags, `draft:` placement).
 - **Records dir discovery** mirrors the skills exactly (shallowest `hugo.yaml`, then `records/` → `docs/records/` → other fallbacks).
 - **Tag routing** identical: `#tags` → `records/first-tag/`.
-- **Cross-platform**: uses `pathlib` (Python), Lua I/O (Neovim), Node.js child_process (VSCode).
+- **Cross-platform**: uses `pathlib` (Python), Lua I/O (Neovim), Node.js child_process (VSCode), `call-process` (Emacs).
+- **No protocol logic in an editor** — plugins parse a slash command and call the CLI. If an editor needs something the CLI can't do, the CLI grows.
 - **No git hooks or side effects** — the plugins are purely mechanical; they don't touch `.git` or trigger deployments on their own.
 
 ## Files
 
-- `python/.gitignore` — Python bytecode, test cache, build output
+- `python/.gitignore` — Python bytecode, test cache, build output, `uv.lock`
 - `vscode/.gitignore` — Node modules, compiled output, extension package
 - `neovim/.gitignore` — Neovim runtime cache (doc/tags)
 - Root `.gitignore` — added VSCode and Neovim artifacts, not picked up by the subproject ignores
 
 ## Next Steps
 
-- **Test both plugins** against the real blyant records site (create a record, append, feature, commit).
-- **Wire Ollama in Neovim** (the CLI's `ollama-reply` does the HTTP work; VSCode is done) and add the voice skills as system-prompt presets.
-- **Expand to other editors** (Emacs, Vim, etc.) — the CLI is editor-agnostic, so the pattern is straightforward.
-- **Package and ship** — make the engine installable via PyPI/Homebrew/Cargo, plugins via official registries.
+- **Wire Ollama in Neovim and Emacs** (the CLI's `ollama-reply` does the HTTP work; VSCode is done) and add the voice skills as system-prompt presets.
+- **Upload the releases** — the packaging is done and the runbooks are above; PyPI and Open VSX need credentials.
