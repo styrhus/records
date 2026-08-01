@@ -106,6 +106,10 @@ def _build_parser() -> argparse.ArgumentParser:
 
     cf = sub.add_parser("config", help="print the resolved records directory")
     cf.add_argument("--dir")
+
+    # TODO(schrank): register archive/verify/export/attach — parsers and dispatch branches are
+    # written out in the WIRING docstring of each module (recordkit/{archive,verify,export,attach}.py).
+    # Deferred per the parallel-session rule in docs/records/developers/roadmap/README.md.
     return p
 
 

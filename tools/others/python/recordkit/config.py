@@ -35,6 +35,12 @@ def find_hugo_configs(start: Path) -> list[Path]:
     return found
 
 
+def checkout_root(hugo_yaml: Path) -> Path:
+    """The checkout holding hugo/: its parent, or grandparent when nested in tools/."""
+    parent = Path(hugo_yaml).parent.parent
+    return parent.parent if parent.name == "tools" else parent
+
+
 def read_content_dir(hugo_yaml: Path) -> str:
     """First `contentDir:` value in the config, or '../records' when the line is absent."""
     try:

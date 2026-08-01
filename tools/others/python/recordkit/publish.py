@@ -16,6 +16,7 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 
+from .config import checkout_root as _checkout_root
 from .config import find_hugo_configs
 
 _TARGETS = ("pages-branch", "rsync")
@@ -35,12 +36,6 @@ def _param(text: str, name: str, default: str = "") -> str:
         if m and m.group(1):
             return m.group(1).strip().strip('"').strip("'")
     return default
-
-
-def _checkout_root(cfg: Path) -> Path:
-    """The checkout holding hugo/: its parent, or grandparent when nested in tools/."""
-    parent = cfg.parent.parent
-    return parent.parent if parent.name == "tools" else parent
 
 
 def _build(root: Path, outdir: Path) -> None:
