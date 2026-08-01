@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import json
-import re
 import socket
 import urllib.error
 import urllib.request
 from pathlib import Path
 
+from .turns import parse_turns  # the record parser lives in turns.py; re-exported from here
 from .writer import append_turn
 
 DEFAULT_TIMEOUT = 120.0
@@ -17,45 +17,6 @@ MAX_FILE_BYTES = 65536
 MAX_CONTEXT_BYTES = 262144
 MAX_DIR_ENTRIES = 500
 _DIR_IGNORE = {"node_modules", "__pycache__", ".git"}
-
-_HEADINGS = {"## Human": "user", "## User": "user", "## Assistant": "assistant"}
-_NAMED_HUMAN = re.compile(r"^## (?:Human|User) \(.+\)$")
-
-
-def _role_for(line: str) -> str | None:
-    """Heading -> chat role; named turns (## Human (name)) are user turns too."""
-    return _HEADINGS.get(line) or ("user" if _NAMED_HUMAN.match(line) else None)
-
-
-def parse_turns(text: str) -> list[dict]:
-    """Rebuild the chat history from ## Human/## Assistant sections; signature lines stripped."""
-    messages: list[dict] = []
-    role: str | None = None
-    lines: list[str] = []
-
-    def flush() -> None:
-        nonlocal role, lines
-        if role is None:
-            lines = []
-            return
-        content = "\n".join(lines).strip()
-        if role == "assistant":
-            body = content.rsplit("\n", 1)
-            if body[-1].startswith("— "):  # trailing model signature
-                content = body[0].strip() if len(body) > 1 else ""
-        if content:
-            messages.append({"role": role, "content": content})
-        role, lines = None, []
-
-    for line in text.splitlines():
-        heading = _role_for(line.strip())
-        if heading:
-            flush()
-            role = heading
-        else:
-            lines.append(line)
-    flush()
-    return messages
 
 
 def _file_block(path: Path) -> str:
