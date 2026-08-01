@@ -1,19 +1,41 @@
 [project]
 name = "recordkit"
-version = "0.5.0"
+dynamic = ["version"]
 description = "Run the mechanical records skills without AI: create Hugo-frontmatter records, feature, commit/push/deploy, publish, stamp now-playing."
+readme = "README.md"
+license = "MIT"
 requires-python = ">=3.9"
 dependencies = []
+keywords = ["hugo", "markdown", "records", "publishing", "static-site", "ollama"]
+authors = [{ name = "tb4" }]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: End Users/Desktop",
+  "Programming Language :: Python :: 3",
+  "Topic :: Text Processing :: Markup :: Markdown",
+]
+
+[project.urls]
+Homepage = "https://codeberg.org/blyant/records"
+Source = "https://codeberg.org/blyant/records"
+Issues = "https://codeberg.org/blyant/records/issues"
 
 [project.scripts]
 records = "recordkit.cli:main"
 
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 packages = ["recordkit"]
+license-files = ["LICENSE"]
+
+# The one version number: derived from the repo-root CURRENT and stamped into
+# recordkit/__init__.py by /werden. CURRENT is not in the sdist, so the package is the source.
+[tool.setuptools.dynamic]
+version = { attr = "recordkit.__version__" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -7,6 +7,7 @@ import json
 import sys
 from pathlib import Path
 
+from . import __version__
 from . import commit as commit_mod
 from . import config, create, mucke, myname, ollama, publish, stick, werden, writer
 
@@ -28,6 +29,8 @@ def _records_dir(args: argparse.Namespace) -> Path:
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="records",
                                 description="Run the mechanical records skills without AI.")
+    # The werden cycle number — same one CURRENT carries.
+    p.add_argument("--version", action="version", version=f"recordkit {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     n = sub.add_parser("new", help="create a record with Hugo frontmatter (/record, /all, /me)")

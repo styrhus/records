@@ -24,6 +24,21 @@ cycle   <epoch>.<major>.<minor> <structure>-<animal>   e.g.  0.1.18 fuglekasse-s
 The current cycle lives in `CURRENT` at the repo root (one line); living docs carry the greppable
 marker `<!-- werden: <number> <name> -->`. Names are the version; the digits are just their indices.
 
+## The number is also the package version
+
+`/werden` stamps the same number into `tools/others/python/recordkit/__init__.py` as `__version__`,
+and `pyproject.toml` reads it from there. There is one version number in this project, and it is the
+cycle.
+
+That has one consequence worth stating plainly. **Structures are not walked in pool order** — the
+roads on the [roadmap](../../../docs/records/developers/ROADMAP.md) are open, not queued — so a step
+from `badstu` (12) back to `bikube` (3) derives `0.3.1`, which is *lower* than `0.12.1`. Package
+indexes order releases numerically, so the older release would stay "latest" forever.
+
+**The rule: when the structure steps down the pool, bump the epoch by hand in `CURRENT` before
+releasing** — `0.12.1 badstu-flue` → `1.3.1 bikube-flue`. The epoch is human-owned precisely for this
+kind of decision, and `/werden --stamp` propagates a hand-edited epoch without advancing the cycle.
+
 ## The pools
 
 ### [dyr.json](dyr.json) — animals, a size mountain

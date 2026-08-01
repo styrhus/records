@@ -1,3 +1,4 @@
 """recordkit — deterministic, no-AI implementations of the mechanical records skills."""
 
-__version__ = "0.5.0"
+# Derived from the repo-root CURRENT; stamped here by /werden. Never hand-edit.
+__version__ = "0.12.1"

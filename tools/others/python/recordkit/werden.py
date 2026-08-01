@@ -9,6 +9,10 @@ from pathlib import Path
 
 _MARKER = re.compile(r"<!-- werden:[^>]*-->")
 _FASE = re.compile(r"^> Fase — .*$", re.MULTILINE)
+_VERSION = re.compile(r'^__version__ = ".*"$', re.MULTILINE)
+
+# The engine's package version is the cycle number — one version, no second place to edit.
+_VERSION_FILE = ("tools", "others", "python", "recordkit", "__init__.py")
 
 _SKIP_DIRS = {".git", "node_modules", "public", ".mem"}
 # Dirs holding the marker as literal text (this mirror, the skill), repo-relative.
@@ -54,6 +58,18 @@ def _stamp_docs(repo: Path, line: str) -> list[str]:
     return sorted(updated)
 
 
+def _stamp_version(repo: Path, num: str) -> bool:
+    """Rewrite recordkit's __version__ to the cycle number; False when the file isn't there."""
+    f = repo.joinpath(*_VERSION_FILE)
+    if not f.is_file():
+        return False
+    text = f.read_text(encoding="utf-8")
+    new_text, n = _VERSION.subn(f'__version__ = "{num}"', text, count=1)
+    if n:
+        f.write_text(new_text, encoding="utf-8")
+    return bool(n)
+
+
 def cycle(repo: Path, structure: str | None = None, stamp: bool = False) -> dict:
     """Mirror of .ai/skills/werden/werden.sh — same modes, same state file, same stamping."""
     repo = Path(repo)
@@ -94,6 +110,7 @@ def cycle(repo: Path, structure: str | None = None, stamp: bool = False) -> dict
     state.write_text(f"{num} {new}\n", encoding="utf-8")
 
     updated = _stamp_docs(repo, f"<!-- werden: {num} {new} -->")
+    version_stamped = _stamp_version(repo, num)
 
     readme = repo / "README.md"
     text = readme.read_text(encoding="utf-8") if readme.is_file() else ""
@@ -103,7 +120,8 @@ def cycle(repo: Path, structure: str | None = None, stamp: bool = False) -> dict
 
     result = {"old": f"{old_num} {old}".strip(), "new": f"{num} {new}",
               "state": str(state), "markers_updated": updated,
-              "fase_line": fase_line, "stamp_only": stamp}
+              "fase_line": fase_line, "version_stamped": version_stamped,
+              "stamp_only": stamp}
     if warnings:
         result["warnings"] = warnings
     return result

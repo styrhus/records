@@ -111,6 +111,14 @@ while IFS= read -r f; do
   updated+=("${f#"$ROOT"/}")
 done < <(grep -rlIF --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=public --exclude-dir=.mem -- '<!-- werden:' "$ROOT" 2>/dev/null || true)
 
+# --- engine version: the cycle number is recordkit's package version, no second place to edit ---
+VERSION_FILE="$ROOT/tools/others/python/recordkit/__init__.py"
+version_stamped=""
+if [[ -f "$VERSION_FILE" ]] && grep -qE '^__version__ = ".*"$' "$VERSION_FILE"; then
+  sed -i -E "s/^__version__ = \".*\"$/__version__ = \"$NUM\"/" "$VERSION_FILE"
+  version_stamped="yes"
+fi
+
 # --- README fase line: the one place the cycle is worn in the open, not whispered in comments ---
 README="$ROOT/README.md"
 fase_renamed=""
@@ -132,4 +140,9 @@ if [[ -n "$fase_renamed" ]]; then
   echo "fase line: > Fase — $NUM $NEW"
 else
   echo "fase line: NOT FOUND — seed  '> Fase — $NUM $NEW'  near the bottom of README.md (see SKILL.md)"
+fi
+if [[ -n "$version_stamped" ]]; then
+  echo "engine version: recordkit __version__ = $NUM"
+else
+  echo "engine version: NOT FOUND — expected __version__ in ${VERSION_FILE#"$ROOT"/}"
 fi

@@ -11,3 +11,6 @@ dist/
 # Local virtualenvs
 .venv/
 venv/
+
+# uv's lockfile — recordkit has no dependencies to lock
+uv.lock

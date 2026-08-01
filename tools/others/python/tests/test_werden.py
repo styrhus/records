@@ -38,6 +38,21 @@ def test_offlist_structure_warns_major_zero(tmp_path):
     assert any("strukturer.json" in w for w in out["warnings"])
 
 
+def test_engine_version_stamped(tmp_path):
+    repo = _repo(tmp_path, "0.1.1 fuglekasse-flue\n")
+    init = repo / "tools" / "others" / "python" / "recordkit" / "__init__.py"
+    init.parent.mkdir(parents=True)
+    init.write_text('"""doc."""\n\n__version__ = "0.0.0"\n', encoding="utf-8")
+    out = werden.cycle(repo)
+    assert out["version_stamped"]
+    assert '__version__ = "0.1.2"' in init.read_text(encoding="utf-8")
+
+
+def test_missing_version_file_reported(tmp_path):
+    out = werden.cycle(_repo(tmp_path, "0.1.1 fuglekasse-flue\n"))
+    assert out["version_stamped"] is False
+
+
 def test_stamp_keeps_name(tmp_path):
     repo = _repo(tmp_path, "0.1.2 fuglekasse-beetle\n")
     out = werden.cycle(repo, stamp=True)

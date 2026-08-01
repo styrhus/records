@@ -39,10 +39,15 @@ line near the bottom (the script renames it):
 > Fase — <number> <structure>-<animal>
 ```
 
+The engine's package version is the same number: the script stamps `__version__` in
+`tools/others/python/recordkit/__init__.py`, so PyPI speaks werden and there is no second version to
+maintain. A structure step *down* the pool derives a lower number — bump the epoch by hand in
+`CURRENT` before releasing, or the older release stays "latest" on PyPI.
+
 ## Steps
 
 1. Run the script — it computes the next name, writes `CURRENT`, rewrites every existing marker,
-   and renames the README's `> Fase — …` line:
+   stamps the engine version, and renames the README's `> Fase — …` line:
 
    ```
    .ai/skills/werden/werden.sh $ARGUMENTS
