@@ -1,0 +1,279 @@
+{{ define "main" }}
+  {{ $mode := site.Params.pageMode | default "basic" }}
+  {{ $dfmt := site.Params.datePostFormat }}
+  {{ $showTags := site.Params.showTags }}
+  {{ if not (in (slice "basic" "posts" "single" "single-flowing") $mode) }}
+    {{ warnf "Postkasse: unknown pageMode %q, falling back to \"basic\"" $mode }}
+    {{ $mode = "basic" }}
+  {{ end }}
+  {{ $order := site.Params.singleOrder | default "asc" }}
+  {{ if not (in (slice "asc" "desc") $order) }}
+    {{ warnf "Postkasse: unknown singleOrder %q, falling back to \"asc\"" $order }}
+    {{ $order = "asc" }}
+  {{ end }}
+  {{ $chapterState := site.Params.chapterState | default "latest" }}
+  {{ if not (in (slice "latest" "expanded" "collapsed") $chapterState) }}
+    {{ warnf "Postkasse: unknown chapterState %q, falling back to \"latest\"" $chapterState }}
+    {{ $chapterState = "latest" }}
+  {{ end }}
+  {{ $showFilter := site.Params.showFilter | default false }}
+  {{ if and $showFilter (ne $mode "single") }}
+    {{ warnf "Postkasse: showFilter is only honoured in pageMode \"single\"" }}
+  {{ end }}
+
+  {{ $all := where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" }}
+  {{/* demoMode: theme-shipped demo records (demo: true) render only while the
+       site has no real records; demoMode false never shows them. */}}
+  {{ $real := where $all "Params.demo" "!=" true }}
+  {{ if or $real (not site.Params.demoMode) }}{{ $all = $real }}{{ end }}
+  {{/* chapterState "latest": the chapter holding the newest record stays open. */}}
+  {{ $latestSection := "" }}
+  {{ if $all }}{{ $latestSection = (index (sort $all "Date" "desc") 0).Section }}{{ end }}
+
+  {{/* posts mode paginates; greeting + intro render on page 1 only. */}}
+  {{ $paginator := false }}
+  {{ if eq $mode "posts" }}
+    {{ $sorted := sort (where $all "Params.featured" true) "Date" "desc" | append (sort (where $all "Params.featured" "!=" true) "Date" "desc") }}
+    {{ $paginator = .Paginate $sorted (site.Params.postsCount | default 3) }}
+  {{ end }}
+  {{ $firstPage := or (not $paginator) (eq $paginator.PageNumber 1) }}
+
+  {{ if $firstPage }}{{ with site.Params.greeting }}<h1 class="greeting">{{ . }}</h1>{{ end }}{{ end }}
+
+  {{/* Chapters: first-level folders named as numbers — arabic or roman — group
+       their records under a collapsible title in single/basic modes.
+       single-flowing flattens: no grouping, every record joins $loose. */}}
+  {{ $arabic := slice }}
+  {{ $roman := slice }}
+  {{ $chapterNames := slice }}
+  {{ if in (slice "single" "basic") $mode }}
+    {{ range $all.GroupBy "Section" }}
+      {{ $name := .Key }}
+      {{/* Optional chapter title from records/<n>/_index.md; .File guards that
+           the section page exists, the compare drops Hugo's humanised default. */}}
+      {{ $title := "" }}
+      {{/* override "open"/"closed" from _index.md chapterOpen; isset keeps false ≠ unset. */}}
+      {{ $override := "" }}
+      {{ with site.GetPage $name }}
+        {{ if and .File (ne (lower .Title) (lower $name)) }}{{ $title = .Title }}{{ end }}
+        {{ if isset .Params "chapteropen" }}{{ $override = cond .Params.chapteropen "open" "closed" }}{{ end }}
+      {{ end }}
+      {{/* Global chapterState, then the per-chapter override wins. */}}
+      {{ $open := false }}
+      {{ if eq $chapterState "expanded" }}{{ $open = true }}
+      {{ else if eq $chapterState "latest" }}{{ $open = eq $name $latestSection }}{{ end }}
+      {{ if eq $override "open" }}{{ $open = true }}{{ else if eq $override "closed" }}{{ $open = false }}{{ end }}
+      {{ if findRE `^-?\d+$` $name }}
+        {{ $arabic = $arabic | append (dict "name" $name "num" (int $name) "title" $title "open" $open "pages" .Pages) }}
+        {{ $chapterNames = $chapterNames | append $name }}
+      {{ else if and $name (findRE `^m{0,3}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3})$` (lower $name)) }}
+        {{/* Roman → int: subtract a numeral standing before a larger one, else add. */}}
+        {{ $vals := dict "i" 1 "v" 5 "x" 10 "l" 50 "c" 100 "d" 500 "m" 1000 }}
+        {{ $chars := split (lower $name) "" }}
+        {{ $num := 0 }}
+        {{ range $i, $ch := $chars }}
+          {{ $v := index $vals $ch }}
+          {{ if and (lt (add $i 1) (len $chars)) (lt $v (index $vals (index $chars (add $i 1)))) }}
+            {{ $num = sub $num $v }}
+          {{ else }}
+            {{ $num = add $num $v }}
+          {{ end }}
+        {{ end }}
+        {{ $roman = $roman | append (dict "name" $name "num" $num "title" $title "open" $open "pages" .Pages) }}
+        {{ $chapterNames = $chapterNames | append $name }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+  {{/* Chapter sequence is fixed ascending, arabic block before roman; singleOrder only orders records within. */}}
+  {{ $chapters := sort $arabic "num" | append (sort $roman "num") }}
+  {{ $loose := where $all "Section" "not in" $chapterNames }}
+
+  {{/* bookLook (single-flowing only): records/forside.md, side-1.md and bakside.md
+       become front cover, page 1 and back cover — forside replaces the _index intro,
+       bakside closes the stream; dated records keep singleOrder between them.
+       $flow is the final flowing order, shared by the stream and the TOC. */}}
+  {{ $bookLook := site.Params.bookLook | default false }}
+  {{ $forside := false }}
+  {{ $flow := slice }}
+  {{ if eq $mode "single-flowing" }}
+    {{ $side1 := false }}
+    {{ $bakside := false }}
+    {{ if $bookLook }}
+      {{ $rest := slice }}
+      {{ range $loose }}
+        {{ if and (not .Section) (eq .File.ContentBaseName "forside") }}{{ $forside = . }}
+        {{ else if and (not .Section) (eq .File.ContentBaseName "side-1") }}{{ $side1 = . }}
+        {{ else if and (not .Section) (eq .File.ContentBaseName "bakside") }}{{ $bakside = . }}
+        {{ else }}{{ $rest = $rest | append . }}{{ end }}
+      {{ end }}
+      {{ $loose = $rest }}
+    {{ end }}
+    {{ with $forside }}{{ $flow = $flow | append . }}{{ end }}
+    {{ with $side1 }}{{ $flow = $flow | append . }}{{ end }}
+    {{ with sort $loose "Date" $order }}{{ $flow = $flow | append . }}{{ end }}
+    {{ with $bakside }}{{ $flow = $flow | append . }}{{ end }}
+  {{ else if $bookLook }}
+    {{ warnf "Postkasse: bookLook is only honoured in pageMode \"single-flowing\"" }}
+  {{ end }}
+
+  {{/* Floating table of contents (params.showToc): top-right, collapsed; home page, single/basic modes. */}}
+  {{ if and site.Params.showToc (ne $mode "posts") (or $loose $chapters $flow) }}
+    {{ $isSingle := in (slice "single" "single-flowing") $mode }}
+    {{ $dir := cond $isSingle $order "desc" }}
+    <details class="toc">
+      <summary aria-label="Table of contents"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></summary>
+      <nav class="toc-body">
+        {{/* single-flowing lists $flow as-is so bookLook's cover/back-cover order carries over. */}}
+        {{ $tocLoose := sort $loose "Date" $dir }}
+        {{ if eq $mode "single-flowing" }}{{ $tocLoose = $flow }}{{ end }}
+        {{ with $tocLoose }}
+          <ul class="toc-loose">
+            {{ range . }}
+              <li><a href="{{ cond $isSingle (printf "#%s" (path.Base .RelPermalink)) .RelPermalink }}">{{ partial "inline/record-title.html" . }}</a></li>
+            {{ end }}
+          </ul>
+        {{ end }}
+        {{ range $chapters }}
+          <details class="toc-chapter">
+            <summary>{{ .name }}{{ with .title }} — {{ . }}{{ end }}</summary>
+            <ul>
+              {{ range sort .pages "Date" $dir }}
+                <li><a href="{{ cond $isSingle (printf "#%s" (path.Base .RelPermalink)) .RelPermalink }}">{{ partial "inline/record-title.html" . }}</a></li>
+              {{ end }}
+            </ul>
+          </details>
+        {{ end }}
+      </nav>
+    </details>
+  {{ end }}
+
+  {{ if eq $mode "single" }}
+    {{/* One-page document stack: _index first, loose records per singleOrder, then chapters. */}}
+    {{ if $showFilter }}{{ partial "inline/filter.html" $all }}{{ end }}
+    <article class="record-page">{{ .Content }}</article>
+    {{ range sort $loose "Date" $order }}
+      {{ partial "inline/record-card.html" . }}
+    {{ end }}
+    {{ range $chapters }}
+      <details class="chapter"{{ if .open }} open{{ end }}>
+        <summary id="chapter-{{ .name }}">{{ .name }}{{ with .title }} — {{ . }}{{ end }}<a class="anchor" href="#chapter-{{ .name }}" aria-label="Link to this chapter">#</a></summary>
+        {{ range sort .pages "Date" $order }}
+          {{ partial "inline/record-card.html" . }}
+        {{ end }}
+      </details>
+    {{ end }}
+  {{ else if eq $mode "single-flowing" }}
+    {{/* Continuous conversation: intro, then bare turn streams split by a dinkus.
+         With bookLook, forside stands in for the intro. */}}
+    {{ if not $forside }}{{ .Content }}{{ end }}
+    {{ range $i, $r := $flow }}
+      {{ if $i }}<div class="record-sep" aria-hidden="true">· · ·</div>{{ end }}
+      {{ $book := "" }}
+      {{ if and $bookLook (not $r.Section) (in (slice "forside" "side-1" "bakside") $r.File.ContentBaseName) }}{{ $book = printf " book-%s" $r.File.ContentBaseName }}{{ end }}
+      <article class="record-flow{{ $book }}" id="{{ path.Base $r.RelPermalink }}"{{ with $r.Params.language }} lang="{{ . }}"{{ end }}>
+        {{ partial "record.html" (dict "content" $r.Content "prefix" (path.Base $r.RelPermalink) "voice" $r.Params.voiceRecorded) }}
+      </article>
+    {{ end }}
+  {{ else if eq $mode "posts" }}
+    {{ if $firstPage }}{{ .Content }}{{ end }}
+    {{/* Excerpt feed, paginated postsCount at a time (newest first, featured pinned). */}}
+    {{ range $paginator.Pages }}
+      <article class="post">
+        <h2><a href="{{ .RelPermalink }}">{{ partial "inline/record-title.html" . }}</a></h2>
+        {{ partial "record.html" (dict "content" .Summary "prefix" (path.Base .RelPermalink) "voice" .Params.voiceRecorded) }}
+        {{ if .Truncated }}<p class="more"><a href="{{ .RelPermalink }}">Read more →</a></p>{{ end }}
+        {{ if and $showTags (ne .Params.showTags false) .Params.tags }}<p class="post-tags">{{ range .Params.tags }}<span>#{{ . }}</span> {{ end }}</p>{{ end }}
+        {{ if and $dfmt (ne .Params.showDate false) }}<p class="post-date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format $dfmt .Date }}</time></p>{{ end }}
+      </article>
+    {{ end }}
+    {{ if or $paginator.HasPrev $paginator.HasNext }}
+      {{/* Newer → previous 3 (or front page); Previous → next 3 older. */}}
+      <nav class="pager">
+        {{ if $paginator.HasPrev }}<a class="newer" href="{{ $paginator.Prev.URL }}">← Newer</a>{{ end }}
+        {{ if $paginator.HasNext }}<a class="previous" href="{{ $paginator.Next.URL }}">Previous →</a>{{ end }}
+      </nav>
+    {{ end }}
+  {{ else }}
+    {{ .Content }}
+    {{/* basic: link index (featured pinned, newest-first); loose records first, then chapters. */}}
+    {{ partial "inline/record-list.html" $loose }}
+    {{ range $chapters }}
+      <details class="chapter"{{ if .open }} open{{ end }}>
+        <summary id="chapter-{{ .name }}">{{ .name }}{{ with .title }} — {{ . }}{{ end }}<a class="anchor" href="#chapter-{{ .name }}" aria-label="Link to this chapter">#</a></summary>
+        {{ partial "inline/record-list.html" .pages }}
+      </details>
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{/* One record as a single-mode document card. */}}
+{{ define "_partials/inline/record-card.html" }}
+  {{ $id := path.Base .RelPermalink }}
+  <article class="record-page"{{ with .Params.language }} lang="{{ . }}"{{ end }}{{ with .Params.tags }} data-tags="{{ delimit . "," }}"{{ end }} data-date="{{ .Date.Format "2006-01-02" }}">
+    {{ partial "lang-badge.html" . }}
+    <h2 class="record-head" id="{{ $id }}">{{ partial "inline/record-title.html" . }}<a class="anchor" href="#{{ $id }}" aria-label="Link to this record">#</a></h2>
+    {{ partial "record.html" (dict "content" .Content "prefix" $id "voice" .Params.voiceRecorded) }}
+    {{ if and site.Params.showTags (ne .Params.showTags false) .Params.tags }}<p class="post-tags">{{ range .Params.tags }}<span>#{{ . }}</span> {{ end }}</p>{{ end }}
+    {{ if and site.Params.datePostFormat (ne .Params.showDate false) }}<p class="post-date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format site.Params.datePostFormat .Date }}</time></p>{{ end }}
+    {{ partial "comment-link.html" . }}
+  </article>
+{{ end }}
+
+{{/* A set of records as the basic-mode link list, featured pinned, newest first. */}}
+{{ define "_partials/inline/record-list.html" }}
+  {{ $sorted := sort (where . "Params.featured" true) "Date" "desc" | append (sort (where . "Params.featured" "!=" true) "Date" "desc") }}
+  {{ with $sorted }}
+  <ul class="records">
+    {{ range . }}
+      <li>
+        <a href="{{ .RelPermalink }}">{{ partial "inline/record-title.html" . }}</a>
+      </li>
+    {{ end }}
+  </ul>
+  {{ end }}
+{{ end }}
+
+{{/* Filter popper (params.showFilter, single mode): tag/language/date controls over the record cards. */}}
+{{ define "_partials/inline/filter.html" }}
+  {{ $tags := slice }}
+  {{ $langs := slice }}
+  {{ $hasNoLang := false }}
+  {{ range . }}
+    {{ range .Params.tags }}{{ $tags = $tags | append . }}{{ end }}
+    {{ with .Params.language }}{{ $langs = $langs | append . }}{{ else }}{{ $hasNoLang = true }}{{ end }}
+  {{ end }}
+  {{ $tags = sort (uniq $tags) }}
+  {{ $langs = sort (uniq $langs) }}
+  <details class="filter{{ if site.Params.spotify }} beside-spotify{{ end }}">
+    <summary aria-label="Filter records"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg></summary>
+    <form class="filter-body">
+      {{ with $tags }}
+      <fieldset><legend>Tags</legend>
+        {{ range . }}<label><input type="checkbox" name="tags" value="{{ . }}"> #{{ . }}</label>{{ end }}
+      </fieldset>
+      {{ end }}
+      {{ with $langs }}
+      <fieldset><legend>Language</legend>
+        {{ range . }}<label><input type="checkbox" name="language" value="{{ . }}"> {{ . }}</label>{{ end }}
+        {{ if $hasNoLang }}<label><input type="checkbox" name="language" value="none"> (none)</label>{{ end }}
+      </fieldset>
+      {{ end }}
+      <fieldset><legend>Date</legend>
+        <label>From <input type="date" name="from"></label>
+        <label>To <input type="date" name="to"></label>
+      </fieldset>
+      <fieldset><legend>Word</legend>
+        <input type="search" name="word" placeholder="text or regex">
+      </fieldset>
+      <button type="button" class="filter-clear">Clear</button>
+    </form>
+  </details>
+{{ end }}
+
+{{/* A record's display title: hand-written .Title, else the timestamp slug via dateTitleFormat. */}}
+{{ define "_partials/inline/record-title.html" }}
+  {{- $fmt := site.Params.dateTitleFormat -}}
+  {{- $key := .File.ContentBaseName -}}
+  {{- if not (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $key) }}{{ $key = .Date.Format "2006-01-02_15-04" }}{{ end -}}
+  {{- if and .Title (ne .Title $key) }}{{ .Title }}{{ else }}<time datetime="{{ substr $key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .Date }}{{ else }}{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}{{ end }}</time>{{ end -}}
+{{ end }}

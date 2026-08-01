@@ -1,0 +1,11 @@
+{{- /* URL for a built asset (assets/ pipeline): prefixed with params.cdnURL in production builds,
+       site-relative otherwise. Takes a resource, not a path — .RelPermalink already carries the
+       baseURL sub-path, which the CDN form strips before re-prefixing. See static-url.html for
+       files served straight from static/. */ -}}
+{{- $rel := .RelPermalink -}}
+{{- if and hugo.IsProduction site.Params.cdnURL -}}
+{{- $base := (urls.Parse site.BaseURL).Path -}}
+{{- printf "%s/%s" (strings.TrimSuffix "/" site.Params.cdnURL) (strings.TrimPrefix "/" (strings.TrimPrefix $base $rel)) -}}
+{{- else -}}
+{{- $rel -}}
+{{- end -}}

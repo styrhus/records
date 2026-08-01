@@ -1,0 +1,10 @@
+name = "Postkasse"
+license = "MIT"
+licenselink = "https://codeberg.org/blyant/records/src/branch/main/LICENSE.md"
+description = "The growth theme for blyant records — Fuglekasse's shape with an assets pipeline, room for search, backlinks and feeds."
+homepage = "https://codeberg.org/blyant/records"
+min_version = "0.158.0"
+tags = ["blog", "transcripts", "search"]
+
+[author]
+  name = "tb4"

@@ -1,0 +1,17 @@
+{{ define "main" }}
+  <article>
+    {{ partial "lang-badge.html" . }}
+    {{ $fmt := site.Params.dateTitleFormat }}
+    {{- if and $fmt (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` .Title) }}
+    <h1><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format $fmt .Date }}</time></h1>
+    {{- else }}
+    {{- with .Title }}
+    <h1>{{ . }}</h1>
+    {{- end }}
+    {{- end }}
+    {{ partial "record.html" (dict "content" .Content "voice" .Params.voiceRecorded) }}
+    {{ if and site.Params.showTags (ne .Params.showTags false) .Params.tags }}<p class="post-tags">{{ range .Params.tags }}<span>#{{ . }}</span> {{ end }}</p>{{ end }}
+    {{ if and site.Params.datePostFormat (ne .Params.showDate false) }}<p class="post-date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format site.Params.datePostFormat .Date }}</time></p>{{ end }}
+    {{ partial "comment-link.html" . }}
+  </article>
+{{ end }}

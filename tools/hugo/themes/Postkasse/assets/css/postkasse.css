@@ -1,0 +1,176 @@
+{{- /* Executed as a template by baseof.html so params.style lands in the palette. */ -}}
+{{- $s := site.Params.style -}}
+/* Palette + display font come from hugo.yaml params.style (see the theme README). */
+:root {
+  color-scheme: light dark;
+  --bg: {{ $s.light.bg | safeCSS }};
+  --fg: {{ $s.light.fg | safeCSS }};
+  --dim: {{ $s.light.dim | safeCSS }};
+  --accent: {{ $s.light.accent | safeCSS }};
+  --surface: {{ $s.light.surface | safeCSS }};
+  --card: {{ $s.light.card | safeCSS }};
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: {{ $s.dark.bg | safeCSS }};
+    --fg: {{ $s.dark.fg | safeCSS }};
+    --dim: {{ $s.dark.dim | safeCSS }};
+    --accent: {{ $s.dark.accent | safeCSS }};
+    --surface: {{ $s.dark.surface | safeCSS }};
+    --card: {{ $s.dark.card | safeCSS }};
+  }
+}
+body {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+  font-family: system-ui, sans-serif;
+  line-height: 1.65;
+  background: var(--bg);
+  color: var(--fg);
+}
+header { margin-bottom: 2.5rem; }
+header a { font-weight: 600; text-decoration: none; color: inherit; }
+h1, h2 { line-height: 1.25; }
+h2 { margin: 2.75rem 0 0.4rem; }
+a { color: var(--accent); }
+a:hover { text-decoration: underline; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+::selection { background: var(--accent); color: var(--bg); }
+section:empty { display: none; }
+section.user { border-left: 3px solid var(--accent); padding-left: 1rem; }
+section.user h2, section.assistant h2 { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; margin: 2.5rem 0 0.25rem; }
+section.user h2 { color: var(--accent); }
+section.assistant h2 { color: var(--fg); }
+section.assistant { opacity: 0.75; }
+code, pre { font-size: 0.9em; background: var(--surface); }
+code { padding: 0.1em 0.3em; border-radius: 3px; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 0.75rem; border-radius: 6px; }
+pre code { padding: 0; background: none; }
+.highlight { margin: 1rem 0; }
+.highlight pre { margin: 0; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid var(--dim); padding: 0.4em 0.7em; text-align: left; }
+tbody tr:nth-child(even) { background: var(--surface); }
+blockquote { margin: 1rem 0; padding: 0.6rem 1rem; border-left: 4px solid var(--accent); background: var(--surface); border-radius: 4px; }
+blockquote > :first-child { margin-top: 0; }
+blockquote > :last-child { margin-bottom: 0; }
+blockquote pre, blockquote code { background: var(--bg); } /* --surface on --surface would blend */
+/* Syntax colours track light/dark. Light = Tokyo Night Light, dark = Dracula — matching params.style. */
+:root {
+  --hl-comment: #757985; --hl-keyword: #6c17b2; --hl-string: #085726;
+  --hl-number: #8b2800; --hl-func: #0c3bbf; --hl-builtin: #004f7b; --hl-var: #980d0d;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --hl-comment: #9aabde; --hl-keyword: #ff79c6; --hl-string: #f1fa8c;
+    --hl-number: #bd93f9; --hl-func: #50fa7b; --hl-builtin: #8be9fd; --hl-var: #ffb86c;
+  }
+}
+.chroma .c, .chroma .ch, .chroma .cm, .chroma .c1, .chroma .cs, .chroma .cp, .chroma .cpf { color: var(--hl-comment); font-style: italic; }
+.chroma .k, .chroma .kc, .chroma .kd, .chroma .kn, .chroma .kp, .chroma .kr, .chroma .o, .chroma .ow { color: var(--hl-keyword); }
+.chroma .s, .chroma .sa, .chroma .sb, .chroma .sc, .chroma .dl, .chroma .sd, .chroma .s2, .chroma .se, .chroma .sh, .chroma .si, .chroma .sx, .chroma .sr, .chroma .s1, .chroma .ss { color: var(--hl-string); }
+.chroma .m, .chroma .mb, .chroma .mf, .chroma .mh, .chroma .mi, .chroma .il, .chroma .mo { color: var(--hl-number); }
+.chroma .nf, .chroma .fm { color: var(--hl-func); }
+.chroma .nb, .chroma .bp, .chroma .nt, .chroma .kt { color: var(--hl-builtin); }
+.chroma .nv, .chroma .vc, .chroma .vg, .chroma .vi, .chroma .na, .chroma .gd { color: var(--hl-var); }
+.chroma .gi { color: var(--hl-string); }
+.chroma .err { color: var(--hl-var); }
+.post-date { text-align: right; font-size: 0.85em; color: var(--dim); margin: 0.5rem 0 0; }
+.post-tags { font-size: 0.85em; color: var(--dim); margin: 0.5rem 0 0; }
+ul.records { list-style: none; padding: 0; }
+ul.records li { margin: 0.6rem 0; }
+/* posts mode: excerpt feed */
+.mode-posts .post { margin: 2.5rem 0; }
+.mode-posts .post h2 { margin-bottom: 0.4rem; }
+.mode-posts .post .more { font-size: 0.9em; }
+.mode-posts .pager { display: flex; margin: 3rem 0 0; font-size: 0.9em; }
+.mode-posts .pager .previous { margin-left: auto; }
+/* single mode: each record is a flowing "document" card, gap between them */
+.mode-single .record-page {
+  background: var(--card);
+  border: 1px solid var(--surface);
+  border-radius: 8px;
+  padding: 2rem 1.75rem;
+  margin-bottom: 3.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,.14);
+}
+.mode-single .record-page:last-child { margin-bottom: 0; }
+.mode-single .record-head { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); margin: 0 0 1rem; }
+/* single-flowing mode: bare turn stream, records split by a dimmed dinkus */
+.record-sep { text-align: center; color: var(--dim); letter-spacing: 0.5em; text-indent: 0.5em; margin: 2.5rem 0; user-select: none; }
+/* Hover "#" anchors on single-mode record titles, every Human turn heading, and chapter summaries. */
+.record-head, section.user h2, details.chapter > summary { scroll-margin-top: 1rem; }
+.anchor { margin-left: 0.4em; color: var(--dim); text-decoration: none; opacity: 0; transition: opacity 0.15s; }
+.record-head:hover .anchor, section.user h2:hover .anchor, details.chapter > summary:hover .anchor, .anchor:focus { opacity: 1; }
+.anchor:hover { text-decoration: none; }
+/* Mic icon on Human headings of voiceRecorded records. */
+.voice-icon svg { height: 0.7em; width: auto; margin-left: 0.4em; color: var(--accent); vertical-align: baseline; }
+/* Language badge (frontmatter "language"), top right of records. */
+.record-lang { float: right; font-size: 0.8em; color: var(--dim); margin: 0.3rem 0 0 0.6em; }
+.record-lang svg { height: 0.9em; width: auto; vertical-align: -0.08em; }
+/* Chapters: numbered records/ folders fold under a clickable title. */
+details.chapter { margin: 2.5rem 0; }
+details.chapter > summary { cursor: pointer; font-size: 1.3em; font-weight: 600; line-height: 1.25; }
+details.chapter > summary::marker { color: var(--dim); }
+details.chapter > summary:hover { color: var(--accent); }
+details.chapter[open] > summary { margin-bottom: 1rem; }
+footer { margin-top: 4rem; font-size: 0.85em; color: var(--dim); }
+footer sup { font-size: 0.7em; }
+/* Optional brand mark, pinned to the viewport corner (params.logo). */
+.site-logo { position: fixed; right: 1rem; bottom: 1rem; width: 48px; height: auto; }
+/* Scroll-to-top button: centre-bottom, shown once the opening viewport scrolls away. */
+.scroll-to-top { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); width: 48px; height: 48px; padding: 0; border: none; border-radius: 50%; background: var(--accent); cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.2s, transform 0.2s, background 0.2s; z-index: 1000; }
+.scroll-to-top.visible { opacity: 1; visibility: visible; }
+.scroll-to-top:hover { transform: translateX(-50%) scale(1.12); background: var(--fg); }
+.scroll-to-top svg { width: 22px; height: 22px; fill: none; stroke: var(--bg); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+/* Floating table of contents (params.showToc): collapsed button top-right, panel drops below. */
+.toc { position: fixed; top: 1rem; right: 1rem; z-index: 1000; }
+.toc > summary { list-style: none; cursor: pointer; width: 44px; height: 44px; margin-left: auto; border-radius: 8px; background: var(--surface); color: var(--fg); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,.14); }
+.toc > summary::-webkit-details-marker { display: none; }
+.toc > summary::marker { content: ""; }
+.toc > summary:hover, .toc[open] > summary { background: var(--accent); color: var(--bg); }
+.toc > summary svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.toc-body { margin-top: 0.5rem; padding: 0.75rem 1rem; max-width: min(18rem, calc(100vw - 2rem)); max-height: calc(100vh - 5rem); overflow-y: auto; background: var(--surface); border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,.14); font-size: 0.9em; line-height: 1.5; }
+.toc-body ul { list-style: none; margin: 0; padding: 0; }
+.toc-body li { margin: 0.25rem 0; }
+.toc-body a { text-decoration: none; color: var(--fg); }
+.toc-body a:hover { color: var(--accent); text-decoration: underline; }
+.toc-loose { margin-bottom: 0.5rem; }
+.toc-chapter > summary { cursor: pointer; font-weight: 600; margin: 0.4rem 0 0.2rem; }
+.toc-chapter > summary::marker { color: var(--dim); }
+.toc-chapter > ul { padding-left: 0.9rem; }
+/* Spotify badge (params.spotify): dim logo pinned bottom-left, opposite params.logo; player opens above it. */
+.spotify { position: fixed; left: 1rem; bottom: 1rem; z-index: 1000; }
+.spotify > summary { list-style: none; cursor: pointer; color: var(--dim); }
+.spotify > summary::-webkit-details-marker { display: none; }
+.spotify > summary::marker { content: ""; }
+.spotify > summary:hover, .spotify[open] > summary { color: var(--accent); }
+.spotify > summary svg { display: block; width: 16px; height: 16px; fill: currentColor; }
+.spotify-body { position: absolute; left: 0; bottom: calc(100% + 0.5rem); width: min(22rem, calc(100vw - 2rem)); background: var(--surface); border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.14); }
+.spotify-body iframe { display: block; width: 100%; height: min(352px, calc(100vh - 6rem)); border: 0; border-radius: 12px; }
+.spotify-body iframe[data-src] { display: none; } /* unloaded; JS swaps in src on first open, no-JS uses the noscript iframe */
+/* Record filter (params.showFilter, single mode): funnel bottom-left, panel opens above it. */
+.filter { position: fixed; left: 1rem; bottom: 1rem; z-index: 1000; }
+.filter.beside-spotify { left: 2.75rem; } /* clear the 16px Spotify logo + gap */
+.filter > summary { list-style: none; cursor: pointer; color: var(--dim); }
+.filter > summary::-webkit-details-marker { display: none; }
+.filter > summary::marker { content: ""; }
+.filter > summary:hover, .filter[open] > summary { color: var(--accent); }
+.filter > summary svg { display: block; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.filter-body { position: absolute; left: 0; bottom: calc(100% + 0.5rem); width: min(16rem, calc(100vw - 2rem)); max-height: calc(100vh - 6rem); overflow-y: auto; padding: 0.75rem 1rem; background: var(--surface); border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.14); font-size: 0.9em; line-height: 1.5; }
+.filter-body fieldset { border: none; margin: 0 0 0.5rem; padding: 0; }
+.filter-body legend { font-weight: 600; padding: 0; }
+.filter-body label { display: block; }
+.filter-body input[type="search"] { width: 100%; box-sizing: border-box; font: inherit; }
+.filter-clear { font: inherit; color: var(--fg); background: var(--card); border: none; border-radius: 6px; padding: 0.15rem 0.6rem; cursor: pointer; }
+.filter-clear:hover { color: var(--accent); }
+.filter-hidden { display: none; }
+::highlight(word-match) { background-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+/* Architects Daughter by Kimberly Geswein — SIL OFL 1.1, see fonts/OFL.txt. */
+@font-face {
+  font-family: "{{ $s.font | safeCSS }}";
+  src: url("{{ partial "static-url.html" $s.fontfile }}") format("woff2");
+  font-display: swap;
+}
+.greeting { font-family: "{{ $s.font | safeCSS }}", cursive; font-size: 3.5rem; line-height: 1.15; margin: 0 0 1.75rem; }

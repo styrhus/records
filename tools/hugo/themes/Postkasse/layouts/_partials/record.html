@@ -1,0 +1,14 @@
+{{/* Takes {content, prefix?, voice?}: content is rendered record HTML (.Content/.Summary). Strip signatures,
+     rewrite records/ links, wrap speaker turns. Each Human turn keeps its heading id (namespaced by
+     prefix, so ids stay unique when many records share one page) and gets a hover "#" anchor;
+     voice (voiceRecorded frontmatter) appends a mic icon to each Human heading.
+     Named turns (## Human (name), written when /myname is set) render the same, name shown. */}}
+{{ $c := .content | replaceRE `<p>— [\w.-]+</p>` "" }}
+{{ if site.Params.repoURL }}{{ $c = replaceRE `href="[^"]*records/([^"]+)"` (printf `href="%s/records/$1"` (partial "repo-link.html" (dict "kind" "raw"))) $c }}{{ end }}
+{{ $p := "" }}
+{{ with .prefix }}{{ $p = printf "%s-" . }}{{ end }}
+{{ $mic := "" }}
+{{ if .voice }}{{ $mic = `<span class="voice-icon" title="voice recorded"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg></span>` }}{{ end }}
+{{ $c = replaceRE `<h2 id="((?:human|user)(?:-[^"]+)?)">([^<]*)</h2>` (printf `</section><section class="user"><h2 id="%s$1">$2%s<a class="anchor" href="#%s$1">#</a></h2>` $p $mic $p) $c }}
+{{ $c = replaceRE `<h2 id="assistant(?:-\d+)?">` `</section><section class="assistant"><h2>` $c }}
+{{ printf "<section>%s</section>" $c | safeHTML }}

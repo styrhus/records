@@ -1,0 +1,51 @@
+# Postkasse ships its brand defaults here. A site's hugo.yaml deep-merges over
+# these (site params win), so a forker overrides any subset from that one file.
+# Root keys (like timeZone) don't merge from themes — those live in the site config.
+# Theme defaults do not chain between themes, so this repeats Fuglekasse's set:
+# switching themes is a capability change, not a reconfiguration.
+[params]
+pageMode = "basic"   # "basic" (link index) | "posts" (excerpt feed) | "single" (one-page document stack) | "single-flowing" (one continuous conversation)
+postsCount = 3       # posts mode: how many latest records to show
+singleOrder = "asc"  # single/single-flowing mode record order: "asc" (oldest→newest, top→bottom) | "desc" (newest at top)
+bookLook = false     # single-flowing: records/forside.md, side-1.md, bakside.md become front cover, page 1 and back cover
+chapterState = "latest"  # chapter fold state: "latest" (open the chapter with the newest record) | "expanded" | "collapsed"
+showToc = false      # floating table-of-contents widget (top-right, home page; all modes but posts)
+showFilter = false   # single mode: floating filter button (bottom-left) — filter record cards by word (text/regex), tags, language and date range
+demoMode = false     # true: render theme-shipped demo records (front matter demo: true) while the site has no real records — the first real record auto-hides them; false never shows them
+# dateTitleFormat = "02. January 2006"  # Go date layout for timestamp-fallback titles; unset keeps the raw slug
+# datePostFormat = "02. January 2006 15:04"  # show the record date bottom-right in each post; unset shows none
+showTags = true      # show front-matter tags as dim #labels under each post; a page opts out with showTags: false
+showRepoURL = true   # footer link to params.repoURL; false hides it (repoURL still rewrites record links)
+repoLinkStyle = "auto"  # raw/browse URL shape for repoURL links: auto (github.com/gitlab.com detected from repoURL, else Forgejo/Gitea) | forgejo | github | gitlab
+repoBranch = "main"     # branch the rewritten records/ links and the footer branch link point at (site and PDF/EPUB)
+# pdf = "records.pdf"  # footer "Get PDF" link to the pandoc-built site PDF (see tools/pandoc/ in the records repo); unset shows none
+# epub = "records.epub"  # footer "Get EPUB" link to the pandoc-built site EPUB (see tools/pandoc/ in the records repo); unset shows none
+# booklet = "records-booklet.pdf"  # footer "Get booklet" link to the print booklet (A5 pages two-up on A4 landscape, folding order); unset shows none
+# logo = "fuglekasse.svg"  # brand mark fixed to the bottom-right corner; unset shows none. Postkasse ships no mark of its own — point this at your own file in the repo-root static/
+# favicon = "fuglekasse.svg"  # <link rel="icon"> file in static/; unset falls back to the shipped fuglekasse.svg
+# spotify = "https://open.spotify.com/playlist/…"  # Spotify logo pinned bottom-left that opens an embedded player; share or embed URL; unset shows none
+# commentURL = "https://codeberg.org/you/yourrepo/issues/new"  # per-record "Comment" link opening a prefilled issue; unset shows none
+# commentSite = "example.com"  # site label in the prefilled issue title ([site - #slug]); unset uses the baseURL host
+# cdnURL = "https://example.b-cdn.net/"  # CDN prefix for static assets and the built CSS/JS in production builds; unset serves them from the site
+
+[params.style]
+font = "Architects Daughter"
+fontfile = "fonts/architects-daughter.woff2"
+
+# Tokyo Night Light
+[params.style.light]
+bg = "#d5d6db"
+fg = "#343b58"
+dim = "#9699a3"
+accent = "#34548a"
+surface = "#e5e6ea"
+card = "#f5f5f7"
+
+# Dracula — dim lifted from #6272a4 so small footer/label text stays legible.
+[params.style.dark]
+bg = "#282a36"
+fg = "#f8f8f2"
+dim = "#8b96c9"
+accent = "#bd93f9"
+surface = "#21222c"
+card = "#323445"

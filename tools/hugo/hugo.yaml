@@ -8,6 +8,9 @@ title: blyant records
 
 # The default branding theme; all design lives in tools/hugo/themes/Fuglekasse/.
 theme: Fuglekasse
+# OR — Postkasse, the growth theme: same site, same params, but with an assets
+# pipeline and room for JavaScript (see tools/hugo/themes/Postkasse/README.md).
+# theme: Postkasse
 
 # records/ is the single source of truth for content.
 contentDir: ../../records
