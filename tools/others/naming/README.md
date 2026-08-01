@@ -1,4 +1,5 @@
 # naming
+<!-- werden: 0.12.1 badstu-flue -->
 
 How werden-cycle names are formed, and the name pools they draw from.
 

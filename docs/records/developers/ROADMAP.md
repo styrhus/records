@@ -3,7 +3,7 @@ title: Roadmap
 date: 2026-07-29T13:47:55+01:00
 tags: [developers, roadmap]
 ---
-<!-- werden: 0.2.2 postkasse-beetle -->
+<!-- werden: 0.12.1 badstu-flue -->
 
 # Roadmap
 
@@ -11,69 +11,189 @@ tags: [developers, roadmap]
 
 *"Which road lies ahead of us to make **blyant records** at least as good as these other tools, and simply better?"* — asked by a dreamer, 2026-07-29, in front of this very file while it was still empty.
 
-The answer has a shape: five roads, walked in order, each one a named werden step.
+The answer has a shape: eleven roads, from the mailbox to the sauna, each one a named werden step.
 
 ## Where we stand
 
-`0.2.1 postkasse-flue`, the provider-agnostic release. One build path (`bin/build.sh`) behind every provider; forks publish with zero edits. An AI-free engine (`recordkit`, 102 tests) drives the mechanical commands from a VSCode sidebar, a Neovim split, or plain shell; Ollama brings the AI back, locally, when wanted.
+`CURRENT` reads **`0.12.1 badstu-flue`** — the road under our feet.
 
-And the sentence that sets our course: everyone's conversations are locked away in other people's apps. Nobody publishes them well. That is the whole gap we exist in.
+Behind it, nine roads stand open and unwalked. They are not a queue. The werden major is a position
+in the name pool, not a percentage of anything, and a road is claimed by whoever arrives with time
+for it. Walk them in the order that suits the week.
 
-## Seams — postkasse (0.2.x, now)
+What is already built: one build path (`bin/build.sh`) behind every provider, forks publishing with
+zero edits, an AI-free engine (`recordkit` 0.5.0, 102 tests) driving the mechanical commands from a
+VSCode sidebar, a Neovim split, or plain shell — and Ollama bringing the AI back, locally, when
+wanted.
 
-Finish what's begun before carrying it further. Each seam is one animal.
+And the sentence that sets the course: everyone's conversations are locked away in other people's
+apps, and nobody publishes them well. That is the whole gap we exist in.
 
-Ollama reaches Neovim — the CLI already does the HTTP, `handle_slash` just has to ask. Replies learn to stream, stdlib chunked reads in `recordkit/ollama.py`, surfaced in both plugins. The voice skills become system-prompt presets — deterministic prompt files, no model in the engine. `/stick` becomes checkout-aware like its siblings, and gets the first `test_stick.py`. And the CI stops fibbing politely: pypdf and rsync/openssh go into the hugo-runner image so the booklet stops being skipped, and the live-untested GitHub/GitLab shims get their smoke-repo rehearsal.
+## How to walk one
 
-## Reach — bikube (0.3.x)
+Each road has a folder. The folder holds the elaborate plan and a handoff table where items are
+claimed one at a time. The protocol is one page: [how a road is walked](roadmap/README.md).
 
-The hive the engine swarms out from. Shipping with known-unfinished seams would export the debt; that is why reach waits for seams.
+Agents pick up items. Humans turn the cycle.
 
-`pipx install recordkit`, version derived from `CURRENT` so PyPI speaks werden. The VSCode extension goes to Open VSX first — Codeberg-first is a habit, not an accident — then the Marketplace; publisher `tb4` is already set. `records.nvim` becomes installable the lazy.nvim way. Emacs is named because the README already said it: the CLI is editor-agnostic, the pattern is straightforward. An animal, not a promise.
+---
 
-## Capture — suitcase (0.4.x)
+## 12 · badstu — Steam <small>(now)</small>
 
-Pack your conversations and carry them home. This is the road nobody else walks.
+The sauna: heat, sweat, cold water, and the room where people talk without titles. Two things
+happen here at once. The project gets **help** — this roadmap, the folders below it, a handoff
+protocol so many hands can work without collision. And the project gets **honest** — the untested
+provider shims actually exercised, the silently-skipped booklet unskipped, every claim in every
+README checked against the code that is supposed to back it.
 
-A new `recordkit/importer.py` behind `records import`, emitting through the existing `frontmatter.py` and `writer.py` so an imported record byte-matches a created one. Then one source per animal: Claude Code session transcripts (JSONL), ChatGPT export JSON, Claude export JSON, `llm` SQLite logs. Parsers stay stdlib — `json`, `sqlite3` — deterministic, tested beside the 102.
+What survives the heat is what the project really is.
 
-Packaged first, imported second: `records import` arrives inside an installable tool, not a cloned repo.
+→ [plan](roadmap/badstu/ROADMAP.md) · [status](roadmap/badstu/STATUS.md)
 
-## Reading — kiste (0.5.x): theme Postkasse
+## 2 · postkasse — Seams
 
-A chest of records, opened for reading. Fuglekasse stays as it is — minimal is a feature with a fence, and the fence holds. Growth gets its own house: a second theme, **Postkasse**, wearing the name of the cycle that dreamed it.
+Finish what's begun before carrying it further. Ollama reaches Neovim — the CLI already does the
+HTTP, `handle_slash` just has to ask. Replies learn to stream. The voice skills become system-prompt
+presets, deterministic files, no model in the engine. `/stick` becomes checkout-aware like its
+siblings, and gets the first `test_stick.py`.
 
-Grown from Fuglekasse's flat shape, chosen by the one-line `theme:` key in `hugo.yaml`, `bin/build.sh` untouched. Inside Postkasse, and only there: site-wide search (JavaScript is allowed past this fence), backlinks between records computed at build time, and RSS done right — a feed template that strips the signature lines, flipping `disableKinds` knowingly in site config.
+→ [plan](roadmap/postkasse/ROADMAP.md) · [status](roadmap/postkasse/STATUS.md)
 
-Reading follows capture on purpose: the richer site should launch with richer content.
+## 3 · bikube — Reach
 
-## Android — akvarium (0.6.x)
+The hive the engine swarms out from. `pipx install recordkit`, version derived from `CURRENT` so
+PyPI speaks werden. The VSCode extension to Open VSX first — Codeberg-first is a habit, not an
+accident — then the Marketplace. `records.nvim` installable the lazy.nvim way. Emacs because the
+CLI is editor-agnostic and the pattern is straightforward.
 
-Writing through the glass. A ladder, named but not solved.
+→ [plan](roadmap/bikube/ROADMAP.md) · [status](roadmap/bikube/STATUS.md)
 
-The first rung can land any day as a docs minor: a record is just a Markdown file committed to a repo, so any phone git client or the Forgejo web editor already works — it only needs writing down. The second rung is a small PWA committing through the forge APIs. The third rung is *maybe* voice capture — and `voiceRecorded: true` marks, it never transcribes. Maybe means maybe.
+## 4 · suitcase — Capture
 
-## The order of things
+Pack your conversations and carry them home. This is the road nobody else walks. A
+`recordkit/importer.py` behind `records import`, emitting through the existing `frontmatter.py` and
+`writer.py` so an imported record byte-matches a created one. Then one source per animal: Claude
+Code session transcripts, ChatGPT export JSON, Claude export JSON, `llm` SQLite logs. Parsers stay
+stdlib — `json`, `sqlite3` — deterministic, tested beside the rest.
 
-Near is the rest of postkasse, minors only. Mid is bikube and suitcase. Far is kiste and akvarium.
+→ [plan](roadmap/suitcase/ROADMAP.md) · [status](roadmap/suitcase/STATUS.md)
 
-| Road | Structure | First animals |
-|---|---|---|
-| Seams | postkasse (0.2.x, now) | beetle, cricket, moth, tadpole, snail |
-| Reach | bikube (0.3.x) | flue: PyPI · beetle: Open VSX/Marketplace · cricket: records.nvim |
-| Capture | suitcase (0.4.x) | flue: importer · beetle: Claude Code · cricket: ChatGPT · moth: llm logs |
-| Reading | kiste (0.5.x) | flue: Postkasse skeleton · beetle: search · cricket: backlinks · moth: RSS |
-| Android | akvarium (0.6.x) | flue: the phone doc · later rungs unnumbered |
-| — | hundehus, schrank | left deliberately blank |
+## 5 · kiste — Reading
 
-This table is desire, not contract. Names are claimed only when `/werden` actually turns; the epoch stays human-owned, hand-edited in `CURRENT`.
+A chest of records, opened for reading. Fuglekasse stays as it is — minimal is a feature with a
+fence, and the fence holds. Growth gets its own house: a second theme, **Postkasse**, wearing the
+name of the cycle that dreamed it. Inside it, and only there: site-wide search, backlinks computed
+at build time, RSS done right — a feed that strips the signature lines — and attachments that
+render as what they are: photos as figures, video as video, a PDF as something you can take.
+
+→ [plan](roadmap/kiste/ROADMAP.md) · [status](roadmap/kiste/STATUS.md)
+
+## 6 · akvarium — Android
+
+Writing through the glass. A ladder, named but not solved. The first rung is a docs minor: a record
+is a Markdown file committed to a repo, so any phone git client or the Forgejo web editor already
+works — it only needs writing down. The second rung is a small PWA committing through the forge
+APIs. The third is *maybe* voice capture — and `voiceRecorded: true` marks, it never transcribes.
+Maybe means maybe.
+
+→ [plan](roadmap/akvarium/ROADMAP.md) · [status](roadmap/akvarium/STATUS.md)
+
+## 7 · hundehus — The watch
+
+The doghouse is where the loyal thing sleeps, outside, watching the door. `records watch` is a small
+stdlib process that notices a record change, rebuilds, and barks — never commits, never publishes,
+never decides. Beside it `records doctor` sniffs a checkout and says what is wrong: missing
+`baseURL`, absent pandoc, a `deployCommand` pointing nowhere, a records dir the config can't find.
+
+A dog is useful because it has no opinions.
+
+→ [plan](roadmap/hundehus/ROADMAP.md) · [status](roadmap/hundehus/STATUS.md)
+
+## 8 · schrank — Preservation
+
+A cupboard is where things wait without spoiling. Everything here assumes the tools are gone:
+`records archive` writes one self-contained bundle — records, images, config, a manifest with
+checksums — using nothing but `zipfile` and `hashlib`. `records verify` reads it back and reports
+rot. And the plain-text emergency export that outlives Hugo, pandoc, this repo, and us.
+
+Attachments get a home here too, and it isn't git-annex: a record that carries files becomes a Hugo
+leaf page bundle, `index.md` with the photo, the video, the PDF sitting beside it, published at the
+same URL the flat record had. `records attach` does the move. Everything you attached is a file in
+your repo, next to the words it belongs to.
+
+Publishing is about reach. This road is about the other thing.
+
+→ [plan](roadmap/schrank/ROADMAP.md) · [status](roadmap/schrank/STATUS.md)
+
+## 9 · booth — The booth
+
+Two booths, one road. The **recording booth**: `records booth`, a distraction-free composing screen
+in stdlib `curses` — one box, one conversation, no model required, the whole ceremony of writing a
+record reduced to a room with a door. The **photo booth**: `records card`, turning a single turn
+into a shareable SVG quote card drawn from the site's own palette, no dependencies, no service, just
+a file you can post anywhere.
+
+A booth is small on purpose. You step in, something is captured, you step out.
+
+→ [plan](roadmap/booth/ROADMAP.md) · [status](roadmap/booth/STATUS.md)
+
+## 10 · portaloo — Carry it
+
+The whole facility, carried. Two deliverables that both mean *needs nothing installed*:
+`records.pyz`, the engine as a single-file stdlib `zipapp` that runs on any Python; and
+`records pack`, the entire site collapsed into one self-contained HTML file — CSS inlined, images
+data-URI'd — that opens from `file://`, works on a USB stick, and survives an airplane.
+
+Not glamorous. Extremely useful. Both true of a portaloo.
+
+→ [plan](roadmap/portaloo/ROADMAP.md) · [status](roadmap/portaloo/STATUS.md)
+
+## 11 · utedo — What must leave
+
+The outhouse: the smallest useful building, standing apart, dealing with what has to go. Every
+publishing tool pretends this road doesn't exist. `records redact` rewrites a turn in place and
+leaves a visible seam rather than a lie. `records unpublish` pulls a record out of the site, the
+pages branch and the books, leaving a tombstone. A secret-scrub path for the day a key lands in a
+transcript, with honest guidance about what git history does and doesn't forget.
+
+Publishing without a way back is a trap. This is the way back.
+
+→ [plan](roadmap/utedo/ROADMAP.md) · [status](roadmap/utedo/STATUS.md)
+
+---
+
+## The eleven, at a glance
+
+| # | Structure | Road | First items |
+|---|---|---|---|
+| 2 | postkasse | Seams | flue: Ollama in Neovim · beetle: streaming · cricket: voice presets · moth: `/stick` |
+| 3 | bikube | Reach | flue: PyPI · beetle: Open VSX · cricket: lazy.nvim · moth: Emacs |
+| 4 | suitcase | Capture | flue: importer core · beetle: Claude Code · cricket: ChatGPT · moth: `llm` logs |
+| 5 | kiste | Reading | flue: Postkasse skeleton · beetle: search · cricket: backlinks · moth: RSS · snail: attachments render |
+| 6 | akvarium | Android | flue: the phone doc · beetle: PWA · cricket: *maybe* voice |
+| 7 | hundehus | The watch | flue: `records doctor` · beetle: `records watch` · cricket: the bark |
+| 8 | schrank | Preservation | flue: `records archive` · beetle: `records verify` · cricket: attachments as page bundles · snail: `records attach` |
+| 9 | booth | The booth | flue: `records card` · beetle: the curses booth · cricket: booth + Ollama |
+| 10 | portaloo | Carry it | flue: `records.pyz` · beetle: `records pack` · cricket: offline books |
+| 11 | utedo | What must leave | flue: `records redact` · beetle: `records unpublish` · cricket: scrub |
+| 12 | badstu | Steam <small>(now)</small> | flue: this roadmap · beetle: CI truth · cricket: runner image · moth: the audit |
+
+This table is desire, not contract. Names are claimed only when `/werden` actually turns; the epoch
+stays human-owned, hand-edited in `CURRENT`.
 
 ## What we will not build
 
-No Windows — the build path is bash and stays bash. No voice-to-text engine. No federation, no comments platform, no accounts, no hosted service — a record is a file in your repo and the site is static; that is the product. No second build path. No growth in Fuglekasse. No dependencies in the engine — stdlib parsers, model-optional, mechanical output byte-matching AI output. No dates — the werden names are the schedule, and the mountain is climbed at walking pace. And no AI-drafted upstream contributions, ever — see [never-ever-ever-ai-slop.md](never-ever-ever-ai-slop.md), this file's older sibling.
+No Windows — the build path is bash and stays bash. No voice-to-text engine. No federation, no
+comments platform, no accounts, no hosted service — a record is a file in your repo and the site is
+static; that is the product. No second build path. No growth in Fuglekasse. No dependencies in the
+engine — stdlib parsers, model-optional, mechanical output byte-matching AI output. No dates — the
+werden names are the schedule, and the mountain is climbed at walking pace. And no AI-drafted
+upstream contributions, ever — see [never-ever-ever-ai-slop.md](never-ever-ever-ai-slop.md), this
+file's older sibling.
 
 Borders are a good thing.
 
 ## One closing line
 
-We live in postkasse now; when the records are finally read the way they deserve, it will be a theme wearing this cycle's name that opens the lid.
+Eleven roads, and none of them leads away from the same small idea: your words, your repo, your
+site. We are in the sauna now — and what walks out of the heat still has to fit in a mailbox.

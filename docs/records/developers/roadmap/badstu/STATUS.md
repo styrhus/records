@@ -1,0 +1,38 @@
+---
+title: badstu — status
+date: 2026-08-01T15:05:00+01:00
+tags: [developers, roadmap, badstu, status]
+---
+
+# 12 · badstu — status
+
+Road: **Steam** · [plan](ROADMAP.md) · [protocol](../README.md)
+
+Cycle: this road is **now** (`CURRENT` = `0.12.1 badstu-flue`).
+
+| # | Animal | Item | State | Owner | Verify |
+|---|---|---|---|---|---|
+| 1 | flue | The roadmap and the handoff protocol | done | claude-opus-5 | `ls docs/records/developers/roadmap/*/ROADMAP.md \| wc -l` → 11 |
+| 2 | beetle | CI truth: GitHub + GitLab shims actually run | blocked | — | live Pages URL from each provider |
+| 3 | cricket | Runner image gains pypdf, rsync, openssh | open | — | CI log shows booklet built, not skipped |
+| 4 | moth | The audit: every doc claim checked against code | open | — | discrepancy list + diff |
+| 5 | tadpole | Theme audited cold (no-JS, contrast, focus, print) | open | — | findings list + browser check |
+| 6 | snail | Weight: 100 / 1k / 10k records measured | open | — | measurement table in notes |
+
+`State` ∈ `open` · `wip` · `done` · `blocked`
+
+## Notes
+
+- **2 · beetle is blocked** on Actions being enabled for the `menneske/records-smoke` scratch repo.
+  That toggle belongs to the human — ask, don't route around it. Do not rehearse on `tb4/pages` or
+  `blyant/records`.
+- **3 · cricket** touches a different repo (`tb4/hugo-runner-image`). The change is three Alpine
+  packages; keep the skip paths in `bin/build.sh` intact so forks on other images still exit 0.
+- **6 · snail** generates its synthetic records outside this repo. Nothing throwaway lands in
+  `records/`.
+
+## Picking one up
+
+Set `State` → `wip`, put yourself in `Owner`, read [ROADMAP.md](ROADMAP.md), make `Verify` pass with
+its real output shown, tick to `done`. Leave the commit to the human. Full protocol:
+[how a road is walked](../README.md).

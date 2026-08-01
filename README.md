@@ -52,6 +52,6 @@ plain shell — no model needed. Add [Ollama](tools/others/ollama/README.md) and
 
 ---
 
-> Fase — 0.2.2 postkasse-beetle
+> Fase — 0.12.1 badstu-flue
 
 [blyant](https://snl.no/blyant)

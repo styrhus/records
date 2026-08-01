@@ -1,6 +1,6 @@
 # Fuglekasse
 
-<!-- werden: 0.2.2 postkasse-beetle -->
+<!-- werden: 0.12.1 badstu-flue -->
 
 The default theme for [blyant records](https://codeberg.org/blyant/records) — Norwegian for
 *nesting box*. A deliberately small, config-driven Hugo theme for publishing
