@@ -7,6 +7,7 @@ from datetime import datetime
 from pathlib import Path
 
 _TAG_DROP = re.compile(r"[^a-z0-9-]")
+_FILE_DROP = re.compile(r"[^a-z0-9-]")
 _WS = re.compile(r"\s+")
 
 
@@ -46,6 +47,16 @@ def slugify(title: str) -> str:
 
 def ensure_md(name: str) -> str:
     return name if name.endswith(".md") else name + ".md"
+
+
+def slug_filename(name: str) -> str:
+    """Attachment hygiene: slugify the stem, keep the extension, drop anything not [a-z0-9-.]."""
+    stem, dot, ext = Path(name).name.rpartition(".")
+    if not dot:
+        stem, ext = name, ""
+    stem = _FILE_DROP.sub("", slugify(stem)).strip("-") or "file"
+    ext = _FILE_DROP.sub("", ext.lower())
+    return f"{stem}.{ext}" if ext else stem
 
 
 def unique_path(directory: Path, filename: str) -> Path:

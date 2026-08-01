@@ -291,7 +291,15 @@ local records = {}
 
 for _, f in ipairs(files) do
   local base = f.rel:match("([^/]+)%.md$")
-  local seg1 = f.rel:match("^([^/]+)/")
+  -- Leaf page bundles are <slug>/index.md: the folder is the record's name, slug and date
+  -- fallback, and it is not a chapter. Hugo's :contentbasename does the same, so book and
+  -- site agree. `_index.md` is a section page, not a bundle, and is left alone.
+  local forSection = f.rel
+  if base == "index" then
+    base = f.rel:match("([^/]+)/index%.md$") or base
+    forSection = f.rel:gsub("[^/]+/index%.md$", "index.md")
+  end
+  local seg1 = forSection:match("^([^/]+)/")
   if not ignored(f.rel) then
     if base == "_index" then
       if f.rel == "_index.md" then
