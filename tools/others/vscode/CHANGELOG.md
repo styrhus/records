@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.6.0
+
+- First registry release: the extension is published to Open VSX and the VS Code Marketplace instead of sideloaded as a `.vsix`.
+- README rewritten to stand on its own as a registry page — what the extension is, that it drives the `records` CLI (`pipx install recordkit`), and that Ollama is optional.
+- Registry metadata: keywords, homepage, issue tracker, gallery banner.
+- `.vscodeignore` excludes `*.vsix`, so built packages can no longer end up inside a built package.
+
+## 0.5.0
+
+- Ephemeral chat without an active recording: with a model configured, messages go through `records ollama-chat`, history lives in the extension's memory only and nothing touches disk; it resets on `/record`, `/all`, `/me` and `/esc`.
+- With no model and no recording, a dim hint replaces the old "No active recording session." error.
+- Second keybinding `Ctrl+Shift+\` / `Cmd+Shift+\` (`Ctrl+|` on US layouts) on `records.openChat`, which now also focuses the input field.
+- Status lines render dim; the `> ` user echo and model replies stay prominent.
+
 ## 0.4.0
 
 - Chat messages word-wrap; long lines no longer produce a horizontal scrollbar.

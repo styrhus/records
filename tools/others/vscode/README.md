@@ -1,7 +1,28 @@
-# Records Chat — VSCode Extension
+# Records Chat
 
-A sidebar chat view for the blyant records site's mechanical skills, with optional Ollama support.
+Write your conversations down, and publish them as your own static site.
+
+[blyant records](https://codeberg.org/blyant/records) turns Markdown transcripts into a published
+site. This extension is the editor side of it: a sidebar chat where you record a conversation — with
+yourself, or with a local model — and it lands as a Markdown file in your own repo, with correct
+frontmatter, ready to build and publish. No account, no service, no data leaving your machine.
+
 Works in VS Code and VSCodium alike.
+
+## Requires the `records` CLI
+
+The extension has no logic of its own — it drives
+[recordkit](https://pypi.org/project/recordkit/), a dependency-free Python CLI:
+
+```bash
+pipx install recordkit
+```
+
+If `records` isn't on your PATH afterwards, set `records.binaryPath` to its full path.
+
+A local [Ollama](https://ollama.com) model is **optional**. Without one, every command still works;
+recordings are simply one-sided. Full setup for the CLI and every editor:
+[docs/install.md](https://codeberg.org/blyant/records/src/branch/main/docs/install.md).
 
 ## Features
 
@@ -22,37 +43,15 @@ Works in VS Code and VSCodium alike.
 - Missing-CLI detection: if the `records` binary isn't found, the chat shows install
   instructions and a button to open the `records.binaryPath` setting
 
-## Prerequisites
+## Opening it
 
-The extension drives the `recordkit` CLI. Install it from the repo root:
+The birdhouse icon in the activity bar. Or `Ctrl+Shift+R` / `Cmd+Shift+R`, or `Ctrl+Shift+\` /
+`Cmd+Shift+\` (that's `Ctrl+|` on a US layout), or "Records: Open Chat" from the command palette —
+all of them focus the chat's text input directly.
 
-```bash
-pip install -e tools/others/python     # or: pipx install ./tools/others/python
-```
-
-If the `records` command isn't on your PATH, set `records.binaryPath` to its full path.
-
-## Install
-
-Build the extension package once, then install the `.vsix` permanently:
-
-```bash
-cd tools/others/vscode
-npm install
-npm run package          # produces records-chat-0.5.0.vsix
-codium --install-extension records-chat-0.5.0.vsix   # VSCodium
-code --install-extension records-chat-0.5.0.vsix     # VS Code
-```
-
-Reload the editor — the birdhouse icon appears in the activity bar. Click it, press
-`Ctrl+Shift+R` / `Cmd+Shift+R` or `Ctrl+Shift+\` / `Cmd+Shift+\` (that's `Ctrl+|` on a
-US layout), or run "Records: Open Chat" from the command palette. All of these focus the
-chat's text input directly.
-
-> `npm run package` needs Node; with mise: `mise exec node@24 -- npm run package`.
-> Note: `Ctrl+Shift+R` shadows the editor's default Refactor binding while an editor has focus.
-> On non-US layouts the second binding follows the physical `\` key — check
-> Preferences → Keyboard Shortcuts if it doesn't respond, and rebind as needed.
+> `Ctrl+Shift+R` shadows the editor's default Refactor binding while an editor has focus. On non-US
+> layouts the second binding follows the physical `\` key — check Preferences → Keyboard Shortcuts
+> if it doesn't respond, and rebind as needed.
 
 ## Usage
 
@@ -67,17 +66,10 @@ hello world             ← free text is appended as a Human turn
 ## Development
 
 Open `tools/others/vscode/` in the editor, `npm install`, then press F5 to launch the
-Extension Development Host (`npm run watch` for incremental compiles).
-
-## Publishing (later)
-
-The metadata is registry-ready; publishing is a manual step once accounts exist:
-
-- **Open VSX** (VSCodium's default registry): create an Eclipse account + namespace, then
-  `npx ovsx publish -p <token>`.
-- **VS Code Marketplace**: create an Azure DevOps publisher, then `npx vsce publish`.
-
-The `publisher` field is `tb4` — it must match the registry namespace/publisher id you claim.
+Extension Development Host (`npm run watch` for incremental compiles). `npm run package` builds the
+`.vsix`; built `.vsix` files are throwaway build artefacts — never committed, never packaged.
+Release steps live in
+[tools/others/README.md](https://codeberg.org/blyant/records/src/branch/main/tools/others/README.md).
 
 ## Settings
 
@@ -114,4 +106,4 @@ missing files degrade to a marker instead of failing the turn. The `@` picker li
 2000 workspace files (common build/VCS dirs excluded). Without a configured model,
 attachments are ignored and the message is recorded user-only with a notice.
 
-See `../ollama/README.md`.
+See [tools/others/ollama/README.md](https://codeberg.org/blyant/records/src/branch/main/tools/others/ollama/README.md).

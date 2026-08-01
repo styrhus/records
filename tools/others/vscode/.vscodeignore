@@ -6,3 +6,6 @@ out/**/*.map
 node_modules/**
 package-lock.json
 **/.DS_Store
+
+# Built packages must never end up inside a built package.
+*.vsix

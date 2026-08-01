@@ -558,15 +558,11 @@ export function getWebviewContent(commandsJson: string): string {
       div.appendChild(head);
 
       const body = document.createElement("div");
-      body.textContent = "Install the recordkit CLI (from the repo root):";
+      body.textContent = "Install the recordkit CLI:";
       div.appendChild(body);
 
-      const pip = document.createElement("code");
-      pip.textContent = "pip install -e tools/others/python";
-      div.appendChild(pip);
-
       const pipx = document.createElement("code");
-      pipx.textContent = "pipx install ./tools/others/python";
+      pipx.textContent = "pipx install recordkit";
       div.appendChild(pipx);
 
       const hint = document.createElement("div");
