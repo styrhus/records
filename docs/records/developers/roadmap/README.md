@@ -94,6 +94,27 @@ note what `CLAUDE.local.md` and `tools/others/README.md` need rather than editin
 Items that create new files and touch nothing shared are the ones to fan out on. Anything under
 `docs/` is free.
 
+## Which model walks it
+
+Each road in the [roadmap's at-a-glance table](../ROADMAP.md#the-eleven-at-a-glance) carries a
+recommended model. The assignment is simple:
+
+- **sonnet** is the fan-out default. Roadmap items are deliberately session-sized, with named files,
+  an acceptance check and a border — exactly the well-specified work Sonnet handles at near-Opus
+  quality, and parallel sessions multiply whatever a model costs.
+- **opus** for the three roads where judgment outweighs typing: *kiste* (a second theme designed
+  from scratch — search, backlinks, RSS all have wrong-but-plausible shapes), *utedo* (redact,
+  unpublish, scrub — destructive and irreversible, where a subtle mistake is a lie in the record),
+  and *badstu* (the whole-repo audit and CI truth-checking, which is judgment about everything at
+  once).
+- **haiku** for no road. Every road touches multiple files or writes tested code; the savings are
+  not worth the re-runs.
+- **fable** for no road either. Nothing here needs the top tier, and its cost cuts directly against
+  fanning out. If any single item earns it, it is `badstu`'s audit — which runs alone anyway.
+
+A recommendation is a default, not a rule: a human running one session on a hard item can always
+step up a tier.
+
 ## The borders
 
 Every road inherits the project's borders, listed in full at the bottom of the

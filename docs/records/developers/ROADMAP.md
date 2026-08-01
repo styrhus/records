@@ -168,19 +168,22 @@ Publishing without a way back is a trap. This is the way back.
 
 ## The eleven, at a glance
 
-| # | Structure | Road | First items |
-|---|---|---|---|
-| 2 | postkasse | Seams | flue: Ollama in Neovim · beetle: streaming · cricket: voice presets · moth: `/stick` |
-| 3 | bikube | Reach | flue: PyPI · beetle: Open VSX · cricket: lazy.nvim · moth: Emacs |
-| 4 | suitcase | Capture | flue: importer core · beetle: Claude Code · cricket: ChatGPT · moth: `llm` logs |
-| 5 | kiste | Reading | flue: Postkasse skeleton · beetle: search · cricket: backlinks · moth: RSS · snail: attachments render |
-| 6 | akvarium | Android | flue: the phone doc · beetle: PWA · cricket: *maybe* voice |
-| 7 | hundehus | The watch | flue: `records doctor` · beetle: `records watch` · cricket: the bark |
-| 8 | schrank | Preservation | flue: `records archive` · beetle: `records verify` · cricket: attachments as page bundles · snail: `records attach` |
-| 9 | booth | The booth | flue: `records card` · beetle: the curses booth · cricket: booth + Ollama |
-| 10 | portaloo | Carry it | flue: `records.pyz` · beetle: `records pack` · cricket: offline books |
-| 11 | utedo | What must leave | flue: `records redact` · beetle: `records unpublish` · cricket: scrub |
-| 12 | badstu | Steam <small>(now)</small> | flue: this roadmap · beetle: CI truth · cricket: runner image · moth: the audit |
+| # | Structure | Road | Model | First items |
+|---|---|---|---|---|
+| 2 | postkasse | Seams | sonnet | flue: Ollama in Neovim · beetle: streaming · cricket: voice presets · moth: `/stick` |
+| 3 | bikube | Reach | sonnet | flue: PyPI · beetle: Open VSX · cricket: lazy.nvim · moth: Emacs |
+| 4 | suitcase | Capture | sonnet | flue: importer core · beetle: Claude Code · cricket: ChatGPT · moth: `llm` logs |
+| 5 | kiste | Reading | opus | flue: Postkasse skeleton · beetle: search · cricket: backlinks · moth: RSS · snail: attachments render |
+| 6 | akvarium | Android | sonnet | flue: the phone doc · beetle: PWA · cricket: *maybe* voice |
+| 7 | hundehus | The watch | sonnet | flue: `records doctor` · beetle: `records watch` · cricket: the bark |
+| 8 | schrank | Preservation | sonnet | flue: `records archive` · beetle: `records verify` · cricket: attachments as page bundles · snail: `records attach` |
+| 9 | booth | The booth | sonnet | flue: `records card` · beetle: the curses booth · cricket: booth + Ollama |
+| 10 | portaloo | Carry it | sonnet | flue: `records.pyz` · beetle: `records pack` · cricket: offline books |
+| 11 | utedo | What must leave | opus | flue: `records redact` · beetle: `records unpublish` · cricket: scrub |
+| 12 | badstu | Steam <small>(now)</small> | opus | flue: this roadmap · beetle: CI truth · cricket: runner image · moth: the audit |
+
+The `Model` column is the recommended Claude model for a session walking that road — the reasoning
+lives in [how a road is walked](roadmap/README.md#which-model-walks-it).
 
 This table is desire, not contract. Names are claimed only when `/werden` actually turns; the epoch
 stays human-owned, hand-edited in `CURRENT`.
