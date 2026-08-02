@@ -1,5 +1,5 @@
 # naming
-<!-- werden: 0.12.1 badstu-flue -->
+<!-- werden: 0.12.2 badstu-beetle -->
 
 How werden-cycle names are formed, and the name pools they draw from.
 

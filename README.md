@@ -63,6 +63,6 @@ record — [install it](docs/install.md).
 
 ---
 
-> Fase — 0.12.1 badstu-flue
+> Fase — 0.12.2 badstu-beetle
 
 [blyant](https://snl.no/blyant)
