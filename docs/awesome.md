@@ -2,7 +2,9 @@
 
 Want the site to look like *you*? The quickest changes are in
 `tools/hugo/hugo.yaml`; the full design lives in the **Fuglekasse** theme under
-`tools/hugo/themes/Fuglekasse/`.
+`tools/hugo/themes/Fuglekasse/`. This guide names Fuglekasse paths — with
+`theme: Postkasse` in `tools/hugo/hugo.yaml` the same layouts and params live under
+`tools/hugo/themes/Postkasse/` (see its README for the assets pipeline).
 
 ## The layouts
 

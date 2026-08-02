@@ -13,8 +13,10 @@ The front page explains the rest: <https://blyant.codeberg.page/records/>.
 ## Make it yours
 
 It ships with **Fuglekasse**, a small default theme you restyle from
-`tools/hugo/hugo.yaml` or replace. Some like it [simple](docs/simple.md), some like
-it [awesome](docs/awesome.md) — [Hugo has it all](docs/hugo.md).
+`tools/hugo/hugo.yaml` or replace. A second theme, **Postkasse** — same site, same
+knobs, room to grow — is one line away: `theme: Postkasse`. Some like it
+[simple](docs/simple.md), some like it [awesome](docs/awesome.md) —
+[Hugo has it all](docs/hugo.md).
 
 ## Publish anywhere
 

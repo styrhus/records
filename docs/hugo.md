@@ -2,7 +2,9 @@
 
 This site is plain [Hugo](https://gohugo.io/). Its whole look is one small
 default theme — **Fuglekasse** — that you restyle from `tools/hugo/hugo.yaml`, edit,
-or replace. Anything Hugo can do, your records home can do.
+or replace. A second theme, **Postkasse**, ships beside it and is selected with a
+single line in `tools/hugo/hugo.yaml`: `theme: Postkasse`. Anything Hugo can do,
+your records home can do.
 
 ## How it is wired
 
@@ -12,6 +14,8 @@ or replace. Anything Hugo can do, your records home can do.
   like `records/`; upstream never ships or moves files there
 - `tools/hugo/themes/Fuglekasse/` — the default theme: four templates and one font,
   the entire design
+- `tools/hugo/themes/Postkasse/` — the second theme: the same look and params, plus
+  an assets pipeline; switch with `theme: Postkasse`
 - `bin/build.sh` — the one build path: resolves the site URL, runs Hugo and
   the book build; CI calls it, and so can you
 - `.forgejo/workflows/pages.yml` — builds and publishes on every push to
@@ -38,5 +42,5 @@ hugo server
 
 Menus, shortcodes, image processing, multilingual sites — the
 [Hugo documentation](https://gohugo.io/documentation/) covers it all.
-Any template you add under `tools/hugo/layouts/` takes over from Fuglekasse
+Any template you add under `tools/hugo/layouts/` takes over from the active theme
 and Hugo's defaults.
