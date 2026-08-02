@@ -60,3 +60,16 @@ def test_resolve_missing_and_fragments(tmp_path):
     (records / "a b.png").write_bytes(b"1")
     assert refs.resolve("nope.png", record, records, tmp_path) is None
     assert refs.resolve("a%20b.png", record, records, tmp_path) == (records / "a b.png").resolve()
+
+
+def test_resolve_configured_theme_static(tmp_path):
+    records = tmp_path / "records"
+    records.mkdir()
+    record = records / "r.md"
+    record.write_text("x")
+    static = tmp_path / "tools" / "hugo" / "themes" / "Postkasse" / "static"
+    static.mkdir(parents=True)
+    (static / "logo.svg").write_bytes(b"<svg/>")
+    assert refs.resolve("logo.svg", record, records, tmp_path, theme="Postkasse") == \
+        (static / "logo.svg").resolve()
+    assert refs.resolve("logo.svg", record, records, tmp_path) is None

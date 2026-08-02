@@ -175,3 +175,16 @@ def _corrupt(zip_path: Path, member: str) -> None:
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
         for info, data in keep:
             zf.writestr(info, b"tampered\n" if info.filename == member else data)
+
+
+def test_theme_key_switches_the_static_dir(tmp_path):
+    repo = _repo(tmp_path, {"a.md": "![logo](logo.svg)\n"})
+    (repo / "tools" / "hugo" / "hugo.yaml").write_text(
+        "contentDir: ../../records\ntheme: Postkasse\n", encoding="utf-8")
+    static = repo / "tools" / "hugo" / "themes" / "Postkasse" / "static"
+    static.mkdir(parents=True)
+    (static / "logo.svg").write_bytes(b"<svg/>")
+    out = tmp_path / "r.zip"
+    archive.archive(repo, out=out, when=WHEN)
+    with zipfile.ZipFile(out) as zf:
+        assert "static/logo.svg" in zf.namelist()

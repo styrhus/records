@@ -17,7 +17,7 @@ import json
 import zipfile
 from pathlib import Path
 
-from . import refs
+from . import config, refs
 
 _SKIP = ("manifest.json", "README.txt")
 
@@ -83,7 +83,8 @@ def verify_repo(repo: Path = Path(".")) -> dict:
     """Every local image/media reference in every record, resolved the way the site resolves it."""
     from . import archive as archive_mod
 
-    root, records_dir, _ = archive_mod.resolve_repo(Path(repo))
+    root, records_dir, cfg = archive_mod.resolve_repo(Path(repo))
+    theme = config.read_theme(cfg) if cfg else config.DEFAULT_THEME
     faults: list[dict] = []
     checked = 0
 
@@ -91,7 +92,7 @@ def verify_repo(repo: Path = Path(".")) -> dict:
         text = record.read_text(encoding="utf-8", errors="replace")
         for target in refs.asset_references(text):
             checked += 1
-            if refs.resolve(target, record, records_dir, root) is None:
+            if refs.resolve(target, record, records_dir, root, theme) is None:
                 faults.append(_fault("broken-reference", target,
                                      "no file of that name beside the record, in the records "
                                      "root, or in a static directory",

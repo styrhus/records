@@ -9,6 +9,8 @@ _PRUNE = {"node_modules"}
 _DOCS_NAMES = ["docs", "doc", "documentation", "notes"]
 _MAXDEPTH = 5
 _CONTENTDIR = re.compile(r"^contentDir:\s*(.*?)\s*(?:#.*)?$")
+DEFAULT_THEME = "Fuglekasse"  # book.lua's fallback — keep in sync
+_THEME = re.compile(r"^theme:\s*(.*?)\s*(?:#.*)?$")
 
 
 def find_hugo_configs(start: Path) -> list[Path]:
@@ -51,6 +53,18 @@ def read_content_dir(hugo_yaml: Path) -> str:
     except OSError:
         pass
     return "../records"
+
+
+def read_theme(hugo_yaml: Path, default: str = DEFAULT_THEME) -> str:
+    """First `theme:` value in the config, or `default` when the line is absent."""
+    try:
+        for line in Path(hugo_yaml).read_text(encoding="utf-8").splitlines():
+            m = _THEME.match(line)
+            if m:
+                return m.group(1).strip().strip('"').strip("'") or default
+    except OSError:
+        pass
+    return default
 
 
 def resolve_records_dir(start: Path = Path(".")) -> Path:

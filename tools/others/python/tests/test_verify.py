@@ -149,3 +149,19 @@ def test_repo_finds_bundle_assets(tmp_path):
     repo = _repo(tmp_path, {"2026-07-06_23-30/index.md": "![x](image.png)\n"})
     (repo / "records" / "2026-07-06_23-30" / "image.png").write_bytes(b"PNG")
     assert verify.verify_repo(repo)["ok"] is True
+
+
+def test_repo_reference_follows_the_theme_key(tmp_path):
+    repo = _repo(tmp_path, {"a.md": "![logo](logo.svg)\n"})
+    (repo / "tools" / "hugo" / "hugo.yaml").write_text(
+        "contentDir: ../../records\ntheme: Postkasse\n", encoding="utf-8")
+    wrong = repo / "tools" / "hugo" / "themes" / "Fuglekasse" / "static"
+    wrong.mkdir(parents=True)
+    (wrong / "logo.svg").write_bytes(b"<svg/>")
+    report = verify.verify_repo(repo)
+    assert report["ok"] is False
+    assert report["faults"][0]["kind"] == "broken-reference"
+    right = repo / "tools" / "hugo" / "themes" / "Postkasse" / "static"
+    right.mkdir(parents=True)
+    (right / "logo.svg").write_bytes(b"<svg/>")
+    assert verify.verify_repo(repo)["ok"] is True

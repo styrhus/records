@@ -365,3 +365,30 @@ def test_the_doctor_writes_nothing(tmp_path, monkeypatch):
     doctor.diagnose(repo, env={})
     after = {p: (p.stat().st_mtime, p.stat().st_size) for p in sorted(repo.rglob("*"))}
     assert before == after
+
+
+def test_theme_directory_present_is_ok(tmp_path, monkeypatch):
+    _healthy(monkeypatch)
+    repo = _repo(tmp_path, config="contentDir: ../../records\ntheme: Fuglekasse\n")
+    (repo / "tools" / "hugo" / "themes" / "Fuglekasse").mkdir(parents=True)
+    result = doctor.diagnose(repo, env={"BASE_URL": "https://x/"})
+    assert _check(result, "theme")["level"] == "ok"
+
+
+def test_theme_typo_is_an_error(tmp_path, monkeypatch):
+    _healthy(monkeypatch)
+    repo = _repo(tmp_path, config="contentDir: ../../records\ntheme: postkasse\n")
+    (repo / "tools" / "hugo" / "themes" / "Fuglekasse").mkdir(parents=True)
+    (repo / "tools" / "hugo" / "themes" / "Postkasse").mkdir(parents=True)
+    result = doctor.diagnose(repo, env={"BASE_URL": "https://x/"})
+    c = _check(result, "theme")
+    assert c["level"] == "error"
+    assert "postkasse" in c["message"]
+    assert "Postkasse" in c["remedy"] and "case-sensitive" in c["remedy"]
+    assert result["ok"] is False
+
+
+def test_no_theme_key_means_no_theme_check(tmp_path, monkeypatch):
+    _healthy(monkeypatch)
+    result = doctor.diagnose(_repo(tmp_path), env={"BASE_URL": "https://x/"})
+    assert not [c for c in result["checks"] if c["name"] == "theme"]

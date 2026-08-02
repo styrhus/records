@@ -14,6 +14,8 @@ import re
 from pathlib import Path
 from urllib.parse import unquote
 
+from .config import DEFAULT_THEME
+
 TARGET = r"\(\s*(?:<([^>]*)>|([^)\s]+))[^)]*\)"  # the <angle> form may hold spaces
 MD_IMAGE = re.compile(r"!\[[^\]]*\]" + TARGET)
 SRC_ATTR = re.compile(r"""<(?:img|video|audio|source|embed)\b[^>]*?\bsrc\s*=\s*["']([^"']+)["']""",
@@ -48,21 +50,23 @@ def links(text: str) -> list[tuple[str, str]]:
             for m in MD_LINK.finditer(text)]
 
 
-def search_dirs(record: Path, records_dir: Path, root: Path | None = None) -> list[Path]:
+def search_dirs(record: Path, records_dir: Path, root: Path | None = None,
+                theme: str = DEFAULT_THEME) -> list[Path]:
     """Where a relative reference is looked for, in book.lua's order."""
     dirs = [Path(record).parent, Path(records_dir)]
     if root:
         dirs += [Path(root) / "tools" / "hugo" / "static",
-                 Path(root) / "tools" / "hugo" / "themes" / "Fuglekasse" / "static"]
+                 Path(root) / "tools" / "hugo" / "themes" / theme / "static"]
     return dirs
 
 
-def resolve(target: str, record: Path, records_dir: Path, root: Path | None = None) -> Path | None:
+def resolve(target: str, record: Path, records_dir: Path, root: Path | None = None,
+            theme: str = DEFAULT_THEME) -> Path | None:
     """The first existing file for a local reference, or None when nothing matches."""
     candidate = unquote(target.split("#", 1)[0].split("?", 1)[0])
     if not candidate:
         return None
-    for d in search_dirs(record, records_dir, root):
+    for d in search_dirs(record, records_dir, root, theme):
         p = d / candidate
         if p.is_file():
             return p.resolve()

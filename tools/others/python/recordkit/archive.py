@@ -148,16 +148,17 @@ def resolve_repo(repo: Path) -> tuple[Path, Path, Path | None]:
     return Path(repo).resolve(), records_dir, None
 
 
-def _static_dirs(root: Path) -> list[Path]:
+def _static_dirs(root: Path, theme: str = config.DEFAULT_THEME) -> list[Path]:
     """The site and theme static dirs, in the same order refs.resolve searches them."""
     root = Path(root)
     return [d for d in (root / "tools" / "hugo" / "static",
-                        root / "tools" / "hugo" / "themes" / "Fuglekasse" / "static")
+                        root / "tools" / "hugo" / "themes" / theme / "static")
             if d.is_dir()]
 
 
 def plan(root: Path, records_dir: Path, cfg: Path | None) -> tuple[list[tuple[str, Path]], list[dict]]:
     """(entries, excluded): what goes in the bundle, and what is left out with a reason each."""
+    theme = config.read_theme(cfg) if cfg else config.DEFAULT_THEME
     entries: list[tuple[str, Path]] = []
     excluded: list[dict] = []
 
@@ -170,12 +171,12 @@ def plan(root: Path, records_dir: Path, cfg: Path | None) -> tuple[list[tuple[st
             continue
         text = src.read_text(encoding="utf-8", errors="replace")
         for target in refs.asset_references(text):
-            hit = refs.resolve(target, src, records_dir, root)
+            hit = refs.resolve(target, src, records_dir, root, theme)
             if hit is None:
                 excluded.append({"path": target, "reason": "not found",
                                  "referenced_by": arc})
             elif not _under(hit, records_dir):
-                arcname = _static_arcname(hit, root)
+                arcname = _static_arcname(hit, root, theme)
                 if arcname:
                     wanted[hit] = arcname
                 else:
@@ -185,7 +186,7 @@ def plan(root: Path, records_dir: Path, cfg: Path | None) -> tuple[list[tuple[st
     for src, arc in sorted(wanted.items(), key=lambda kv: kv[1]):
         entries.append((arc, src))
 
-    for d in _static_dirs(root):
+    for d in _static_dirs(root, theme):
         for f in sorted(p for p in d.rglob("*") if p.is_file()):
             if f.resolve() not in wanted:
                 excluded.append({"path": str(f.relative_to(root)), "reason": "unreferenced"})
@@ -208,8 +209,8 @@ def _under(path: Path, parent: Path) -> bool:
     return True
 
 
-def _static_arcname(hit: Path, root: Path) -> str | None:
-    for d in _static_dirs(root):
+def _static_arcname(hit: Path, root: Path, theme: str = config.DEFAULT_THEME) -> str | None:
+    for d in _static_dirs(root, theme):
         if _under(hit, d):
             return "static/" + hit.resolve().relative_to(d.resolve()).as_posix()
     return None

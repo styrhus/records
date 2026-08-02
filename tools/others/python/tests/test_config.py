@@ -49,3 +49,34 @@ def test_shallowest_config_wins(tmp_path):
     _mk(deep)
     (deep / "hugo.yaml").write_text("contentDir: ../content\n")
     assert config.resolve_records_dir(tmp_path) == (tmp_path / "records").resolve()
+
+
+def test_read_theme_default_when_absent(tmp_path):
+    p = tmp_path / "hugo.yaml"
+    p.write_text("contentDir: ../records\n")
+    assert config.read_theme(p) == "Fuglekasse"
+
+
+def test_read_theme_reads_the_value(tmp_path):
+    p = tmp_path / "hugo.yaml"
+    p.write_text("theme: Postkasse\n")
+    assert config.read_theme(p) == "Postkasse"
+    p.write_text('theme: "Postkasse"\n')
+    assert config.read_theme(p) == "Postkasse"
+    p.write_text("theme: Postkasse  # growth\n")
+    assert config.read_theme(p) == "Postkasse"
+
+
+def test_read_theme_ignores_commented_lines(tmp_path):
+    """The shipped hugo.yaml shape: active Fuglekasse, commented Postkasse."""
+    p = tmp_path / "hugo.yaml"
+    p.write_text("# theme: Postkasse\ntheme: Fuglekasse\n")
+    assert config.read_theme(p) == "Fuglekasse"
+    p.write_text("# theme: Postkasse\n")
+    assert config.read_theme(p) == "Fuglekasse"
+
+
+def test_read_theme_default_parameter(tmp_path):
+    p = tmp_path / "hugo.yaml"
+    p.write_text("baseURL: /\n")
+    assert config.read_theme(p, default="") == ""

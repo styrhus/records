@@ -19,7 +19,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from .config import find_hugo_configs, read_content_dir, resolve_records_dir
+from .config import find_hugo_configs, read_content_dir, read_theme, resolve_records_dir
 from .publish import _TARGETS, _checkout_root, _param
 
 _HUGO_MIN = (0, 158)  # the theme's site.Language.Locale needs it
@@ -104,6 +104,22 @@ def _config_check(cfg: Path | None, records_dir: Path | None, repo: Path) -> dic
     return _check("config", "ok", f"{cfg} → {records_dir}")
 
 
+def _theme_check(cfg: Path) -> list[dict]:
+    """An explicit theme: must name a directory under themes/ beside the config."""
+    theme = read_theme(cfg, default="")
+    if not theme:
+        return []
+    themes_dir = cfg.parent / "themes"
+    if (themes_dir / theme).is_dir():
+        return [_check("theme", "ok", f"{theme} → {themes_dir / theme}")]
+    present = sorted(d.name for d in themes_dir.iterdir() if d.is_dir()) \
+        if themes_dir.is_dir() else []
+    remedy = ("themes present: " + ", ".join(present) + " — the name is case-sensitive"
+              if present else f"create {themes_dir / theme}, or drop the theme: line")
+    return [_check("theme", "error",
+                   f"theme: {theme!r} has no directory under {themes_dir}", remedy)]
+
+
 def _records_checks(records_dir: Path | None, text: str) -> list[dict]:
     if records_dir is None or not records_dir.is_dir():
         return []
@@ -162,7 +178,7 @@ def _hugo_check() -> dict:
     version = (int(m.group(1)), int(m.group(2)))
     if version < _HUGO_MIN:
         return _check("hugo", "error", f"hugo {version[0]}.{version[1]} is too old",
-                      "the Fuglekasse theme needs hugo ≥ 0.158 (site.Language.Locale)")
+                      "the bundled themes need hugo ≥ 0.158 (site.Language.Locale)")
     return _check("hugo", "ok", f"hugo {version[0]}.{version[1]}")
 
 
@@ -270,6 +286,8 @@ def diagnose(repo: Path = Path("."), env=None) -> dict:
                    else resolve_records_dir(repo))
 
     checks = [_config_check(cfg, records_dir, repo)]
+    if cfg:
+        checks += _theme_check(cfg)
     checks += _records_checks(records_dir, text)
     checks.append(_url_check(text, env, root))
     checks.append(_hugo_check())
