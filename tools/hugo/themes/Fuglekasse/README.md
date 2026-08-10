@@ -68,6 +68,22 @@ separate the dated records. **Off by default**; in every other page mode the
 param is ignored (with a build warning) and the three files are ordinary
 records.
 
+## Anchored separators
+
+Set `params.threeDotAnchor: true` (single-flowing only) to turn the `· · ·`
+dividers into clickable anchors, and to add one above the very first record —
+so every point in the stream is a shareable link. Each divider becomes an
+`<a href="#XXXXX">` whose id is five characters from the URL-safe alphabet
+`A–Z a–z 0–9 - . _ ~` (66 characters, `66⁵ ≈ 1.25 billion` possible ids).
+
+The ids are **stable across builds**: each is derived by hashing the record's
+slug (Hugo has no build-time RNG), so a link you copy today still works after
+the next rebuild. They look random but are deterministic. Ids collide only on a
+hash collision over the record slugs, which is negligible in practice.
+
+**Off by default**; in every other page mode the param is ignored (with a build
+warning). The PDF/EPUB book is unaffected — this is a web-only feature.
+
 ## Chapters
 
 Name a first-level folder in your content directory after a number — arabic

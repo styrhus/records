@@ -98,7 +98,9 @@ ul.records li { margin: 0.6rem 0; }
 .mode-single .record-page:last-child { margin-bottom: 0; }
 .mode-single .record-head { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); margin: 0 0 1rem; }
 /* single-flowing mode: bare turn stream, records split by a dimmed dinkus */
-.record-sep { text-align: center; color: var(--dim); letter-spacing: 0.5em; text-indent: 0.5em; margin: 2.5rem 0; user-select: none; }
+.record-sep { display: block; text-align: center; color: var(--dim); letter-spacing: 0.5em; text-indent: 0.5em; margin: 2.5rem 0; user-select: none; text-decoration: none; }
+a.record-sep { cursor: pointer; }
+a.record-sep:target { color: var(--accent); }
 /* Hover "#" anchors on single-mode record titles, every Human turn heading, and chapter summaries. */
 .record-head, section.user h2, details.chapter > summary { scroll-margin-top: 1rem; }
 .anchor { margin-left: 0.4em; color: var(--dim); text-decoration: none; opacity: 0; transition: opacity 0.15s; }

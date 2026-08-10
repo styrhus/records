@@ -136,6 +136,17 @@ The PDF/EPUB build follows suit — the generated cover is dropped in favour of 
 specials get their own pages, and the `· · ·` dividers separate only the dated records. **Off by
 default**; in any other page mode the param is ignored with a build warning.
 
+## Anchored separators
+
+Set `params.threeDotAnchor: true` (single-flowing only) to turn the `· · ·` dividers into clickable
+anchors, and to add one above the very first record — so every point in the stream is a shareable
+link. Each divider becomes an `<a href="#XXXXX">` whose id is five characters from the URL-safe
+alphabet `A–Z a–z 0–9 - . _ ~` (66 characters, `66⁵ ≈ 1.25 billion` possible ids). The ids are
+**stable across builds** — derived by hashing each record's slug (Hugo has no build-time RNG), so a
+copied link survives a rebuild. They collide only on a slug-hash collision, negligible in practice.
+**Off by default**; ignored (with a build warning) in every other page mode, and the PDF/EPUB book
+is unaffected — this is web-only.
+
 ## Chapters
 
 Name a first-level folder in your content directory after a number — arabic (`records/2/`) or roman

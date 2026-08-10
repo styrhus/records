@@ -130,6 +130,13 @@ params:
   # give each special file its own page. All three are optional. Off by default.
   # bookLook: true
 
+  # Anchored separators (single-flowing mode only): the · · · dinkus between
+  # records becomes a clickable link with a stable 5-character id, and one is
+  # added above the first record too, so every point in the stream is a
+  # shareable #anchor. Ids are derived from each record's slug (same every
+  # build). Off by default; uncomment to enable.
+  # threeDotAnchor: true
+
   # Chapter fold state in basic/single modes (numbered records/<n>/ folders):
   #   latest    — open the chapter holding the newest record, collapse the rest (default)
   #   expanded  — every chapter open

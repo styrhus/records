@@ -20,6 +20,10 @@
   {{ if and $showFilter (ne $mode "single") }}
     {{ warnf "Fuglekasse: showFilter is only honoured in pageMode \"single\"" }}
   {{ end }}
+  {{ $threeDotAnchor := site.Params.threeDotAnchor | default false }}
+  {{ if and $threeDotAnchor (ne $mode "single-flowing") }}
+    {{ warnf "Fuglekasse: threeDotAnchor is only honoured in pageMode \"single-flowing\"" }}
+  {{ end }}
 
   {{ $all := where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" }}
   {{/* demoMode: theme-shipped demo records (demo: true) render only while the
@@ -167,9 +171,23 @@
          With bookLook, forside stands in for the intro. */}}
     {{ if not $forside }}{{ .Content }}{{ end }}
     {{ range $i, $r := $flow }}
-      {{ if $i }}<div class="record-sep" aria-hidden="true">· · ·</div>{{ end }}
+      {{ $isSpecial := and $bookLook (not $r.Section) (in (slice "forside" "side-1" "bakside") $r.File.ContentBaseName) }}
+      {{ if $threeDotAnchor }}
+        {{/* Anchored dinkus above every record incl. the first; not above a bookLook cover.
+             id: 5 base-66 chars from an FNV-1a hash of the slug — stable across builds. */}}
+        {{ if not (and (eq $i 0) $isSpecial) }}
+          {{ $abc := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~" }}
+          {{ $seed := hash.FNV32a (path.Base $r.RelPermalink) }}
+          {{ $id := "" }}
+          {{ range seq 5 }}
+            {{ $id = printf "%s%s" $id (substr $abc (mod $seed 66) 1) }}
+            {{ $seed = int (div $seed 66) }}
+          {{ end }}
+          <a class="record-sep" href="#{{ $id }}" id="{{ $id }}" aria-label="Link to this point">· · ·</a>
+        {{ end }}
+      {{ else if $i }}<div class="record-sep" aria-hidden="true">· · ·</div>{{ end }}
       {{ $book := "" }}
-      {{ if and $bookLook (not $r.Section) (in (slice "forside" "side-1" "bakside") $r.File.ContentBaseName) }}{{ $book = printf " book-%s" $r.File.ContentBaseName }}{{ end }}
+      {{ if $isSpecial }}{{ $book = printf " book-%s" $r.File.ContentBaseName }}{{ end }}
       <article class="record-flow{{ $book }}" id="{{ path.Base $r.RelPermalink }}"{{ with $r.Params.language }} lang="{{ . }}"{{ end }}>
         {{ partial "record.html" (dict "content" $r.Content "prefix" (path.Base $r.RelPermalink) "voice" $r.Params.voiceRecorded) }}
       </article>

@@ -8,6 +8,7 @@ pageMode = "basic"   # "basic" (link index) | "posts" (excerpt feed) | "single" 
 postsCount = 3       # posts mode: how many latest records to show
 singleOrder = "asc"  # single/single-flowing mode record order: "asc" (oldest→newest, top→bottom) | "desc" (newest at top)
 bookLook = false     # single-flowing: records/forside.md, side-1.md, bakside.md become front cover, page 1 and back cover
+threeDotAnchor = false  # single-flowing: the · · · separators become copy-linkable anchors (stable 5-char ids), one above every record incl. the first
 chapterState = "latest"  # chapter fold state: "latest" (open the chapter with the newest record) | "expanded" | "collapsed"
 showToc = false      # floating table-of-contents widget (top-right, home page; all modes but posts)
 showFilter = false   # single mode: floating filter button (bottom-left) — filter record cards by word (text/regex), tags, language and date range
