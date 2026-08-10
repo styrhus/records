@@ -3,6 +3,10 @@ tools/hugo/resources/
 *.local.md
 .hugo_build.lock
 
+# Fork-private extra model-name tokens layered on data/models.json — local
+# builds only (absent in CI, so it never affects the published site).
+data/models_local.json
+
 # Example files used for testing
 records/2026-07-06_23-2*.md
 records/assembler-for-the-people.md

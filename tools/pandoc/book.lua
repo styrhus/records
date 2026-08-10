@@ -25,6 +25,20 @@ local function exists(p)
   return false
 end
 
+-- Model-name tokens for signature stripping — the same repo-root data/ files
+-- record.html reads via site.Data. repoRoot is tools/, so the repo root is
+-- one level up. models_local.json is the gitignored fork-private extras.
+local MODELS = {}
+for _, f in ipairs({ "models.json", "models_local.json" }) do
+  local raw = slurp(path.join({ repoRoot, "..", "data", f }))
+  if raw then
+    local ok, list = pcall(pandoc.json.decode, raw)
+    if ok and type(list) == "table" then
+      for _, m in ipairs(list) do MODELS[#MODELS + 1] = tostring(m):lower() end
+    end
+  end
+end
+
 ---------------------------------------------------------------- site config
 
 -- hugo.yaml parsed as pandoc YAML metadata (smart off — values stay literal);
@@ -439,12 +453,26 @@ local function contentFilter(recDir)
   }
 end
 
--- Signature lines: <p>— model-name</p>, stripped like record.html.
+-- Signature lines: <p>— model-name</p>, stripped like record.html — the
+-- single-token form, plus any "— …" paragraph naming a known model vendor
+-- (multi-word names the token form misses).
 local function isSignature(b)
-  if b.t ~= "Para" or #b.content ~= 3 then return false end
-  local dash, sp, name = b.content[1], b.content[2], b.content[3]
-  return dash.t == "Str" and dash.text == "—" and sp.t == "Space"
-    and name.t == "Str" and name.text:match("^[%w_%.%-]+$") ~= nil
+  if b.t ~= "Para" then return false end
+  if #b.content == 3 then
+    local dash, sp, name = b.content[1], b.content[2], b.content[3]
+    if dash.t == "Str" and dash.text == "—" and sp.t == "Space"
+      and name.t == "Str" and name.text:match("^[%w_%.%-]+$") ~= nil then
+      return true
+    end
+  end
+  local first = b.content[1]
+  if first and first.t == "Str" and first.text == "—" then
+    local txt = utils.stringify(b):lower()
+    for _, m in ipairs(MODELS) do
+      if txt:find(m, 1, true) then return true end
+    end
+  end
+  return false
 end
 
 local function speakerOf(b)

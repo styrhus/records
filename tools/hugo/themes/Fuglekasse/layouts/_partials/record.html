@@ -4,6 +4,13 @@
      voice (voiceRecorded frontmatter) appends a mic icon to each Human heading.
      Named turns (## Human (name), written when /myname is set) render the same, name shown. */}}
 {{ $c := .content | replaceRE `<p>— [\w.-]+</p>` "" }}
+{{/* Also strip a "— …" signature paragraph naming a known model vendor, in any
+     spelling (catches multi-word names the single-token regex above misses).
+     hugo.Data.models is the shipped list; models_local the gitignored extras. */}}
+{{ $models := slice }}
+{{ with hugo.Data.models }}{{ $models = $models | append . }}{{ end }}
+{{ with hugo.Data.models_local }}{{ $models = $models | append . }}{{ end }}
+{{ with $models }}{{ $c = replaceRE (printf `(?i)<p>—\s+[^<]*(?:%s)[^<]*</p>` (delimit (uniq .) "|")) "" $c }}{{ end }}
 {{ if site.Params.repoURL }}{{ $c = replaceRE `href="[^"]*records/([^"]+)"` (printf `href="%s/records/$1"` (partial "repo-link.html" (dict "kind" "raw"))) $c }}{{ end }}
 {{ $p := "" }}
 {{ with .prefix }}{{ $p = printf "%s-" . }}{{ end }}

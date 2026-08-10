@@ -21,6 +21,12 @@ contentDir: ../../records
 # records/, it is fork-owned: upstream never ships or moves files there.
 staticDir: [static, ../../static]
 
+# Repo-root data/ feeds site.Data. data/models.json is the shipped list of
+# vendor/model name tokens (claude, gpt, gemini, …) that record.html strips
+# from signature lines on top of the built-in single-token regex; forks add
+# private extras in the gitignored data/models_local.json (local builds only).
+dataDir: ../../data
+
 # The explicit date: field is authoritative (ordering follows it, not the
 # filename); timestamp-named records without a date: fall back to the filename.
 frontmatter:
