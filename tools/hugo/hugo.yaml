@@ -27,6 +27,15 @@ staticDir: [static, ../../static]
 # private extras in the gitignored data/models_local.json (local builds only).
 dataDir: ../../data
 
+# The generator meta tag names the software, not Hugo: the themes emit
+# "blyant records <version>" from the repo-root CURRENT file (werden cycle),
+# mounted into assets because readFile cannot leave the project dir.
+disableHugoGeneratorInject: true
+module:
+  mounts:
+    - source: ../../CURRENT
+      target: assets/CURRENT
+
 # The explicit date: field is authoritative (ordering follows it, not the
 # filename); timestamp-named records without a date: fall back to the filename.
 frontmatter:
