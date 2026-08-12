@@ -1,0 +1,39 @@
+# One-page output — merged over hugo.yaml by bin/build.sh when params.pageMode
+# is "single" or "single-flowing". Those modes put every record on the front
+# page, so the per-record pages are orphans nothing links to: this stops Hugo
+# writing them, and drops the sitemap with them. What still ships: index.html,
+# 404.html, a records/LICENSE.md if you keep one, everything in static/, the
+# pdf/epub/booklet, and the attachments beside a record in a page bundle.
+#
+# Hugo config cannot read its own params, which is why this lives in a second
+# file rather than in a pageMode branch inside hugo.yaml.
+#
+# MIRROR: list keys REPLACE (not merge) across config files, so both blocks
+# below must restate hugo.yaml's values in full — change them there, change
+# them here.
+
+cascade:
+  # Same as hugo.yaml: tag/chapter folder URLs stay 404s.
+  - target:
+      kind: section
+    build:
+      render: never
+      list: never
+  # First match wins, so the license exemption must precede the catch-all —
+  # the footer links to it. A hand-written page can opt back in the same way,
+  # with `build: {render: always}` in its own front matter (front matter beats
+  # cascade).
+  - target:
+      kind: page
+      path: '{/license}'
+    build:
+      render: always
+  # Records: no file on disk, but keep the permalink — "never" would empty
+  # .RelPermalink, and the single/single-flowing anchors, threeDotAnchor ids
+  # and table of contents are all derived from it.
+  - target:
+      kind: page
+    build:
+      render: link
+
+disableKinds: [taxonomy, term, rss, sitemap]

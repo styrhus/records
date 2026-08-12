@@ -117,12 +117,20 @@ set. Layering is unchanged: theme `hugo.toml` → site `hugo.yaml` → `HUGO_PAR
   `params.postsCount` (default `3`) sets how many appear.
 - `single` — a one-page site: every record rendered inline as a "document" card, `_index.md` on
   top. `params.singleOrder` sets the order — `"asc"` *(default)* oldest→newest, `"desc"` newest
-  first. Records stay reachable at their own URLs.
+  first.
 - `single-flowing` — one continuous conversation: only the Human/Assistant turns, no titles, tags,
   dates or chapters (numbered folders are flattened), records split by a dimmed `· · ·` divider and
   ordered per `singleOrder`. The PDF/EPUB build follows the same presentation.
 
 An unknown value warns and falls back to `basic`.
+
+Both single modes publish **one page**: every record is already on the front page, so
+`bin/build.sh` merges `tools/hugo/one-page.yaml` for them and the built site is `index.html`,
+`404.html`, a `LICENSE.md` page if you keep one, your `static/` files, the PDF/EPUB/booklet and the
+attachments beside a record in a page bundle — no per-record URLs and no `sitemap.xml`. Link to a
+record by its in-page anchor (`/#<slug>`) rather than `/<slug>/`; a page that should be published on
+its own anyway can say `build: {render: always}` in its front matter. A hand-run `hugo`/`hugo server`
+skips the merge and still writes the record pages.
 
 ## Book look
 

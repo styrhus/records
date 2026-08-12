@@ -86,7 +86,16 @@ if [ -z "$CONFIG_REPOURL" ] && [ -z "${HUGO_PARAMS_REPOURL:-}" ]; then
   fi
 fi
 
-(cd "$ROOT/tools/hugo" && hugo --minify --baseURL "$PAGES_URL" --destination "$OUTDIR")
+# One-page modes publish one index.html: no per-record pages, no sitemap.
+# Hugo config cannot branch on its own params, so the rules live in a second
+# config merged in here (see tools/hugo/one-page.yaml).
+PAGE_MODE="${HUGO_PARAMS_PAGEMODE:-$(sed -n 's/^[[:space:]]*pageMode:[[:space:]]*//p' "$ROOT/tools/hugo/hugo.yaml" | head -1 | sed "s/[[:space:]]*#.*\$//; s/[\"']//g")}"
+HUGO_CONFIG=hugo.yaml
+case "$PAGE_MODE" in
+  single|single-flowing) HUGO_CONFIG="hugo.yaml,one-page.yaml" ;;
+esac
+
+(cd "$ROOT/tools/hugo" && hugo --minify --config "$HUGO_CONFIG" --baseURL "$PAGES_URL" --destination "$OUTDIR")
 
 # Phone app: tools/pwa/ is copied in only when params.phoneApp names the path
 # segment to serve it at. Unset = not shipped, because the page holds a forge

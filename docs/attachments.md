@@ -107,6 +107,8 @@ how you find out first. See [preservation](preservation.md).
 
 In `pageMode: single` and `single-flowing`, every record renders on the front
 page, where a relative `image.png` resolves against `/` instead of the
-record's own URL and 404s. Bundles render correctly on their own pages and in
-the PDF and EPUB. The front-page fix belongs to the theme, and is on the
-roadmap.
+record's own URL and 404s — and those modes publish no per-record pages to
+fall back on (see the theme README). The attached files themselves are still
+published, at `/<slug>/image.png`. Bundles render correctly in the other
+modes and in the PDF and EPUB. The front-page fix belongs to the theme, and is
+on the roadmap.

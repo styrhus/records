@@ -40,15 +40,24 @@ To go further, the templates live in `layouts/`, and all the CSS is at the top o
 - `single` — a one-page site: no auto-generated record links; instead every
   record is rendered inline as a "document" card, with `_index.md` on top.
   `params.singleOrder` sets the record order — `"asc"` *(default)* runs
-  oldest→newest (top→bottom), `"desc"` puts the newest at top. Records are still
-  reachable by direct URL, so links you write inside `records/*.md` keep working.
+  oldest→newest (top→bottom), `"desc"` puts the newest at top.
 - `single-flowing` — one continuous conversation: greeting and `_index.md`
   intro on top, then only the Human/Assistant turns of every record — no
   titles, tags, dates or chapters (numbered folders are flattened into the
   stream). Records are separated by a dimmed centred `· · ·` divider and
-  ordered by date per `params.singleOrder`. Direct record URLs keep working,
-  and the PDF/EPUB build follows the same presentation (no table of contents,
-  no per-record page breaks or chapter files).
+  ordered by date per `params.singleOrder`. The PDF/EPUB build follows the same
+  presentation (no table of contents, no per-record page breaks or chapter
+  files).
+
+Both single modes publish **one page**. Since every record is already on the
+front page, `bin/build.sh` merges `tools/hugo/one-page.yaml` for them, and the
+built site is `index.html`, `404.html`, a `LICENSE.md` page if you keep one,
+your `static/` files, the PDF/EPUB/booklet and the attachments beside a record
+in a page bundle — no per-record URLs and no `sitemap.xml`. Link to a record
+with its in-page anchor (`/#<slug>`, or a `· · ·` anchor — see below) rather
+than `/<slug>/`. A page you want published on its own anyway can say so in its
+front matter with `build: {render: always}`. Running `hugo` or `hugo server` by
+hand skips the merge, so previews still show the per-record pages.
 
 ## Book look
 
