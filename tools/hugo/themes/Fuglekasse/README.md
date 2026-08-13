@@ -77,6 +77,13 @@ separate the dated records. **Off by default**; in every other page mode the
 param is ignored (with a build warning) and the three files are ordinary
 records.
 
+Inside `side-1.md` and `bakside.md` a horizontal rule (`---` on its own line,
+with a blank line above it) renders as a **sunken divider** — a rounded trough
+one line-height tall, carved out of the page background. Elsewhere — records,
+`forside.md` — a rule keeps the browser default. Web only; the PDF and EPUB
+are unaffected. Watch the blank line: `---` placed directly under a line of
+text is Markdown for a heading, not a rule.
+
 ## Anchored separators
 
 Set `params.threeDotAnchor: true` (single-flowing only) to turn the `· · ·`

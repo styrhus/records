@@ -144,6 +144,12 @@ The PDF/EPUB build follows suit — the generated cover is dropped in favour of 
 specials get their own pages, and the `· · ·` dividers separate only the dated records. **Off by
 default**; in any other page mode the param is ignored with a build warning.
 
+Inside `side-1.md` and `bakside.md` a horizontal rule (`---` on its own line, with a blank line above
+it) renders as a **sunken divider** — a rounded trough one line-height tall, carved out of the page
+background. Elsewhere — records, `forside.md` — a rule keeps the browser default. Web only; the PDF
+and EPUB are unaffected. Watch the blank line: `---` directly under a line of text is Markdown for a
+heading, not a rule.
+
 ## Anchored separators
 
 Set `params.threeDotAnchor: true` (single-flowing only) to turn the `· · ·` dividers into clickable
