@@ -287,6 +287,12 @@ drop your own into your site's `static/`) to pin a brand mark to the bottom-righ
 corner of every page. It is a fixed, non-clickable image that stays put while you
 scroll. Unset, no logo is shown.
 
+`params.logoSize` sizes it: `default` (48px, the default), `bigger-1` (60px,
++25%), `bigger-2` (72px, +50%) or `bigger-3` (96px, +100%). The bigger steps
+only apply above `48rem` of viewport width — narrower screens (phones) always
+get the default size, so a large mark never crowds a small screen. An unknown
+value warns and falls back to `default`.
+
 ## Favicon
 
 Set `params.favicon` to a file in `static/` to use as the browser-tab icon

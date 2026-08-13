@@ -223,6 +223,11 @@ params:
   # file in the repo-root static/ (or the theme's); remove to show none.
   logo: fuglekasse.svg
 
+  # Size of that mark: default (48px), bigger-1 (+25%), bigger-2 (+50%),
+  # bigger-3 (+100%). The bigger steps only apply on screens wider than
+  # 48rem — phones always get the default size.
+  # logoSize: bigger-1
+
   # Browser-tab icon (<link rel="icon">). Point it at a file in the repo-root static/;
   # unset falls back to the shipped fuglekasse.svg. Kept separate from logo
   # since favicons are square and logos are often not.

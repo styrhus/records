@@ -23,6 +23,7 @@ repoBranch = "main"     # branch the rewritten records/ links and the footer bra
 # epub = "records.epub"  # footer "Get EPUB" link to the pandoc-built site EPUB (see tools/pandoc/ in the records repo); unset shows none
 # booklet = "records-booklet.pdf"  # footer "Get booklet" link to the print booklet (A5 pages two-up on A4 landscape, folding order); unset shows none
 # logo = "fuglekasse.svg"  # brand mark fixed to the bottom-right corner; unset shows none
+logoSize = "default"  # logo size: default (48px), bigger-1 (+25%), bigger-2 (+50%), bigger-3 (+100%); the bigger steps apply above 48rem only
 # favicon = "fuglekasse.svg"  # <link rel="icon"> file in static/; unset falls back to the shipped fuglekasse.svg
 # spotify = "https://open.spotify.com/playlist/…"  # Spotify logo pinned bottom-left that opens an embedded player; share or embed URL; unset shows none
 # commentURL = "https://codeberg.org/you/yourrepo/issues/new"  # per-record "Comment" link opening a prefilled issue; unset shows none

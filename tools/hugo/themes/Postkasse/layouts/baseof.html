@@ -29,7 +29,11 @@
     {{ with site.Params.repoURL }}<sup><a href="{{ . }}">{{ replaceRE `^https?://` "" . }}</a></sup>{{ end }}
     {{ end }}
   </footer>
-  {{ with site.Params.logo }}<img class="site-logo" src="{{ partial "static-url.html" . }}" alt="">{{ end }}
+  {{- with site.Params.logo }}
+  {{- $size := lower (default "default" site.Params.logoSize) }}
+  {{- if not (in (slice "default" "bigger-1" "bigger-2" "bigger-3") $size) }}{{ warnf "logoSize %q unknown (default, bigger-1, bigger-2, bigger-3) — using default" $size }}{{ $size = "default" }}{{ end }}
+  <img class="site-logo{{ if ne $size "default" }} logo-{{ $size }}{{ end }}" src="{{ partial "static-url.html" . }}" alt="">
+  {{- end }}
   {{- with site.Params.spotify }}
   {{- $url := replaceRE `^(https://open\.spotify\.com)/(embed/)?` "${1}/embed/" . }}
   <details class="spotify">
