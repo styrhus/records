@@ -125,7 +125,7 @@ here, and audio — should [akvarium's](../akvarium/ROADMAP.md) third rung ever 
 nothing else.
 
 **Files:** `recordkit/create.py`, `recordkit/naming.py`, `recordkit/stick.py`,
-`tools/pandoc/book.lua`, `docs/`, `AGENTS.md`.
+ `tools/pandoc/book.lua`, `docs/`, `AGENTS.md`.
 
 **Acceptance:** a record with an image, a PDF and a video rendering correctly on the site, in the
 PDF and in the EPUB — plus an existing flat record left untouched and byte-identical.
