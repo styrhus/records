@@ -89,7 +89,7 @@ succeeding inside the image.
 
 Read the living docs against the code, one section at a time, and fix whichever side is wrong.
 
-- `CLAUDE.local.md` and its tracked mirror `CLAUDE.local.md.example.md` — config keys, ordering
+- `AGENTS.md` — config keys, ordering
   rules, pageModes, the rendering pipeline, the CLI surface. This file is dense and load-bearing;
   drift here misleads every future session.
 - `tools/others/README.md` — the CLI commands listed must match `recordkit/cli.py`'s subparsers, and

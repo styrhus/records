@@ -33,8 +33,8 @@ whose `State` is `open` and whose dependencies are `done`.
 ## What "done" means
 
 An item is done when its acceptance check passes *and* the docs that describe it are true. This
-project's living docs are load-bearing: `CLAUDE.local.md` (and its tracked mirror
-`CLAUDE.local.md.example.md`), `tools/others/README.md`, the theme README. If an item changes a
+project's living docs are load-bearing: `AGENTS.md` (the tracked agent-instructions file;
+`CLAUDE.md` symlinks to it), `tools/others/README.md`, the theme README. If an item changes a
 config key, a command, an ordering rule or a build step, updating the matching prose is part of the
 item, not a follow-up.
 
@@ -57,9 +57,8 @@ git worktree add ../records-hundehus
 git worktree add ../records-schrank
 ```
 
-**`CLAUDE.local.md` is gitignored, so a fresh worktree will not have it.** That file is the project's
-instructions; a session without it is working blind. Either copy it in, or point the session at the
-tracked mirror `CLAUDE.local.md.example.md`. Same for `.mem/`, which is also gitignored.
+The project's instructions (`AGENTS.md`) are tracked, so every fresh worktree has them. `.mem/` is
+gitignored — copy it in if the session needs the local memory.
 
 ### The human assigns; the table is the ledger
 
@@ -79,7 +78,7 @@ The conflict is trivial but universal.
 **A session adding a command writes its module and leaves a one-line `TODO` where the subparser
 would go, rather than editing `cli.py`.** Wiring them all up afterwards is a single small pass with
 no conflicts at all. The same applies to the shared prose: if several sessions are running, they
-note what `CLAUDE.local.md` and `tools/others/README.md` need rather than editing those files.
+note what `AGENTS.md` and `tools/others/README.md` need rather than editing those files.
 
 ### What does not parallelize
 
