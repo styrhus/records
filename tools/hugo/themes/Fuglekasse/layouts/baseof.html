@@ -196,6 +196,7 @@
     }
     .greeting { font-family: "{{ $s.font | safeCSS }}", cursive; font-size: 3.5rem; line-height: 1.15; margin: 0 0 1.75rem; }
   </style>
+  {{ partial "head-extra.html" . }}
 </head>
 <body>
   <header><a href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a></header>

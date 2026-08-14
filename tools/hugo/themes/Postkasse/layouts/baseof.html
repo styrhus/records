@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="{{ partial "asset-url.html" $css }}">
   {{- $js := resources.Get "js/postkasse.js" | minify | fingerprint }}
   <script src="{{ partial "asset-url.html" $js }}" defer></script>
+  {{ partial "head-extra.html" . }}
 </head>
 <body>
   <header><a href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a></header>

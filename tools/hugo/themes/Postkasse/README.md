@@ -351,6 +351,25 @@ Below the front matter the body is plain Markdown. (`url` and `layout` make the 
 `/404.html`; `showDate: false` hides the post date; `build.list: never` keeps it out of record
 lists.)
 
+## Extra `<head>` markup
+
+For JSON-LD, an extra meta tag or a site-verification token, override the empty
+`head-extra.html` partial instead of the whole template: create
+`layouts/_partials/head-extra.html` in your site (beside `hugo.yaml`, not in the
+theme) and put the markup there.
+
+```html
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Book","name":"…"}
+</script>
+```
+
+A site-level `layouts/baseof.html` would also work, but it shadows the theme's
+copy wholesale — every later theme change to the head, the palette or the CSS
+then silently stops reaching your site, and the symptom is a new feature simply
+not appearing. The partial only ever holds your own markup, so it cannot go
+stale that way.
+
 ## License
 
 MIT for the theme code. The bundled *Architects Daughter* font is SIL OFL 1.1 — see
