@@ -1,6 +1,6 @@
 # Postkasse
 
-<!-- werden: 0.12.2 badstu-beetle -->
+<!-- werden: 0.12.3 badstu-cricket -->
 
 The growth theme for [blyant records](https://codeberg.org/blyant/records) — Norwegian for
 *mailbox*, wearing the name of the werden cycle that dreamed it.

@@ -8,7 +8,7 @@ Fork, enable Actions, push — your words appear at
 fork starts as a working demo site; your first record replaces the demo
 automatically.
 
-The front page explains the rest: <https://blyant.codeberg.page/records/>.
+The front page explains the basic functions: <https://blyant.codeberg.page/records/>.
 
 ## Make it yours
 
@@ -63,6 +63,6 @@ record — [install it](docs/install.md).
 
 ---
 
-> Fase — 0.12.2 badstu-beetle
+> Fase — 0.12.3 badstu-cricket
 
 [blyant](https://snl.no/blyant)

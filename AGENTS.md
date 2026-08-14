@@ -1,5 +1,5 @@
 # AGENTS.md
-<!-- werden: 0.12.2 badstu-beetle -->
+<!-- werden: 0.12.3 badstu-cricket -->
 
 Guidance for AI coding agents working in this repository — any vendor.
 

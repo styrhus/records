@@ -1,6 +1,6 @@
 # blyant records Without AI (`tools/others/`)
 
-<!-- werden: 0.12.2 badstu-beetle -->
+<!-- werden: 0.12.3 badstu-cricket -->
 
 This directory contains the **no-AI engine and plugins** for the blyant records site — letting you run the mechanical slash-commands without a model. Optionally add Ollama for the AI-driven skills.
 
