@@ -250,6 +250,16 @@ site-wide, or opt a single record out with `showTags: false` in its front
 matter. Records may live in subfolders (`records/linux/…`); the folders are
 organisation only and render no index page of their own.
 
+## Featured records
+
+`featured: true` in a record's front matter — what `/stick` writes — pins the
+record above the date ordering on the front page in every mode, including
+`singleOrder: desc`, where it would otherwise sit at the bottom. In the two
+one-page modes it also takes a faint accent tint: in `single` a tinted variant
+of the normal card, in `single-flowing` a soft rounded panel lifted off the
+bare stream. The tint is mixed from your own palette, so it follows a fork's
+colours in both light and dark. The PDF/EPUB books stay chronological.
+
 ## Voice-recorded records
 
 Give a record `voiceRecorded: true` in its front matter and a small

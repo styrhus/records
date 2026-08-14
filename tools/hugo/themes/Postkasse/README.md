@@ -251,6 +251,16 @@ default (`params.showTags: true`); set it `false` to hide them site-wide, or opt
 `showTags: false`. Records may live in subfolders (`records/linux/…`); those folders are
 organisation only and render no index page.
 
+## Featured records
+
+`featured: true` in a record's front matter — what `/stick` writes — pins the
+record above the date ordering on the front page in every mode, including
+`singleOrder: desc`, where it would otherwise sit at the bottom. In the two
+one-page modes it also takes a faint accent tint: in `single` a tinted variant
+of the normal card, in `single-flowing` a soft rounded panel lifted off the
+bare stream. The tint is mixed from your own palette, so it follows a fork's
+colours in both light and dark. The PDF/EPUB books stay chronological.
+
 ## Voice-recorded records
 
 Give a record `voiceRecorded: true` and a small microphone icon in the accent colour follows the
