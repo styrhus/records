@@ -37,7 +37,7 @@
   {{/* posts mode paginates; greeting + intro render on page 1 only. */}}
   {{ $paginator := false }}
   {{ if eq $mode "posts" }}
-    {{ $sorted := sort (where $all "Params.featured" true) "Date" "desc" | append (sort (where $all "Params.featured" "!=" true) "Date" "desc") }}
+    {{ $sorted := partial "inline/featured-first.html" (dict "pages" $all "order" "desc") }}
     {{ $paginator = .Paginate $sorted (site.Params.postsCount | default 3) }}
   {{ end }}
   {{ $firstPage := or (not $paginator) (eq $paginator.PageNumber 1) }}
@@ -94,7 +94,8 @@
 
   {{/* bookLook (single-flowing only): records/forside.md, side-1.md and bakside.md
        become front cover, page 1 and back cover — forside replaces the _index intro,
-       bakside closes the stream; dated records keep singleOrder between them.
+       bakside closes the stream; featured records lead the dated stream, the
+       rest keep singleOrder between them.
        $flow is the final flowing order, shared by the stream and the TOC. */}}
   {{ $bookLook := site.Params.bookLook | default false }}
   {{ $forside := false }}
@@ -114,7 +115,7 @@
     {{ end }}
     {{ with $forside }}{{ $flow = $flow | append . }}{{ end }}
     {{ with $side1 }}{{ $flow = $flow | append . }}{{ end }}
-    {{ with sort $loose "Date" $order }}{{ $flow = $flow | append . }}{{ end }}
+    {{ with partial "inline/featured-first.html" (dict "pages" $loose "order" $order) }}{{ $flow = $flow | append . }}{{ end }}
     {{ with $bakside }}{{ $flow = $flow | append . }}{{ end }}
   {{ else if $bookLook }}
     {{ warnf "Fuglekasse: bookLook is only honoured in pageMode \"single-flowing\"" }}
@@ -128,7 +129,7 @@
       <summary aria-label="Table of contents"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></summary>
       <nav class="toc-body">
         {{/* single-flowing lists $flow as-is so bookLook's cover/back-cover order carries over. */}}
-        {{ $tocLoose := sort $loose "Date" $dir }}
+        {{ $tocLoose := partial "inline/featured-first.html" (dict "pages" $loose "order" $dir) }}
         {{ if eq $mode "single-flowing" }}{{ $tocLoose = $flow }}{{ end }}
         {{ with $tocLoose }}
           <ul class="toc-loose">
@@ -141,7 +142,7 @@
           <details class="toc-chapter">
             <summary>{{ .name }}{{ with .title }} — {{ . }}{{ end }}</summary>
             <ul>
-              {{ range sort .pages "Date" $dir }}
+              {{ range partial "inline/featured-first.html" (dict "pages" .pages "order" $dir) }}
                 <li><a href="{{ cond $isSingle (printf "#%s" (path.Base .RelPermalink)) .RelPermalink }}">{{ partial "inline/record-title.html" . }}</a></li>
               {{ end }}
             </ul>
@@ -152,16 +153,16 @@
   {{ end }}
 
   {{ if eq $mode "single" }}
-    {{/* One-page document stack: _index first, loose records per singleOrder, then chapters. */}}
+    {{/* One-page document stack: _index first, featured then loose records per singleOrder, then chapters. */}}
     {{ if $showFilter }}{{ partial "inline/filter.html" $all }}{{ end }}
     <article class="record-page">{{ .Content }}</article>
-    {{ range sort $loose "Date" $order }}
+    {{ range partial "inline/featured-first.html" (dict "pages" $loose "order" $order) }}
       {{ partial "inline/record-card.html" . }}
     {{ end }}
     {{ range $chapters }}
       <details class="chapter"{{ if .open }} open{{ end }}>
         <summary id="chapter-{{ .name }}">{{ .name }}{{ with .title }} — {{ . }}{{ end }}<a class="anchor" href="#chapter-{{ .name }}" aria-label="Link to this chapter">#</a></summary>
-        {{ range sort .pages "Date" $order }}
+        {{ range partial "inline/featured-first.html" (dict "pages" .pages "order" $order) }}
           {{ partial "inline/record-card.html" . }}
         {{ end }}
       </details>
@@ -237,10 +238,15 @@
   </article>
 {{ end }}
 
+{{/* Records with featured: true first, then the rest; both sorted by Date in .order. */}}
+{{ define "_partials/inline/featured-first.html" }}
+  {{ $s := sort (where .pages "Params.featured" true) "Date" .order | append (sort (where .pages "Params.featured" "!=" true) "Date" .order) }}
+  {{ return $s }}
+{{ end }}
+
 {{/* A set of records as the basic-mode link list, featured pinned, newest first. */}}
 {{ define "_partials/inline/record-list.html" }}
-  {{ $sorted := sort (where . "Params.featured" true) "Date" "desc" | append (sort (where . "Params.featured" "!=" true) "Date" "desc") }}
-  {{ with $sorted }}
+  {{ with partial "inline/featured-first.html" (dict "pages" . "order" "desc") }}
   <ul class="records">
     {{ range . }}
       <li>
