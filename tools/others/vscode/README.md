@@ -38,6 +38,7 @@ recordings are simply one-sided. Full setup for the CLI and every editor:
 - `/gc`, `/gcp`, `/cpd` — commit / push / deploy
 - `/myname <name>` — save your name locally
 - `/mucke` — stamp the now-playing MPRIS track
+- `/airtime` — Human vs Assistant token share (the active recording, else the memory-only chat)
 - `/config` — show the resolved records directory
 - `/esc` — stop recording
 - Missing-CLI detection: if the `records` binary isn't found, the chat shows install

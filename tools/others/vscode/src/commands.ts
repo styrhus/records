@@ -16,5 +16,6 @@ export const COMMANDS: CommandSpec[] = [
   { name: "cpd", args: "[message]", description: "Commit, push, deploy" },
   { name: "myname", args: "[name]", description: "Save your name locally" },
   { name: "mucke", args: "", description: "Stamp the now-playing track" },
+  { name: "airtime", args: "", description: "Human vs Assistant token share" },
   { name: "config", args: "", description: "Show the resolved records directory" },
 ];

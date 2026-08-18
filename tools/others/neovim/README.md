@@ -4,8 +4,8 @@ A chat panel in Neovim for writing records — the Markdown files that become a
 [blyant records](https://codeberg.org/blyant/records) site.
 
 `:Records` opens a split at the bottom. Type `/all #linux How To` to start a recording, then plain
-lines to append to it, `/esc` to stop. `/stick`, `/gc`, `/gcp`, `/cpd`, `/myname`, `/mucke` and
-`/config` do what they do everywhere else in this project.
+lines to append to it, `/esc` to stop. `/stick`, `/gc`, `/gcp`, `/cpd`, `/myname`, `/mucke`, `/airtime`
+and `/config` do what they do everywhere else in this project.
 
 The plugin holds no logic of its own: every command runs the `records` CLI. **Mechanical only** — no
 model is involved, and none is needed. `:help records` documents every command and config key.

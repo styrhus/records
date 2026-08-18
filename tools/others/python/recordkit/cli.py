@@ -12,7 +12,8 @@ from . import archive as archive_mod
 from . import commit as commit_mod
 from . import export as export_mod
 from . import pack as pack_mod
-from . import attach, booth, card, config, create, doctor, importer, mucke, myname, ollama
+from . import airtime, attach, booth, card, config, create, doctor, importer, mucke, myname
+from . import ollama
 from . import publish, stick, verify, watch, werden, writer
 
 
@@ -104,6 +105,11 @@ def _build_parser() -> argparse.ArgumentParser:
 
     mk = sub.add_parser("mucke", help="stamp the now-playing track (/mucke)")
     mk.add_argument("--file", required=True)
+
+    ai = sub.add_parser("airtime", help="Human vs Assistant token share (/airtime)")
+    src = ai.add_mutually_exclusive_group(required=True)
+    src.add_argument("--file", help="a record — its ## Human/## Assistant turns are measured")
+    src.add_argument("--history", help="a chat as a JSON array of {role, content}, or '-' to read stdin")
 
     wd = sub.add_parser("werden", help="advance the werden cycle (/werden — verse stays AI-only)")
     wd.add_argument("structure", nargs="?", help="start a new structure (major step)")
@@ -235,6 +241,15 @@ def main(argv: list[str] | None = None) -> int:
             _emit(myname.save(args.name, Path(args.memory_dir) if args.memory_dir else None))
         elif args.cmd == "mucke":
             _emit(mucke.stamp(Path(args.file)))
+        elif args.cmd == "airtime":
+            if args.file:
+                _emit(airtime.measure_file(Path(args.file)))
+            else:
+                try:
+                    history = json.loads(_stdin_or(args.history))
+                except json.JSONDecodeError as e:
+                    raise RuntimeError(f"invalid history JSON: {e}") from e
+                _emit(airtime.measure_history(history))
         elif args.cmd == "werden":
             _emit(werden.cycle(Path(args.repo), args.structure, stamp=args.stamp))
         elif args.cmd == "config":

@@ -99,6 +99,7 @@ All of these work without a model:
 | `/gc`, `/gcp`, `/cpd` | `/gc -m "msg"` | Commit / push / deploy. `-m` required (no AI to author). |
 | `/myname` | `/myname <name>` | Save your name locally (in `.mem/`). |
 | `/mucke` | `/mucke` | Stamp now-playing MPRIS track into a file. |
+| `/airtime` | `/airtime` | Human vs Assistant token share of the record (VS Code: of the unrecorded chat too). |
 | `/werden` | `/werden [structure \| --stamp]` | Advance the development cycle (`CURRENT` + doc markers). |
 
 The AI-only skills (`/poet`, `/pirate`, `/eq`, `/bff`, `/spellcorrect`, `/diff-*`, `/review`, `/phil-gc`) remain in `.ai/skills/` and are available in Claude Code.

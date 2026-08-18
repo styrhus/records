@@ -241,6 +241,9 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       case "mucke":
         await this.mucke();
         break;
+      case "airtime":
+        await this.airtime();
+        break;
       case "config":
         await this.config();
         break;
@@ -452,6 +455,18 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       });
     } catch (e) {
       this.postMessage({ type: "error", error: `Mucke failed: ${e}` });
+    }
+  }
+
+  private async airtime() {
+    try {
+      // the active recording's file, else the memory-only chat (empty → "Human: 0%, Assistant: 0%")
+      const result = this.recording
+        ? await this.runCLI("airtime", { file: this.recording.file })
+        : await this.runCLI("airtime", { history: "-" }, JSON.stringify(this.chatHistory));
+      this.postMessage({ type: "output", content: String(result.line) });
+    } catch (e) {
+      this.postMessage({ type: "error", error: `Airtime failed: ${e}` });
     }
   }
 

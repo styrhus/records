@@ -99,6 +99,7 @@ for one.
     /cpd [message]           Commit, push, deploy
     /myname [name]           Save your name locally
     /mucke                   Stamp the now-playing track into the record
+    /airtime                 Human vs Assistant token share of the record
     /config                  Show the resolved records directory
 
 A plain message, while a recording is active, is appended to it verbatim as a
