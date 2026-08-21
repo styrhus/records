@@ -89,6 +89,12 @@ local light = {}
 for k, dflt in pairs({ bg = "#d5d6db", fg = "#343b58", dim = "#9699a3", accent = "#34548a", surface = "#e5e6ea" }) do
   light[k] = str(lightParams[k]) or dflt
 end
+-- The dark half of the palette: assistant blocks are dark in both schemes (as on the site).
+local darkParams = styleParams.dark or {}
+local dark = {}
+for k, dflt in pairs({ bg = "#282a36", fg = "#f8f8f2", dim = "#8b96c9", accent = "#bd93f9", surface = "#21222c" }) do
+  dark[k] = str(darkParams[k]) or dflt
+end
 local fontName = str(styleParams.font) or "Architects Daughter"
 local fontFile = str(styleParams.fontfile) or "fonts/architects-daughter.woff2"
 
@@ -422,6 +428,18 @@ local function contentFilter(recDir)
       h.identifier = ""
       return h
     end,
+    -- ```assistant fences: model output pasted into a record, rendered as markdown
+    -- on a labelled panel (mirrors the themes' render-codeblock-assistant hook).
+    CodeBlock = function(cb)
+      if not cb.classes:includes("assistant") then return nil end
+      -- Trailing newline: pandoc.read drops a final table row without it.
+      local text = cb.text .. "\n"
+      local ok, d = pcall(pandoc.read, text, "gfm+smart")
+      if not ok then d = pandoc.read(text, "gfm") end
+      local blocks = d.blocks:walk(contentFilter(recDir))
+      blocks:insert(1, pandoc.Header(6, { pandoc.Str("Assistant") }, pandoc.Attr("", { "speaker", "assistant-label" })))
+      return pandoc.Div(blocks, pandoc.Attr("", { "assistant-block" }))
+    end,
     Image = function(img)
       if not hasScheme(img.src) then
         local p = resolveLocal(img.src, recDir)
@@ -616,8 +634,10 @@ if not special.forside then
 end
 
 -- Palette + greeting font from site params, injected after pdf.css so they win.
-local css = string.format(":root{--bg:%s;--fg:%s;--dim:%s;--accent:%s;--surface:%s}@page{background:%s}",
-  light.bg, light.fg, light.dim, light.accent, light.surface, light.bg)
+local css = string.format(":root{--bg:%s;--fg:%s;--dim:%s;--accent:%s;--surface:%s;"
+  .. "--ab-bg:%s;--ab-fg:%s;--ab-code:%s;--ab-accent:%s;--ab-dim:%s}@page{background:%s}",
+  light.bg, light.fg, light.dim, light.accent, light.surface,
+  dark.surface, dark.fg, dark.bg, dark.accent, dark.dim, light.bg)
 local fontPath = path.join({ repoRoot, "hugo", "themes", themeName, "static", fontFile })
 if not exists(fontPath) then fontPath = path.join({ repoRoot, "hugo", "static", fontFile }) end
 if exists(fontPath) then

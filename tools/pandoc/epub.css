@@ -16,6 +16,13 @@ h6.speaker { font-variant: small-caps; font-size: 0.9em; letter-spacing: 0.08em;
 code { font-family: monospace; font-size: 0.9em; }
 pre { border: 1px solid; padding: 0.6em; margin: 1em 0; white-space: pre-wrap; overflow-wrap: break-word; }
 blockquote { border-left: 3px solid; margin: 1em 0; padding-left: 1em; font-style: italic; }
+/* ```assistant fences (Div.assistant-block from book.lua): a labelled panel, no colour. */
+.assistant-block { border: 1px solid; padding: 0.6em; margin: 1em 0; }
+.assistant-block > :last-child { margin-bottom: 0; }
+.assistant-block h6.assistant-label { font-variant: small-caps; letter-spacing: 0.08em; }
+.assistant-block h3 { font-size: 1.05em; }
+.assistant-block h4 { font-size: 1em; }
+.assistant-block h5, .assistant-block h6:not(.speaker) { font-size: 0.92em; }
 blockquote > :first-child { margin-top: 0; }
 blockquote > :last-child { margin-bottom: 0; }
 table { border-collapse: collapse; margin: 1em 0; }

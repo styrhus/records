@@ -78,7 +78,8 @@ Fuglekasse's and carry the same contract:
   `<section class="user|assistant">`.
 - `repo-link.html` takes the same `{kind: "raw"|"tree", branch?}` and resolves the same
   Forgejo/GitHub/GitLab shapes.
-- `lang-badge.html`, `comment-link.html` and `static-url.html` are unchanged copies.
+- `lang-badge.html`, `comment-link.html`, `head-extra.html` and `static-url.html` are unchanged
+  copies, as is the `_markup/render-codeblock-assistant.html` code-block hook.
 
 **These are copies and must be kept in step.** That is the accepted cost of a standalone theme: it
 buys Postkasse the freedom to diverge without any pressure on Fuglekasse. The signature-stripping
@@ -266,6 +267,27 @@ colours in both light and dark. The PDF/EPUB books stay chronological.
 Give a record `voiceRecorded: true` and a small microphone icon in the accent colour follows the
 **Human** label on every human turn — on the record page, in all home modes, and in the PDF/EPUB —
 marking the conversation as spoken rather than typed.
+
+## Assistant blocks
+
+A fenced code block marked `assistant` is not shown as code: its content is parsed as Markdown and
+rendered inside a dark panel labelled **Assistant**, in the same small-caps type as the `## Assistant`
+turn headings. Use it for output from another model quoted inside a record.
+
+````markdown
+```assistant
+# Dyr
+
+**tadpole** *(5)* — bygger seg om innenfra.
+```
+````
+
+The panel is dark in both colour schemes — built from the *dark* half of `params.style`, so a fork's
+palette carries into it — with the label near-white on a light page and light grey on a dark one.
+Headings inside are a step smaller than the same headings outside, and their ids are dropped, so a
+`## Assistant` line *inside* the block cannot break the turn splitting. Nested fences work if the
+outer fence uses more backticks than the inner one. Same rendering in the PDF and EPUB; the print
+booklet draws the panel as an outlined white box.
 
 ## Footer repo link
 

@@ -268,6 +268,28 @@ human turn — on the
 record page, in all home modes, and in the PDF/EPUB books — marking the
 conversation as spoken rather than typed. Absent or `false`, nothing changes.
 
+## Assistant blocks
+
+A fenced code block marked `assistant` is not shown as code: its content is parsed as Markdown and
+rendered inside a dark panel labelled **Assistant**, in the same small-caps type as the `## Assistant`
+turn headings. Use it for output from another model quoted inside a record.
+
+````markdown
+```assistant
+# Dyr
+
+**tadpole** *(5)* — bygger seg om innenfra.
+```
+````
+
+The panel is dark in both colour schemes — it is built from the *dark* half of `params.style`, so a
+fork's palette carries into it — with the label near-white on a light page and light grey on a dark
+one. Headings inside the panel are a step smaller than the same headings outside it, and their ids
+are dropped, so a `## Assistant` line *inside* the block cannot break the turn splitting. Nested code
+fences work if the outer fence uses more backticks than the inner one (```` ```` ```` around ```` ``` ````).
+It renders the same way in the PDF and EPUB; the print booklet draws the panel as an outlined white
+box instead of a dark fill.
+
 ## Footer repo link
 
 `params.repoURL` puts a small link to your repository in the footer (and, with
