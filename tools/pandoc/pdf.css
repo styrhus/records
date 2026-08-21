@@ -83,10 +83,10 @@ code, pre { font-size: 0.9em; background: var(--surface); }
 code { padding: 0.1em 0.3em; border-radius: 3px; }
 pre { padding: 0.75rem; border-radius: 6px; white-space: pre-wrap; overflow-wrap: break-word; }
 pre code { padding: 0; background: none; }
-/* ```assistant fences (Div.assistant-block from book.lua): dark panel, as on the site.
-   --ab-* come from the site palette's dark half, injected via header-includes. */
+/* ```assistant fences (Div.assistant-block from book.lua): the site's slate panel, light-scheme fill.
+   --ab-* are injected via header-includes — fill fixed, the rest from the palette's dark half. */
 .assistant-block {
-  background: var(--ab-bg, #21222c); color: var(--ab-fg, #f8f8f2);
+  background: var(--ab-bg, #717484); color: var(--ab-fg, #f8f8f2);
   margin: 1rem 0; padding: 0.75rem 1rem; border-radius: 6px;
 }
 .assistant-block > :last-child { margin-bottom: 0; }
@@ -101,7 +101,7 @@ pre code { padding: 0; background: none; }
 .assistant-block blockquote { border-left-color: var(--ab-accent, #bd93f9); background: var(--ab-code, #282a36); }
 .assistant-block th, .assistant-block td { border-color: var(--ab-dim, #8b96c9); }
 .assistant-block tbody tr:nth-child(even) { background: var(--ab-code, #282a36); }
-/* Skylighting tokens inside the panel: Dracula, so a nested fence stays readable on the dark fill. */
+/* Skylighting tokens inside the panel: Dracula, so a nested fence stays readable on the dark code fill. */
 .assistant-block code span.co, .assistant-block code span.do { color: #9aabde; }
 .assistant-block code span.kw, .assistant-block code span.cf, .assistant-block code span.op { color: #ff79c6; }
 .assistant-block code span.st, .assistant-block code span.ss, .assistant-block code span.ch, .assistant-block code span.vs { color: #f1fa8c; }

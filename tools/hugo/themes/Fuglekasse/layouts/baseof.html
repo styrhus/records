@@ -64,12 +64,12 @@
     blockquote > :first-child { margin-top: 0; }
     blockquote > :last-child { margin-bottom: 0; }
     blockquote pre, blockquote code { background: var(--bg); } /* --surface on --surface would blend */
-    /* ```assistant fences: model output pasted into a record — markdown on a dark panel in both schemes. */
+    /* ```assistant fences: model output pasted into a record — markdown on a slate panel. */
     .assistant-block {
-      --ab-bg: {{ $s.dark.surface | safeCSS }};
+      --ab-bg: #717484; /* fixed per scheme; text, accents and code fills still track params.style's dark half */
       --ab-fg: {{ $s.dark.fg | safeCSS }};
       --ab-code: {{ $s.dark.bg | safeCSS }};
-      /* Dracula token colours, so a nested fence stays readable on the dark panel in light mode too. */
+      /* Dracula token colours, so a nested fence stays readable on the dark code fill in both schemes. */
       --hl-comment: #9aabde; --hl-keyword: #ff79c6; --hl-string: #f1fa8c;
       --hl-number: #bd93f9; --hl-func: #50fa7b; --hl-builtin: #8be9fd; --hl-var: #ffb86c;
       background: var(--ab-bg); color: var(--ab-fg);
@@ -78,6 +78,8 @@
     .assistant-block > :last-child { margin-bottom: 0; }
     .assistant-label { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 0.5rem; color: var(--ab-fg); }
     @media (prefers-color-scheme: dark) {
+      /* The dark half's bg would blend into this fill — nested code drops to the dark surface. */
+      .assistant-block { --ab-bg: #2a2b38; --ab-code: {{ $s.dark.surface | safeCSS }}; }
       .assistant-label { color: color-mix(in srgb, var(--ab-fg) 62%, var(--ab-bg)); }
     }
     /* Headings inside the block stay a step below their counterparts outside it. */
