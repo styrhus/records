@@ -374,6 +374,41 @@ Below the front matter the body is plain Markdown. (`url` and `layout` make the 
 `/404.html`; `showDate: false` hides the post date; `build.list: never` keeps it out of record
 lists.)
 
+## Meta description and link previews
+
+`layouts/_partials/head-meta.html` writes the page's `<meta name="description">`
+and its OpenGraph tags — the line search engines show under the title, and the
+card chat apps build when someone pastes a link. Both matter most in
+`single`/`single-flowing` mode, where the front page is the whole site and so
+the whole search surface.
+
+The description is derived at build time, so it never goes stale:
+
+1. the page's own `description:` front matter, if it has one;
+2. on the home page only, `params.description`;
+3. otherwise the opening **14 words** — of the newest record on the home page,
+   of the page itself everywhere else — followed by `...`.
+
+The excerpt is taken from the rendered text with the `Human`/`Assistant`
+headings, the `— model` signature lines and any code blocks removed, so it
+starts at real conversation rather than at a speaker label or a paste. A
+record that opens with something unpresentable gets a hand-written
+`description:` in its front matter.
+
+Change the cut length by editing `$words` at the top of the partial.
+
+Alongside it every page gets `og:title` (the same display title as `<title>`,
+without the site suffix), `og:type` (`website` on the front page, `article` on
+a record), `og:url`, `og:site_name`, `og:locale` and `og:description`, plus
+`article:published_time` on records.
+
+`og:image` is the one that needs a file from you: set `params.ogImage` to
+something in `static/`, around 1200x630. It must be a raster format — the
+crawlers that render previews do not accept SVG, which is why it does not fall
+back to `params.logo`. Unset, no image tag is written and previews fall back to
+whatever the client picks. `params.cdnURL` applies here like it does to the
+other static assets.
+
 ## Extra `<head>` markup
 
 For JSON-LD, an extra meta tag or a site-verification token, override the empty

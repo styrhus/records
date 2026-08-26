@@ -6,7 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   {{ with resources.Get "CURRENT" }}<meta name="generator" content="blyant records {{ index (split (trim .Content "\n ") " ") 0 }}">{{ end }}
   <link rel="icon" href="{{ partial "static-url.html" (or site.Params.favicon "fuglekasse.svg") }}">
-  <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ $t := .Title }}{{ if not $t }}{{ $t = .File.ContentBaseName }}{{ end }}{{ with site.Params.dateTitleFormat }}{{ if findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $t }}{{ $t = time.Format . $.Date }}{{ end }}{{ end }}{{ $t }} · {{ site.Title }}{{ end }}</title>
+  {{- /* Display title, resolved once: head-meta.html reuses it for og:title. */ -}}
+  {{- $pageTitle := site.Title -}}
+  {{- if not .IsHome -}}
+    {{- $t := .Title }}{{ if not $t }}{{ $t = .File.ContentBaseName }}{{ end -}}
+    {{- with site.Params.dateTitleFormat }}{{ if findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $t }}{{ $t = time.Format . $.Date }}{{ end }}{{ end -}}
+    {{- $pageTitle = $t -}}
+  {{- end }}
+  <title>{{ $pageTitle }}{{ if not .IsHome }} · {{ site.Title }}{{ end }}</title>
+  {{- partial "head-meta.html" (dict "page" . "title" $pageTitle) }}
   <style>
     /* Palette + display font come from hugo.yaml params.style (see the theme README). */
     :root {
