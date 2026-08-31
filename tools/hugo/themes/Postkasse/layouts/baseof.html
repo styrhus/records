@@ -29,7 +29,7 @@
   {{ partial "head-extra.html" . }}
 </head>
 <body>
-  <header><a href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a></header>
+  <header><a href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a>{{ partial "search.html" . }}</header>
   {{- /* data-keynav is the whole switch for params.keyNav: no attribute, no key handler. */ -}}
   <main{{ with site.Params.pageMode }} class="mode-{{ . }}"{{ end }}{{ if and site.Params.keyNav (in (slice "single" "single-flowing") (site.Params.pageMode | default "basic")) }} data-keynav{{ end }}>
     {{ block "main" . }}{{ end }}

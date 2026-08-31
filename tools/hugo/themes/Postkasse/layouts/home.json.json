@@ -1,0 +1,61 @@
+{{- /* The search index (kiste 2): every record as one JSON object, written once
+       at build time and queried in the browser. No service, no library — the
+       whole engine is a fetch and a loop in assets/js/postkasse.js.
+
+       This is Hugo's built-in "json" output format on the home kind, so the
+       file lands at /index.json. Hugo ignores `outputs` in a theme config
+       (outputFormats and mediaTypes do merge from one — outputs does not), so
+       switching it on is one knowing edit in tools/hugo/hugo.yaml, exactly like
+       RSS. The built-in format name is deliberate: naming a theme-declared
+       format there would make a Fuglekasse build fail outright, where "json"
+       only warns that no template matched.
+
+       Signature lines never reach the index — the text goes through the same
+       strip-signatures.html the page and the feed use. Speaker headings are
+       dropped too: "Human" and "Assistant" occur in every record and match
+       everything.
+
+       Keys are one letter because the file is a download, not a document:
+         v  index format version
+         n  number of records
+         w  params.searchWords in force (0 = whole record text)
+         r  the records, newest first, each:
+              t  title, plain text          u  link (see below)
+              d  ISO date                   k  tags
+              x  searchable text
+       u is the record's own URL in basic/posts, and the front-page #slug
+       anchor in single/single-flowing, where no record page is built — the
+       same rule rss.xml and backlinks.html follow. */ -}}
+{{- $all := where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" -}}
+{{- $real := where $all "Params.demo" "!=" true -}}
+{{- if or $real (not site.Params.demoMode) }}{{ $all = $real }}{{ end -}}
+{{- $items := sort $all "Date" "desc" -}}
+{{- $onePage := in (slice "single" "single-flowing") (site.Params.pageMode | default "basic") -}}
+{{- /* 0 = the whole record; N = the opening N words, which is the knob for an
+       archive whose full text is too heavy to ship (see the theme README). */ -}}
+{{- $words := int (site.Params.searchWords | default 0) -}}
+{{- $records := slice -}}
+{{- range $items -}}
+  {{- /* Display title, same rule as baseof.html and rss.xml. */ -}}
+  {{- $title := .Title -}}
+  {{- if not $title }}{{ $title = .File.ContentBaseName }}{{ end -}}
+  {{- with site.Params.dateTitleFormat }}{{ if findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $title }}{{ $title = time.Format . $.Date }}{{ end }}{{ end -}}
+  {{- $c := partial "strip-signatures.html" .Content -}}
+  {{- $c = replaceRE `(?i)<h2 id="(?:human|user|assistant)[^"]*">[^<]*</h2>` " " $c -}}
+  {{- /* The ```assistant fence's own label, added by the render hook, is chrome
+         for the same reason: it stands in 359 of the corpus's 1 000 records. */ -}}
+  {{- $c = replaceRE `<p class="assistant-label">[^<]*</p>` " " $c -}}
+  {{- $x := $c | plainify | htmlUnescape -}}
+  {{- $x = trim (replaceRE `\s+` " " $x) " " -}}
+  {{- if $words -}}
+    {{- $ws := split $x " " -}}
+    {{- if gt (len $ws) $words }}{{ $x = printf "%s…" (delimit (first $words $ws) " ") }}{{ end -}}
+  {{- end -}}
+  {{- $records = $records | append (dict
+        "t" (plainify $title)
+        "u" (cond $onePage (printf "%s#%s" site.Home.RelPermalink (path.Base .RelPermalink)) .RelPermalink)
+        "d" (.Date.Format "2006-01-02")
+        "k" (or .Params.tags slice)
+        "x" $x) -}}
+{{- end -}}
+{{- dict "v" 1 "n" (len $records) "w" $words "r" $records | jsonify -}}

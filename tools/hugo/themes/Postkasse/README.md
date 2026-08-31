@@ -10,10 +10,12 @@ templates, inline CSS, no build step, no assets pipeline. That fence is a featur
 and everything that wants to grow past it lives here instead. Postkasse has an **assets pipeline**
 and is allowed **JavaScript**. That is the entire reason it is a separate theme.
 
-Today Postkasse renders the same site Fuglekasse does. The difference is structural: the stylesheet
-and the script are built, minified and fingerprinted out of `assets/` instead of sitting inline in
-`baseof.html`. Site-wide search, build-time backlinks, an honest RSS feed and reading chrome are
-planned on top of that foundation — see the
+Postkasse renders the same site Fuglekasse does, and then grows past it. The stylesheet and the
+script are built, minified and fingerprinted out of `assets/` instead of sitting inline in
+`baseof.html`, and on that foundation live the features the fence keeps out of Fuglekasse:
+site-wide [search](#search), build-time [backlinks](#backlinks), an honest [RSS feed](#rss),
+[reading chrome](#reading-chrome), [attachment rendering](#attachments) and per-record
+[Open Graph cards](#meta-description-and-link-previews) — see the
 [kiste roadmap](../../../../docs/records/developers/roadmap/kiste/ROADMAP.md).
 
 ## Switching themes
@@ -73,9 +75,14 @@ Postkasse ships copies of three things from Fuglekasse, on purpose:
 Postkasse is a **standalone theme**, not a Hugo theme component. Its partials are copies of
 Fuglekasse's and carry the same contract:
 
-- `record.html` takes the same dict — `{content, prefix?, voice?}` — strips assistant signature
-  lines, rewrites relative `records/` links to forge raw URLs, and wraps turns in
-  `<section class="user|assistant">`.
+- `record.html` takes the same dict — `{content, prefix?, voice?}`, plus an optional `page` key
+  for attachment resolution — strips assistant signature lines, rewrites relative `records/` links
+  to forge raw URLs, and wraps turns in `<section class="user|assistant">`. Postkasse's copy
+  delegates to `strip-signatures.html`, `resolve-attachments.html` and
+  `rewrite-record-links.html`, so the signature rule lives in **one** place per renderer (theme
+  partial, `book.lua`) instead of two inside the theme — and its forge-link regex is deliberately
+  tighter than Fuglekasse's (relative paths only), because the loose form mangled attachment URLs
+  on a site served under a path containing `records/`.
 - `repo-link.html` takes the same `{kind: "raw"|"tree", branch?}` and resolves the same
   Forgejo/GitHub/GitLab shapes.
 - `lang-badge.html`, `comment-link.html`, `head-extra.html` and `static-url.html` are unchanged
@@ -211,6 +218,142 @@ Filter state lives in the URL query string —
 `?tags=a,b&language=nb,none&from=2026-01-01&to=2026-12-31&word=foo%7Cbar` — so a filtered view is a
 shareable link that survives reload. Tags containing a comma cannot be filtered (the comma is the
 separator). Without JavaScript the panel opens and closes as a plain `<details>`, controls inert.
+
+## Search
+
+Set `params.showSearch: true` for site-wide search — a magnifier beside the site title on **every**
+page, opening a panel that queries every record you have. **Off by default**, and it needs one line
+in the site config as well (below).
+
+It is a static file and a loop, not a service and not a library. At build time
+`layouts/home.json.json` writes `/index.json`: one object per record with its title, ISO date, tags,
+link and text. The browser fetches that file **on the first search**, never on page load, lowercases
+it once, and answers every keystroke from memory.
+
+Words are ANDed and matched as substrings, so a partial word finds the whole one; `"quote a phrase"`
+to keep it together. A hit in the title outranks a hit in the tags, which outranks the body, and how
+often a term occurs breaks the rest of the tie; equal scores go to the newer record. Twenty results
+at most — past that the answer is a better query, not a longer list. `/` opens search from anywhere
+on the page, up/down walk the results, Enter follows one, Escape closes.
+
+Links follow the page mode, exactly as the feed and the backlinks do: the record's own URL in
+`basic`/`posts`, the front-page `#slug` anchor in `single`/`single-flowing`, where no record page is
+built. In `single` a result inside a collapsed chapter unfolds it on arrival.
+
+**Signature lines never reach the index.** The text goes through the same `strip-signatures.html`
+the page and the feed use, so a `— model-name` line the page hides cannot be searched for either.
+Speaker headings go too — `Human` and `Assistant` stand in every record and would match everything —
+and so does the `Assistant` label the ```` ```assistant ```` fence adds. Code blocks stay: a function
+name is one of the things worth finding.
+
+### Turning it on
+
+Two switches, because a theme cannot set them both. Hugo merges `outputFormats` and `mediaTypes`
+from a theme config but **not** `outputs`, so the output itself is one knowing edit in
+`tools/hugo/hugo.yaml`, the same shape RSS needs:
+
+```yaml
+outputs:
+  home: [html, json]     # publishes /index.json
+
+params:
+  showSearch: true       # shows the search button
+```
+
+Uncomment both. With the param on and the output missing the build warns and shows nothing rather
+than shipping a box that finds nothing. There is nothing to mirror in `one-page.yaml`. The format is
+Hugo's built-in `json` on purpose — naming a theme-declared format there would make a Fuglekasse
+build fail outright, where `json` merely warns that no template matched.
+
+### What it costs
+
+`params.searchWords` decides how much of each record reaches the index. `0` *(the default)* indexes
+the whole text; a number indexes the opening N words instead. Titles and tags are indexed in full
+either way. Measured on a synthetic corpus (mean 4.9 kB per record):
+
+| records | `searchWords` | raw | gzip | per record |
+|---|---|---|---|---|
+| 100 | 0 (whole text) | 363 KB | 111 KB | 3.7 KB |
+| 1 000 | 0 (whole text) | 4.1 MB | 1.2 MB | 4.2 KB |
+| 1 000 | 200 | 1.2 MB | 373 KB | 1.2 KB |
+| 1 000 | 120 | 843 KB | 249 KB | 0.9 KB |
+| 1 000 | 40 | 369 KB | 104 KB | 0.4 KB |
+
+The whole text scales linearly and honestly: 10 000 records is around **41 MB raw / 12 MB gzip**,
+which is not a file to hand a browser. A word cap does not — it holds the index near a fixed size
+per record however far the archive grows. Rule of thumb: the whole text up to a few thousand
+records, `searchWords: 120` or so past that, accepting that a phrase deep inside a long
+conversation stops being findable. Nothing here splits or shards the index; the cap is the answer,
+and it is deliberately the only one.
+
+Without JavaScript the wrapper ships `hidden` and the script removes it, so a reader sees no search
+affordance at all — not a dead input. What it does not do: no stemming or fuzzy matching (`records`
+will not find a record that only says `record`); only records are indexed (`site.RegularPages` — not
+the `_index.md` intro, chapter titles, attachment filenames or the license page); and search and the
+`single`-mode filter do not know about each other — a result whose card the filter hides is
+navigated to and not seen.
+
+## Backlinks
+
+`params.showBacklinks` (default **true**): records that link to a record are listed under it as
+**Referenced by**, computed at build time from the markdown source — before relative `records/`
+links become forge raw URLs, which is why the graph is not empty. A link counts when its last path
+segment names a record, so `records/<slug>.md`, `../<slug>.md`, `/<slug>/` and `<slug>/index.md`
+are all the same target; external links, `#fragments` and self-links are skipped. Shown on record
+pages and `single` cards (linking to `#slug` there); not in `single-flowing`, which shows no
+per-record metadata. Two records with the same base name in different folders are one node.
+Reference-style link definitions (`[a]: …`) and autolinks are not scanned.
+
+## RSS
+
+Off until the site config says so, and Postkasse-only. Swap the `disableKinds` line in `hugo.yaml`
+(and `one-page.yaml`) for the commented alternative there — Hugo ignores root keys in theme
+configs, so no theme can flip it. `layouts/rss.xml` then publishes `/index.xml` with **full record
+content**, not summaries: a summary of a conversation is its opening exchange out of context.
+Signature lines are stripped through the same `strip-signatures.html` partial the page uses, so a
+line the page hides cannot reach the feed; attachment and record links are resolved and made
+absolute so a reader away from the site still resolves them. `params.feedCount` (default 20) caps
+the items; in the one-page modes items link to `/#<slug>`. **Leaving RSS enabled under Fuglekasse
+publishes Hugo's embedded feed instead — signatures and all.** The feed carries no
+`content:encoded` and no `<enclosure>`, so a podcast client will not pick up audio attachments.
+
+## Reading chrome
+
+Four params, all **off by default**, each independently switchable, each warning where it has no
+effect:
+
+- `showReadingTime` — `1 min · 21 words` under the title, computed at build (`.ReadingTime`; the
+  count includes code blocks). Record pages, posts excerpts and single cards; not `single-flowing`.
+- `stickyNav` — `single-flowing` only: a slim bar naming the record you are scrolled into.
+  Filled and revealed by JavaScript; a reader without it sees nothing, not an empty bar.
+- `permalinkButton` — replaces the record-level hover `#` with a visible link icon. Without
+  JavaScript it is an ordinary anchor; with it, a click copies the absolute URL and says so.
+- `keyNav` — `j`/`n` next record, `k`/`p` previous. Ignores modifier chords and typing in fields,
+  unfolds a collapsed chapter before scrolling, updates the hash. The keys are documented only
+  here — there is no on-screen hint.
+
+## Attachments
+
+A record that carries files is a leaf page bundle — `records attach` does the conversion, and
+[`docs/attachments.md`](../../../../docs/attachments.md) documents the convention. Postkasse
+renders them as what they are, through render hooks in `layouts/_markup/`:
+
+- **Images** get `loading=lazy`, intrinsic dimensions and a `srcset` at 480/960/1440
+  (`params.responsiveImages`, default **true**; jpeg/png/webp). A markdown *title* — `![alt](img
+  "caption")` — becomes a `<figure>` with a caption. A captioned image must stand on its own line;
+  written mid-sentence the paragraph splits around it.
+- **Video and audio** links become players (`<video controls>`, `<audio controls>`, `preload=none`).
+- **A PDF or any other file** becomes a typed, sized download link.
+- `params.showAttachments` (default **false**) adds a strip under the record listing everything in
+  its bundle.
+
+The hooks resolve URLs through the page's own resources, so they are site-root-absolute and survive
+the one-page modes — under Fuglekasse a relative `image.png` on a `single` front page 404s, and
+here it does not. Raw HTML (`<img src="shot.png">` under `unsafe: true`) is rewritten too, but only
+by resource name: raw HTML pointing outside the record's own bundle, `srcset=`/`poster=`
+attributes, and `<source>` tags without `src=` are left as written. The PDF/EPUB books do not use
+the hooks — `book.lua` already resolves images its own way, and a video link stays a labelled link
+there.
 
 ## Get PDF
 
@@ -408,6 +551,19 @@ crawlers that render previews do not accept SVG, which is why it does not fall
 back to `params.logo`. Unset, no image tag is written and previews fall back to
 whatever the client picks. `params.cdnURL` applies here like it does to the
 other static assets.
+
+Or let the records draw their own: set `params.ogCards: true` and
+`bin/build.sh` runs `records card` over every record after the Hugo build,
+writing a 1200x630 SVG quote card in the site's palette to
+`/cards/<slug>.svg`, and each record page's `og:image` points at its card
+(the home page keeps `params.ogImage`). Postkasse-only, skipped in the
+one-page modes (no per-record pages to carry the tag) and skipped with a note
+when python3 or recordkit is absent — the pandoc pattern. Two caveats, stated
+rather than hidden: the cards are SVG, which Slack and Discord render but many
+crawlers do not (rasterizing would be a dependency, and PNG conversion is
+explicitly not `card.py`'s job); and the tag is emitted whenever the param is
+set, even if generation was skipped — the same trust the **Get PDF** link
+places in `params.pdf`.
 
 ## Extra `<head>` markup
 

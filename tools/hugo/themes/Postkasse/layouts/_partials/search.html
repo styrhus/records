@@ -1,0 +1,30 @@
+{{/* Site-wide search (params.showSearch): the button beside the site title in
+     every page's header, and the panel it opens. Takes the page.
+
+     Progressive enhancement in the theme's usual shape — the wrapper ships
+     `hidden` and assets/js/postkasse.js removes the attribute. A reader without
+     JavaScript therefore sees nothing at all rather than a dead input, and the
+     home page's own filter (params.showFilter) and the table of contents keep
+     working as before.
+
+     Two switches, and both must be on. params.showSearch is the theme's;
+     /index.json is the site config's, because Hugo ignores `outputs` in a theme
+     config. When the param is on and the output is missing there is nothing to
+     search, so say exactly which line to uncomment rather than shipping a box
+     that returns nothing. */}}
+{{ if site.Params.showSearch }}
+  {{ with site.Home.OutputFormats.Get "json" }}
+    <div class="search" data-search-index="{{ .RelPermalink }}" hidden>
+      <button type="button" class="search-open" aria-expanded="false" aria-label="Search records" title="Search records">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.35-4.35"/></svg>
+      </button>
+      <div class="search-panel" hidden>
+        <input type="search" class="search-input" placeholder="Search records" aria-label="Search records" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <p class="search-status" role="status"></p>
+        <ol class="search-results"></ol>
+      </div>
+    </div>
+  {{ else }}
+    {{ warnf "Postkasse: params.showSearch is on but the site publishes no /index.json — uncomment the `outputs:` block in tools/hugo/hugo.yaml (see the theme README, \"Search\")" }}
+  {{ end }}
+{{ end }}

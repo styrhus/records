@@ -145,6 +145,186 @@
     });
   }
 
+  // Site-wide search (params.showSearch, kiste 2). The index is /index.json, written at
+  // build time by layouts/home.json.json; everything below is the whole engine.
+  //
+  // The wrapper ships hidden and is revealed here, so a reader without JavaScript sees no
+  // search affordance at all. The index itself is fetched on first use, never on page load:
+  // at full text it is the largest file the site serves, and most visits never search.
+  var search = document.querySelector('.search[data-search-index]');
+  if (search) {
+    var searchBtn = search.querySelector('.search-open');
+    var searchPanel = search.querySelector('.search-panel');
+    var searchInput = search.querySelector('.search-input');
+    var searchStatus = search.querySelector('.search-status');
+    var searchResults = search.querySelector('.search-results');
+    var LIMIT = 20;      // results shown; more than this is a worse query, not a longer list
+    var SNIPPET = 160;   // characters of context around the first match
+    var index = null, loading = null, cursor = -1;
+
+    function loadIndex() {
+      if (loading) return loading;
+      searchStatus.textContent = 'Loading index…';
+      loading = fetch(search.getAttribute('data-search-index'))
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (data) {
+          index = data.r || [];
+          // Lowercase once, here, rather than per keystroke per record. The originals stay
+          // for snippets, so this costs a second copy of the text in memory and nothing else.
+          for (var i = 0; i < index.length; i++) {
+            index[i].lt = (index[i].t || '').toLowerCase();
+            index[i].lx = (index[i].x || '').toLowerCase();
+            index[i].lk = (index[i].k || []).join(' ').toLowerCase();
+          }
+          searchStatus.textContent = '';
+        })
+        .catch(function () {
+          searchStatus.textContent = 'Could not load the search index.';
+          loading = null;
+        });
+      return loading;
+    }
+
+    // "quoted phrases" stay whole; everything else splits on whitespace.
+    function terms(q) {
+      var out = [], re = /"([^"]+)"|(\S+)/g, m;
+      while ((m = re.exec(q))) {
+        var t = (m[1] || m[2]).toLowerCase().trim();
+        if (t) out.push(t);
+      }
+      return out;
+    }
+
+    function countIn(hay, needle) {
+      var n = 0, i = hay.indexOf(needle);
+      while (i !== -1 && n < 50) { n++; i = hay.indexOf(needle, i + needle.length); }
+      return n;
+    }
+
+    // Every term must appear somewhere in the record (AND). A title or tag hit outranks
+    // body hits, and how often a term occurs in the body breaks the rest of the tie.
+    function query(q) {
+      var ts = terms(q);
+      if (!ts.length) return [];
+      var hits = [];
+      for (var i = 0; i < index.length; i++) {
+        var rec = index[i], score = 0, ok = true;
+        for (var j = 0; j < ts.length; j++) {
+          var t = ts[j], s = 0;
+          if (rec.lt.indexOf(t) !== -1) s += 40;
+          if (rec.lk.indexOf(t) !== -1) s += 20;
+          var c = countIn(rec.lx, t);
+          if (c) s += 2 + c;
+          if (!s) { ok = false; break; }
+          score += s;
+        }
+        if (ok) hits.push({ rec: rec, score: score, term: ts[0] });
+      }
+      // Equal scores: the newer record first — d is an ISO date, so string order is date order.
+      hits.sort(function (a, b) { return b.score - a.score || (a.rec.d < b.rec.d ? 1 : -1); });
+      return hits.slice(0, LIMIT);
+    }
+
+    function escapeHTML(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Context around the first occurrence of the leading term, with every term marked.
+    function snippet(rec, ts) {
+      var text = rec.x || '';
+      if (!text) return '';
+      var at = rec.lx.indexOf(ts[0]);
+      if (at === -1) at = 0;
+      var start = Math.max(0, at - Math.floor(SNIPPET / 3));
+      var cut = text.slice(start, start + SNIPPET);
+      // One pass over the escaped text, all terms in a single alternation — marking them
+      // one at a time would let a later term match inside a <mark> already inserted.
+      // Terms are literal text, so their regex metacharacters are escaped, not trusted.
+      var re = new RegExp(ts.map(function (t) {
+        return escapeHTML(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      }).join('|'), 'gi');
+      var html = escapeHTML(cut).replace(re, '<mark>$&</mark>');
+      return (start ? '…' : '') + html + (start + SNIPPET < text.length ? '…' : '');
+    }
+
+    function render(q) {
+      var ts = terms(q);
+      searchResults.innerHTML = '';
+      cursor = -1;
+      if (!ts.length) { searchStatus.textContent = ''; return; }
+      var hits = query(q);
+      searchStatus.textContent = hits.length
+        ? hits.length + (hits.length === LIMIT ? '+ records' : ' record' + (hits.length === 1 ? '' : 's'))
+        : 'No records match.';
+      for (var i = 0; i < hits.length; i++) {
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.href = hits[i].rec.u;
+        a.innerHTML = '<span class="search-title">' + escapeHTML(hits[i].rec.t) + '</span>' +
+          '<span class="search-date">' + escapeHTML(hits[i].rec.d) + '</span>' +
+          '<span class="search-snippet">' + snippet(hits[i].rec, ts) + '</span>';
+        li.appendChild(a);
+        searchResults.appendChild(li);
+      }
+    }
+
+    var debounce = null;
+    function scheduleRender() {
+      clearTimeout(debounce);
+      debounce = setTimeout(function () { if (index) render(searchInput.value); }, 120);
+    }
+
+    function openSearch() {
+      searchPanel.hidden = false;
+      searchBtn.setAttribute('aria-expanded', 'true');
+      searchInput.focus();
+      searchInput.select();
+      loadIndex().then(function () { if (searchInput.value) render(searchInput.value); });
+    }
+
+    function closeSearch() {
+      searchPanel.hidden = true;
+      searchBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    searchBtn.addEventListener('click', function () {
+      if (searchPanel.hidden) openSearch(); else closeSearch();
+    });
+    searchInput.addEventListener('input', scheduleRender);
+
+    // Up/down walk the results, Enter follows the highlighted one, Escape closes.
+    searchInput.addEventListener('keydown', function (e) {
+      var links = searchResults.querySelectorAll('a');
+      if (e.key === 'Escape') { closeSearch(); searchBtn.focus(); return; }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if (!links.length) return;
+        e.preventDefault();
+        cursor = Math.min(links.length - 1, Math.max(0, cursor + (e.key === 'ArrowDown' ? 1 : -1)));
+        for (var i = 0; i < links.length; i++) links[i].classList.toggle('current', i === cursor);
+        links[cursor].scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'Enter' && cursor > -1 && links[cursor]) {
+        e.preventDefault();
+        links[cursor].click();
+      }
+    });
+
+    // "/" opens search from anywhere on the page — but not while typing in a field,
+    // and not on top of keyNav's j/k, which ignores form controls for the same reason.
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+      var t = e.target;
+      if (t && (t.isContentEditable || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) return;
+      e.preventDefault();
+      openSearch();
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!searchPanel.hidden && !search.contains(e.target)) closeSearch();
+    });
+
+    search.hidden = false;
+  }
+
   // Load the Spotify embed on first open, so it measures the real panel size (a hidden load renders compact).
   var spotify = document.querySelector('details.spotify');
   if (spotify) spotify.addEventListener('toggle', function () {

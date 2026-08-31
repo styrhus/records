@@ -36,6 +36,12 @@ cascade:
     build:
       render: link
 
+# Nothing to mirror for search: `outputs:` is set only in hugo.yaml, so the
+# home page keeps its json output through the merge and /index.json is written
+# in these modes too — verified at 1 000 records. Do not add an `outputs:` block
+# here without restating hugo.yaml's list in full; it would replace it, not
+# extend it, and the search index would silently stop being built.
+
 disableKinds: [taxonomy, term, rss, sitemap]
 # OR — with theme: Postkasse and RSS enabled in hugo.yaml, use this instead.
 # The feed still works in the one-page modes: no record page is built, so each

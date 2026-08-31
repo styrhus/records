@@ -12,6 +12,8 @@ threeDotAnchor = false  # single-flowing: the · · · separators become copy-li
 chapterState = "latest"  # chapter fold state: "latest" (open the chapter with the newest record) | "expanded" | "collapsed"
 showToc = false      # floating table-of-contents widget (top-right, home page; all modes but posts)
 showFilter = false   # single mode: floating filter button (bottom-left) — filter record cards by word (text/regex), tags, language and date range
+showSearch = false      # site-wide search: a button beside the site title on every page, querying the build-time /index.json in the browser (no service, no library). Needs the `outputs:` block in the site config too — see the README, "Search"
+searchWords = 0         # how much of each record reaches that index: 0 = the whole text (honest search, biggest file), N = the opening N words (title and tags are always indexed in full). See the README for measured sizes
 showBacklinks = true    # "Referenced by" under a record, listing the records that link to it (computed at build); no effect in single-flowing, which shows no per-record metadata
 showReadingTime = false # reading time + word count under a record (record pages, posts excerpts, single cards)
 stickyNav = false       # single-flowing: a sticky bar naming the record you are currently inside (JavaScript; invisible without it)

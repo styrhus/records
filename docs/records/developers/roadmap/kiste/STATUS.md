@@ -14,7 +14,7 @@ four-record fixture in all four pageModes, Fuglekasse byte-identical throughout.
 | # | Animal | Item | State | Owner | Verify |
 |---|---|---|---|---|---|
 | 1 | flue | Postkasse theme skeleton | done | `032c102` | `theme: Postkasse` builds clean; Fuglekasse output unchanged |
-| 2 | beetle | Site-wide search | open | — | query over 1 000 records + index size reported |
+| 2 | beetle | Site-wide search | done | Claude Opus 5, 2026-08-31 | 1 000-record query returns the one matching record in every pageMode; index 4.1 MB raw / 1.2 MB gzip, 0 of 4 333 signature lines leak |
 | 3 | cricket | Backlinks computed at build | done | Claude Opus 5, 2026-08-31 | three records link a fourth by two link shapes; all three listed under it, forge rewrite intact |
 | 4 | moth | RSS with signatures stripped | done | Claude Opus 5, 2026-08-31 | feed parses (minidom), 4 items, 0 `— model` lines — Hugo's embedded feed leaked 4 on the same fixture |
 | 5 | tadpole | Reading chrome (time, sticky nav, keys) | done | Claude Opus 5, 2026-08-31 | each param off by default, mode-warned, markup absent when off |
@@ -49,7 +49,19 @@ four-record fixture in all four pageModes, Fuglekasse byte-identical throughout.
   feature here belongs to Postkasse — including the render hook that fixes the attachment path bug.
   If something seems genuinely universal, argue it separately — do not slip it in.
 
-## Walked (2026-08-31, items 3–6)
+## Walked (2026-08-31, items 2–6)
+
+- **2 · beetle**: `layouts/home.json.json` writes `/index.json` through Hugo's **built-in** `json`
+  output format; `assets/js/postkasse.js` fetches it on the first search and answers from memory.
+  Tested empirically in 0.165: `outputFormats` and `mediaTypes` *do* merge from a theme config,
+  `outputs` does **not** — so enabling it is one commented line in `hugo.yaml`, the RSS shape. The
+  built-in format is deliberate: a theme-declared name in `outputs` would make a Fuglekasse build
+  fail outright. Full text costs 4.2 kB/record (4.1 MB / 1.2 MB gzip at 1 000; ~41 MB extrapolated
+  at 10 000), so `params.searchWords` caps it at ~0.9 kB/record — no sharding, the cap is the
+  answer. Signatures, speaker headings and the ```` ```assistant ```` label never reach the index
+  (0 of 4 333 signature lines, per model, verified). Used badstu 6's corpus, as instructed. The
+  DOM half (panel, `/` binding, arrows) is reviewed but unexecuted — no browser on the box; the
+  query engine was verified by a line-for-line port run against the real emitted index.
 
 - **3 · cricket**: `backlinks-map.html` builds the graph once (`partialCached`) from
   `.RawContent` — before the forge rewrite, as warned — scanning both markdown links and raw
