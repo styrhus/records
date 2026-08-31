@@ -28,9 +28,10 @@ _TITLE_UNSAFE = re.compile(r"[\\/\x00-\x1f]+")
 
 def _clean_title(text: str, limit: int = TITLE_LIMIT) -> str:
     """A title from arbitrary source text: first line, path-safe, truncated on a word boundary.
-    ' #' goes too — YAML reads it as a comment and would silently swallow the rest of the title."""
+    ' #' used to be stripped here too, as a workaround for frontmatter.build writing it unquoted;
+    build() now quotes it (frontmatter.quote), so a parser-derived '#' survives into the title."""
     first = next((ln for ln in (text or "").splitlines() if ln.strip()), "")
-    line = " ".join(_TITLE_UNSAFE.sub("-", first).replace(" #", " ").split()).strip("-. ")
+    line = " ".join(_TITLE_UNSAFE.sub("-", first).split()).strip("-. ")
     if len(line) <= limit:
         return line
     return line[:limit].rsplit(" ", 1)[0] or line[:limit]

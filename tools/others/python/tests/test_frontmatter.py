@@ -37,6 +37,11 @@ def test_build_quotes_a_title_holding_a_colon():
         '---\ntitle: "Chapter 1: Beginnings"\ndate: D\n---\n')
 
 
+def test_build_quotes_a_title_with_a_mid_string_space_hash():
+    assert frontmatter.build("Title #b", "D") == (
+        '---\ntitle: "Title #b"\ndate: D\n---\n')
+
+
 def test_build_escapes_quotes_inside_a_quoted_title():
     assert 'title: "\\"quoted\\" start"\n' in frontmatter.build('"quoted" start', "D")
 
@@ -54,6 +59,7 @@ def test_build_quotes_extra_values_that_need_it():
     "@readme.md#30-43 fix this", "`backtick", "*star", "|pipe", ">gt", "%percent",
     "[bracket", "{brace", '"quote', "'apostrophe", "Chapter 1: Beginnings", "trailing colon:",
     'He said "hi" and \\ left', "A plain title", "2026-07-06_23-22",
+    "Title #b", "Ticket #42 done", "trailing hash #",
 ])
 def test_title_survives_a_build_read_round_trip(title):
     assert frontmatter.read(frontmatter.build(title, "D"))["title"] == title

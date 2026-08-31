@@ -78,11 +78,11 @@ def test_claude_code_title_fallback_is_path_safe(tmp_path):
     assert "/" not in only(f).title
 
 
-def test_claude_code_title_keeps_no_hash_yaml_would_swallow(tmp_path):
+def test_claude_code_title_keeps_a_hash_now_that_build_quotes_it(tmp_path):
     f = tmp_path / "s.jsonl"
     f.write_text(json.dumps({"type": "user", "sessionId": "s", "timestamp": "2026-07-13T22:00:00Z",
                              "message": {"role": "user", "content": "fix the #tag bug"}}) + "\n")
-    assert only(f).title == "fix the tag bug"
+    assert only(f).title == "fix the #tag bug"
 
 
 def test_claude_code_reads_a_directory_of_sessions(tmp_path):

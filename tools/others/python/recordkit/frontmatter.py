@@ -11,11 +11,11 @@ _YAML_INDICATORS = "-?:,[]{}#&*!|>'\"%@`"
 
 def quote(value: str) -> str:
     """A YAML scalar: bare when it can be, double-quoted when a plain scalar would not parse.
-    A ' #' inside a value also needs quoting, but the PWA's byte contract mirrors the bare form —
-    parser-derived titles neutralise it in sources.py instead."""
+    A ' #' inside a value opens a comment mid-scalar — the reader keeps everything before it and
+    silently drops the rest — so it quotes too, wherever it falls, not just at the start."""
     text = str(value)
     if (not text or text[0] in _YAML_INDICATORS or text.endswith(":")
-            or ": " in text or text.strip() != text):
+            or ": " in text or " #" in text or text.strip() != text):
         return '"' + text.replace("\\", "\\\\").replace('"', '\\"') + '"'
     return text
 

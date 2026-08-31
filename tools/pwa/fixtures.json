@@ -67,7 +67,18 @@
         "path": "a/title-#b.md",
         "title": "Title #b",
         "tags": ["a"],
-        "text": "---\ntitle: Title #b\ndate: 2026-08-01T16:20:41+02:00\ntags: [a]\n---\n"
+        "text": "---\ntitle: \"Title #b\"\ndate: 2026-08-01T16:20:41+02:00\ntags: [a]\n---\n"
+      }
+    },
+    {
+      "name": "space-hash mid-title is quoted so YAML can't eat it as a comment",
+      "wall": { "y": 2026, "mo": 8, "d": 1, "h": 16, "mi": 20, "s": 41, "offsetMinutes": 120 },
+      "argumentString": "Ticket #42 done",
+      "expect": {
+        "path": "ticket-#42-done.md",
+        "title": "Ticket #42 done",
+        "tags": [],
+        "text": "---\ntitle: \"Ticket #42 done\"\ndate: 2026-08-01T16:20:41+02:00\n---\n"
       }
     },
     {

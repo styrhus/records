@@ -42,6 +42,15 @@ Walked once, 2026-08-01. Two rungs wait on a real phone; the third is answered.
   [schrank](../schrank/ROADMAP.md). What survived is one documented paragraph in `docs/phone.md`.
 - The `voiceRecorded: true` flag already works end to end (site, PDF, EPUB). It marks. It does not
   transcribe, and nothing on this road changes that.
+- **The ` #`-in-title truncation flagged by suitcase is fixed (2026-08-31), both sides of the
+  byte contract.** `frontmatter.py`'s `quote()` and `record.js`'s new `quoteScalar()` now quote
+  any title containing ` #`, not just leading-indicator titles; `read()` round-trips it unchanged.
+  `tools/pwa/fixtures.json` pins it — the `#a Title #b` case now expects `title: "Title #b"`,
+  plus a new `Ticket #42 done` case — and `test_phone_fixtures.py` passes on the Python side.
+  The JS side is verified by trace only: no browser or node on the fixing box, so
+  `selftest.html`'s in-browser run is the next check before ticking item 2 further.
+  `sources.py`'s `_clean_title` no longer neutralises ` #` — that workaround *deleted* the `#`
+  from parser-derived titles; imports now keep it verbatim.
 
 ## Picking one up
 

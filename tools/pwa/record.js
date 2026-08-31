@@ -8,6 +8,10 @@
 const TAG_DROP = /[^a-z0-9-]/g;
 const WS = /\s+/g;
 
+// A YAML plain scalar may not open with an indicator, nor hold ': ' or ' #' (a
+// space-hash opens a comment mid-scalar and the reader drops everything after it).
+const YAML_INDICATORS = "-?:,[]{}#&*!|>'\"%@`";
+
 const pad = (n) => String(n).padStart(2, "0");
 
 // A wall-clock instant plus the offset it is expressed in. Kept explicit rather
@@ -72,11 +76,23 @@ export function uniqueName(filename, taken) {
   return candidate;
 }
 
-// frontmatter.build — raw interpolation, no quoting anywhere, draft before tags,
-// the tags line absent entirely when there are none. The Python side takes one
-// more argument, `extra`, for the importer's source keys; a phone never sets it.
+// frontmatter.quote — a YAML scalar: bare when it can be, double-quoted when a
+// plain scalar would not parse. Mirrors recordkit/frontmatter.py's quote() exactly.
+export function quoteScalar(value) {
+  const text = String(value);
+  if (!text || YAML_INDICATORS.includes(text[0]) || text.endsWith(":")
+      || text.includes(": ") || text.includes(" #") || text.trim() !== text) {
+    return '"' + text.replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
+  }
+  return text;
+}
+
+// frontmatter.build — the title is quoted when a bare scalar would not round-trip
+// through YAML, draft before tags, the tags line absent entirely when there are
+// none. The Python side takes one more argument, `extra`, for the importer's
+// source keys; a phone never sets it.
 export function buildFrontmatter(title, dateIso, tags, draft) {
-  const lines = ["---", `title: ${title}`, `date: ${dateIso}`];
+  const lines = ["---", `title: ${quoteScalar(title)}`, `date: ${dateIso}`];
   if (draft) lines.push("draft: true");
   if (tags && tags.length) lines.push("tags: [" + tags.join(", ") + "]");
   lines.push("---");
