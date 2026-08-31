@@ -12,12 +12,13 @@ from . import archive as archive_mod
 from . import commit as commit_mod
 from . import export as export_mod
 from . import pack as pack_mod
-from . import airtime, attach, booth, card, config, create, doctor, importer, mucke, myname
+from . import airtime, attach, booth, card, config, create, doctor, ignore, importer, mucke, myname
 from . import ollama
-from . import publish, stick, verify, watch, werden, writer
+from . import publish, redact, scan, stick, unpublish, verify, watch, werden, writer
 
 
-_PASSTHROUGH = {"doctor": doctor, "watch": watch}  # own parser, own output — not JSON-on-stdout
+# own parser, own output — not JSON-on-stdout
+_PASSTHROUGH = {"doctor": doctor, "watch": watch, "scan": scan, "ignore": ignore}
 
 
 def _stdin_or(value: str) -> str:
@@ -69,6 +70,8 @@ def _build_parser() -> argparse.ArgumentParser:
                     help="file whose contents go to the model only, never the record (repeatable)")
     ol.add_argument("--context-dir", action="append", default=[], dest="context_dirs",
                     help="directory whose file listing goes to the model only (repeatable)")
+    ol.add_argument("--preset", help="voice preset name (recordkit/presets/<name>.txt); "
+                    "composed as a system message ahead of --context-*")
     ol.add_argument("--name", help="human name for the heading; default: the saved /myname name")
 
     oc = sub.add_parser("ollama-chat", help="ephemeral chat turn via a local Ollama model — no file")
@@ -82,6 +85,8 @@ def _build_parser() -> argparse.ArgumentParser:
                     help="file whose contents go to the model only (repeatable)")
     oc.add_argument("--context-dir", action="append", default=[], dest="context_dirs",
                     help="directory whose file listing goes to the model only (repeatable)")
+    oc.add_argument("--preset", help="voice preset name (recordkit/presets/<name>.txt); "
+                    "composed as a system message ahead of --context-*")
 
     st = sub.add_parser("stick", help="feature a record (/stick)")
     grp = st.add_mutually_exclusive_group(required=True)
@@ -175,10 +180,31 @@ def _build_parser() -> argparse.ArgumentParser:
     bo.add_argument("--timeout", type=float, default=ollama.DEFAULT_TIMEOUT)
     bo.add_argument("--name", help="human name for the headings; default: the saved /myname name")
 
-    # Registered for the help listing only — main() hands these two straight to their own module,
+    rd = sub.add_parser("redact", help="rewrite one turn in place, leaving a visible seam")
+    rd.add_argument("record", help="the record's .md path, or its bundle folder")
+    rd.add_argument("--turn", type=int, required=True,
+                    help="1-based turn number in document order (as `records card --turn`)")
+    rdm = rd.add_mutually_exclusive_group(required=True)
+    rdm.add_argument("--replace", help="text to stand in for the turn; the [redacted] seam is kept too")
+    rdm.add_argument("--remove", action="store_true", help="leave the [redacted] marker alone")
+    rd.add_argument("--dry-run", action="store_true", help="show the diff, write nothing")
+    rd.add_argument("--yes", action="store_true", help="skip the confirmation prompt")
+
+    up = sub.add_parser("unpublish",
+                        help="take a record out of the site, the books and the pages branch")
+    up.add_argument("record", help="the record's path, its bundle folder, or its slug")
+    upm = up.add_mutually_exclusive_group()
+    upm.add_argument("--tombstone", action="store_true", help="leave a stub at the old URL")
+    upm.add_argument("--restore", action="store_true", help="put an unpublished record back")
+    up.add_argument("--dir")
+    up.add_argument("--dry-run", action="store_true", help="report what would change, write nothing")
+
+    # Registered for the help listing only — main() hands these straight to their own module,
     # which owns its flags and its human-readable rendering (see _PASSTHROUGH).
     for name, helptext in (("doctor", "report what will fail in this checkout"),
-                           ("watch", "rebuild when a record changes — never commits or publishes")):
+                           ("watch", "rebuild when a record changes — never commits or publishes"),
+                           ("scan", "look for credential-shaped strings in the records"),
+                           ("ignore", "regenerate ignoreFiles from records/.recordsignore")):
         sub.add_parser(name, help=helptext, add_help=False)
 
     return p
@@ -205,9 +231,10 @@ def main(argv: list[str] | None = None) -> int:
         elif args.cmd == "ollama-reply":
             context = ollama.build_context([Path(p) for p in args.context_files],
                                            [Path(p) for p in args.context_dirs])
+            preset = ollama.load_preset(args.preset) if args.preset else None
             _emit(ollama.reply(Path(args.file), args.endpoint, args.model,
                                _stdin_or(args.human), timeout=args.timeout,
-                               context=context or None,
+                               context=context or None, preset=preset,
                                name=args.name or myname.load()))
         elif args.cmd == "ollama-chat":
             context = ollama.build_context([Path(p) for p in args.context_files],
@@ -216,9 +243,10 @@ def main(argv: list[str] | None = None) -> int:
                 history = json.loads(_stdin_or(args.history))
             except json.JSONDecodeError as e:
                 raise RuntimeError(f"invalid history JSON: {e}") from e
+            preset = ollama.load_preset(args.preset) if args.preset else None
             _emit(ollama.ephemeral_reply(args.endpoint, args.model, _stdin_or(args.human),
                                          history, timeout=args.timeout,
-                                         context=context or None))
+                                         context=context or None, preset=preset))
         elif args.cmd == "stick":
             if args.file:
                 _emit(stick.feature_file(Path(args.file)))
@@ -290,6 +318,18 @@ def main(argv: list[str] | None = None) -> int:
                             draft=args.draft, file=Path(args.file) if args.file else None,
                             endpoint=args.endpoint, model=args.model, timeout=args.timeout,
                             name=args.name or myname.load()))
+        elif args.cmd == "redact":
+            out = redact.redact(Path(args.record), args.turn, replace=args.replace,
+                                remove=args.remove, dry_run=args.dry_run, yes=args.yes)
+            _emit(out)
+            return 0 if (out["written"] or args.dry_run) else 1  # a declined prompt is not success
+        elif args.cmd == "unpublish":
+            d = _records_dir(args)
+            if args.restore:
+                _emit(unpublish.restore(args.record, records_dir=d, dry_run=args.dry_run))
+            else:
+                _emit(unpublish.unpublish(args.record, tombstone=args.tombstone,
+                                          records_dir=d, dry_run=args.dry_run))
     except Exception as e:  # surface as JSON so the plugins can render it
         _emit({"error": str(e)})
         return 1
