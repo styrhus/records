@@ -56,6 +56,7 @@ Setting this changes nothing today; every command is mechanical."
     ("cpd"    . "Commit, push, deploy")
     ("myname" . "Save your name locally")
     ("mucke"  . "Stamp the now-playing track")
+    ("airtime" . "Human vs Assistant token share")
     ("config" . "Show the resolved records directory"))
   "The shared slash registry — the same commands the other plugins offer.")
 
@@ -143,6 +144,12 @@ Signal an error when the CLI is missing, mute, or reports one."
       (records--say (format "Mucke: %s • %s"
                             (alist-get 'title result) (alist-get 'artist result))
                     'success)))
+
+   ((string= cmd "airtime")
+    (unless records--recording
+      (error "/airtime measures the record being written — start one first"))
+    (records--say (alist-get 'line (records--run "airtime" "--file" records--recording))
+                  'success))
 
    ((string= cmd "config")
     (records--say (format "Records dir: %s"

@@ -15,3 +15,13 @@ html { font-size: 9pt; }
 @page :blank {
   @bottom-center { content: none; }
 }
+
+/* Assistant panels print as outlined boxes — a dark fill would soak the page. */
+.assistant-block { background: #fff; color: inherit; border: 1px solid; }
+.assistant-block h6.speaker, .assistant-block a { color: inherit; }
+.assistant-block code, .assistant-block pre,
+.assistant-block blockquote { background: var(--surface); }
+.assistant-block blockquote { border-left-color: var(--accent); }
+.assistant-block th, .assistant-block td { border-color: var(--dim); }
+.assistant-block tbody tr:nth-child(even) { background: var(--surface); }
+.assistant-block code span[class] { color: inherit; } /* beats the Dracula token rules in pdf.css */

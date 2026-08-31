@@ -78,7 +78,8 @@ Fuglekasse's and carry the same contract:
   `<section class="user|assistant">`.
 - `repo-link.html` takes the same `{kind: "raw"|"tree", branch?}` and resolves the same
   Forgejo/GitHub/GitLab shapes.
-- `lang-badge.html`, `comment-link.html` and `static-url.html` are unchanged copies.
+- `lang-badge.html`, `comment-link.html`, `head-extra.html` and `static-url.html` are unchanged
+  copies, as is the `_markup/render-codeblock-assistant.html` code-block hook.
 
 **These are copies and must be kept in step.** That is the accepted cost of a standalone theme: it
 buys Postkasse the freedom to diverge without any pressure on Fuglekasse. The signature-stripping
@@ -267,6 +268,28 @@ Give a record `voiceRecorded: true` and a small microphone icon in the accent co
 **Human** label on every human turn — on the record page, in all home modes, and in the PDF/EPUB —
 marking the conversation as spoken rather than typed.
 
+## Assistant blocks
+
+A fenced code block marked `assistant` is not shown as code: its content is parsed as Markdown and
+rendered inside a slate panel labelled **Assistant**, in the same small-caps type as the `## Assistant`
+turn headings. Use it for output from another model quoted inside a record.
+
+````markdown
+```assistant
+# Dyr
+
+**tadpole** *(5)* — bygger seg om innenfra.
+```
+````
+
+The panel has its own fill in each colour scheme — a mid slate on a light page, a faint lift off the
+background on a dark one — while its text, links, borders and code fills come from the *dark* half of
+`params.style`, so a fork's palette carries into them. The label is near-white on a light page and
+light grey on a dark one. Headings inside are a step smaller than the same headings outside, and
+their ids are dropped, so a `## Assistant` line *inside* the block cannot break the turn splitting.
+Nested fences work if the outer fence uses more backticks than the inner one. Same rendering in the
+PDF and EPUB; the print booklet draws the panel as an outlined white box.
+
 ## Footer repo link
 
 `params.repoURL` puts a small link to your repository in the footer (and, with
@@ -350,6 +373,41 @@ build:
 Below the front matter the body is plain Markdown. (`url` and `layout` make the page render as
 `/404.html`; `showDate: false` hides the post date; `build.list: never` keeps it out of record
 lists.)
+
+## Meta description and link previews
+
+`layouts/_partials/head-meta.html` writes the page's `<meta name="description">`
+and its OpenGraph tags — the line search engines show under the title, and the
+card chat apps build when someone pastes a link. Both matter most in
+`single`/`single-flowing` mode, where the front page is the whole site and so
+the whole search surface.
+
+The description is derived at build time, so it never goes stale:
+
+1. the page's own `description:` front matter, if it has one;
+2. on the home page only, `params.description`;
+3. otherwise the opening **14 words** — of the newest record on the home page,
+   of the page itself everywhere else — followed by `...`.
+
+The excerpt is taken from the rendered text with the `Human`/`Assistant`
+headings, the `— model` signature lines and any code blocks removed, so it
+starts at real conversation rather than at a speaker label or a paste. A
+record that opens with something unpresentable gets a hand-written
+`description:` in its front matter.
+
+Change the cut length by editing `$words` at the top of the partial.
+
+Alongside it every page gets `og:title` (the same display title as `<title>`,
+without the site suffix), `og:type` (`website` on the front page, `article` on
+a record), `og:url`, `og:site_name`, `og:locale` and `og:description`, plus
+`article:published_time` on records.
+
+`og:image` is the one that needs a file from you: set `params.ogImage` to
+something in `static/`, around 1200x630. It must be a raster format — the
+crawlers that render previews do not accept SVG, which is why it does not fall
+back to `params.logo`. Unset, no image tag is written and previews fall back to
+whatever the client picks. `params.cdnURL` applies here like it does to the
+other static assets.
 
 ## Extra `<head>` markup
 

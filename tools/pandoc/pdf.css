@@ -83,6 +83,32 @@ code, pre { font-size: 0.9em; background: var(--surface); }
 code { padding: 0.1em 0.3em; border-radius: 3px; }
 pre { padding: 0.75rem; border-radius: 6px; white-space: pre-wrap; overflow-wrap: break-word; }
 pre code { padding: 0; background: none; }
+/* ```assistant fences (Div.assistant-block from book.lua): the site's slate panel, light-scheme fill.
+   --ab-* are injected via header-includes — fill fixed, the rest from the palette's dark half. */
+.assistant-block {
+  background: var(--ab-bg, #717484); color: var(--ab-fg, #f8f8f2);
+  margin: 1rem 0; padding: 0.75rem 1rem; border-radius: 6px;
+}
+.assistant-block > :last-child { margin-bottom: 0; }
+.assistant-block h6.speaker { color: var(--ab-fg, #f8f8f2); }
+/* Content headings arrive demoted by 2, and stay a step below their counterparts outside. */
+.assistant-block h3, .assistant-block h4, .assistant-block h5, .assistant-block h6:not(.speaker) { color: inherit; }
+.assistant-block h3 { font-size: 1.05em; }
+.assistant-block h4 { font-size: 1em; }
+.assistant-block h5, .assistant-block h6:not(.speaker) { font-size: 0.92em; }
+.assistant-block a { color: var(--ab-accent, #bd93f9); }
+.assistant-block code, .assistant-block pre { background: var(--ab-code, #282a36); }
+.assistant-block blockquote { border-left-color: var(--ab-accent, #bd93f9); background: var(--ab-code, #282a36); }
+.assistant-block th, .assistant-block td { border-color: var(--ab-dim, #8b96c9); }
+.assistant-block tbody tr:nth-child(even) { background: var(--ab-code, #282a36); }
+/* Skylighting tokens inside the panel: Dracula, so a nested fence stays readable on the dark code fill. */
+.assistant-block code span.co, .assistant-block code span.do { color: #9aabde; }
+.assistant-block code span.kw, .assistant-block code span.cf, .assistant-block code span.op { color: #ff79c6; }
+.assistant-block code span.st, .assistant-block code span.ss, .assistant-block code span.ch, .assistant-block code span.vs { color: #f1fa8c; }
+.assistant-block code span.dv, .assistant-block code span.bn, .assistant-block code span.fl, .assistant-block code span.cn { color: #bd93f9; }
+.assistant-block code span.fu { color: #50fa7b; }
+.assistant-block code span.bu, .assistant-block code span.dt, .assistant-block code span.at { color: #8be9fd; }
+.assistant-block code span.va, .assistant-block code span.er, .assistant-block code span.wa { color: #ffb86c; }
 div.sourceCode { margin: 1rem 0; }
 div.sourceCode pre { margin: 0; }
 table { border-collapse: collapse; width: 100%; margin: 1rem 0; }

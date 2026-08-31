@@ -1,0 +1,8 @@
+{{- /* ```assistant fences hold model output pasted into a record: render the markdown,
+       don't show it raw. Heading ids are stripped — record.html splits turns on
+       <h2 id="human|assistant">, which a heading inside the block would fake. */ -}}
+{{- $inner := .Page.RenderString (dict "display" "block") .Inner -}}
+{{- $inner = replaceRE `(<h[1-6])\s+id="[^"]*"` "$1" $inner -}}
+<div class="assistant-block"><p class="assistant-label">Assistant</p>
+{{ $inner | safeHTML }}
+</div>

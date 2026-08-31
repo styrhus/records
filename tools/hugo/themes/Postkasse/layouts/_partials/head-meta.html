@@ -1,0 +1,64 @@
+{{- /* Description + OpenGraph. Takes {page, title} — title is baseof's already
+       resolved display title, so the date-formatted slug rule lives in one place.
+
+       The description is the search-result snippet and the link-preview line:
+       hand-written when the page sets description: (or, on the home page,
+       params.description), otherwise the opening words of the newest record.
+       On a one-page site the front page is the whole search surface, so a
+       fixed line would describe a site that has moved on. Speaker headings and
+       the — model signature lines are stripped first, so the excerpt starts at
+       real conversation text. Change $words to cut at a different length. */ -}}
+{{- $p := .page -}}
+{{- $words := 14 -}}
+{{- $desc := $p.Params.description -}}
+{{- if and (not $desc) $p.IsHome }}{{ $desc = site.Params.description }}{{ end -}}
+{{- if not $desc -}}
+  {{- $src := $p -}}
+  {{- if $p.IsHome -}}
+    {{- $src = "" -}}
+    {{- $all := where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" -}}
+    {{- $real := where $all "Params.demo" "!=" true -}}
+    {{- if or $real (not site.Params.demoMode) }}{{ $all = $real }}{{ end -}}
+    {{- if $all }}{{ $src = index (sort $all "Date" "desc") 0 }}{{ end -}}
+  {{- end -}}
+  {{- with $src -}}
+    {{- /* code blocks are not prose — a record opening with a paste would
+           otherwise describe the site with a stack trace. */ -}}
+    {{- $t := replaceRE `(?s)<pre[^>]*>.*?</pre>` " " (printf "%s" .Content) -}}
+    {{- $t = htmlUnescape (plainify $t) -}}
+    {{- $t = replaceRE `(?m)^—[^\n]*` "" $t -}}
+    {{- $t = replaceRE `(?m)^(Human|User|Assistant)\b` "" $t -}}
+    {{- $t = trim (replaceRE `\s+` " " $t) " " -}}
+    {{- $ws := split $t " " -}}
+    {{- if gt (len $ws) $words -}}
+      {{- /* the cut can land on a full stop or a dash — don't print "....". */ -}}
+      {{- $desc = printf "%s..." (replaceRE `[\s.,;:\x{2014}\x{2013}-]+$` "" (delimit (first $words $ws) " ")) -}}
+    {{- else -}}
+      {{- $desc = $t -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- /* og:locale wants en_NO, the lang attribute wants en-no. */ -}}
+{{- $loc := or $p.Params.language site.Language.Locale -}}
+{{- $lp := split $loc "-" -}}
+{{- if eq (len $lp) 2 }}{{ $loc = printf "%s_%s" (index $lp 0) (upper (index $lp 1)) }}{{ end -}}
+{{- with $desc }}
+  <meta name="description" content="{{ . }}">
+{{- end }}
+  <meta property="og:title" content="{{ $.title }}">
+  <meta property="og:type" content="{{ cond $p.IsHome "website" "article" }}">
+  <meta property="og:url" content="{{ $p.Permalink }}">
+  <meta property="og:site_name" content="{{ site.Title }}">
+  <meta property="og:locale" content="{{ $loc }}">
+{{- with $desc }}
+  <meta property="og:description" content="{{ . }}">
+{{- end }}
+{{- if not $p.IsHome }}{{ with $p.Date }}
+  <meta property="article:published_time" content="{{ .Format "2006-01-02T15:04:05Z07:00" }}">
+{{- end }}{{ end }}
+{{- /* Link-preview image. Must be a raster file — the crawlers that render
+       previews do not accept SVG, so this is unset by default rather than
+       pointed at params.logo. */ -}}
+{{- with site.Params.ogImage }}
+  <meta property="og:image" content="{{ absURL (partial "static-url.html" .) }}">
+{{- end -}}

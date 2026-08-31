@@ -123,6 +123,7 @@ hello world             plain text is appended as a Human turn
 | `/gc`, `/gcp`, `/cpd` | Commit / commit + push / commit + push + deploy |
 | `/myname <name>` | Save your name locally, for the `## Human (name)` headings |
 | `/mucke` | Stamp the now-playing MPRIS track into the record |
+| `/airtime` | Human vs Assistant token share of the record — in VS Code also of the memory-only chat |
 | `/config` | Show the resolved records directory |
 
 The first word of a title may be a `#tag`; the record is then filed under that tag's folder.

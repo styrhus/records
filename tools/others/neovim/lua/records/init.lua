@@ -114,6 +114,14 @@ local function mucke()
   add_line("Mucke: " .. tostring(result.title) .. " • " .. tostring(result.artist), "Function")
 end
 
+local function airtime()
+  if not recording then
+    error("/airtime measures the record being written — start one first")
+  end
+  local result = run_cli("airtime", { flags = { file = recording.file } })
+  add_line(tostring(result.line), "Function")
+end
+
 local function show_config()
   local result = run_cli("config", {})
   add_line("Records dir: " .. result.records_dir, "Function")
@@ -135,6 +143,8 @@ handle_slash = function(cmd, args)
     ok, err = pcall(save_name, args)
   elseif cmd == "mucke" then
     ok, err = pcall(mucke)
+  elseif cmd == "airtime" then
+    ok, err = pcall(airtime)
   elseif cmd == "config" then
     ok, err = pcall(show_config)
   else

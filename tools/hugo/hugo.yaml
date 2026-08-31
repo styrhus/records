@@ -125,6 +125,19 @@ params:
   # Fuglekasse defaults to false.
   demoMode: true
 
+  # Search-result snippet, <meta name="description">. Left unset it is derived
+  # at every build so it never goes stale: the opening 14 words of the newest
+  # record on the front page, of the page itself on a record page, with the
+  # speaker headings, "— model" signatures and code blocks stripped first.
+  # Uncomment for a fixed line on the front page instead; a single record
+  # overrides either with description: in its own front matter.
+  # description: "Conversations with a machine, kept in the open."
+
+  # Link-preview image (og:image) — a file in static/, about 1200x630. Must be
+  # a raster format: the crawlers that build previews in chat apps do not
+  # render SVG, which is why this does not fall back to params.logo.
+  # ogImage: preview.png
+
   # Home page layout — Fuglekasse defaults to "basic"; uncomment to change.
   #   basic  — link index (default)
   #   posts  — latest N records as an excerpt feed (postsCount sets N, default 3)

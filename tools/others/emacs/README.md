@@ -5,7 +5,7 @@ A chat panel in Emacs for writing records — the Markdown files that become a
 
 `M-x records` opens a window at the bottom. `RET` prompts for a line: `/all #linux How To` starts a
 recording, plain text appends to it, `/esc` stops. `/stick`, `/gc`, `/gcp`, `/cpd`, `/myname`,
-`/mucke` and `/config` do what they do everywhere else in this project.
+`/mucke`, `/airtime` and `/config` do what they do everywhere else in this project.
 
 The package holds no logic of its own: every command runs the `records` CLI via `call-process` and
 parses its JSON. **Mechanical only** — no model is involved, and none is needed.
