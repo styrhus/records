@@ -94,7 +94,8 @@ four-record fixture in all four pageModes, Fuglekasse byte-identical throughout.
   Postkasse's copy (now `_partials/rewrite-record-links.html`, shared with the feed) matches
   relative paths only. **Fuglekasse keeps the loose regex** — it has no render hooks, so the bug
   only bites raw HTML there; if the fix is genuinely universal it should be argued in the open,
-  per the border above.
+  per the border above. *Resolved 2026-08-31: tb4 ruled Fuglekasse always takes fixes and small
+  improvements; the tightened regex is now inline in Fuglekasse's `record.html` too.*
 
 ## Picking one up
 

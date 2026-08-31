@@ -36,11 +36,11 @@ logoSize = "default"  # logo size: default (48px), bigger-1 (+25%), bigger-2 (+5
 font = "Architects Daughter"
 fontfile = "fonts/architects-daughter.woff2"
 
-# Tokyo Night Light
+# Tokyo Night Light — dim darkened from #9699a3 so small footer/label text meets AA on --bg.
 [params.style.light]
 bg = "#d5d6db"
 fg = "#343b58"
-dim = "#9699a3"
+dim = "#5a5d67"
 accent = "#34548a"
 surface = "#e5e6ea"
 card = "#f5f5f7"

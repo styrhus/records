@@ -4,7 +4,7 @@
 :root {
   --bg: #d5d6db;
   --fg: #343b58;
-  --dim: #9699a3;
+  --dim: #5a5d67;
   --accent: #34548a;
   --surface: #e5e6ea;
 }
@@ -17,7 +17,7 @@
     content: counter(page);
     font-family: system-ui, sans-serif;
     font-size: 9pt;
-    color: #9699a3; /* --dim; page-margin boxes take literals */
+    color: #5a5d67; /* --dim; page-margin boxes take literals */
   }
 }
 @page :first {

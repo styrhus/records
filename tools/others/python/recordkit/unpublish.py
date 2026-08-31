@@ -51,14 +51,11 @@ def remains(path: Path) -> list[str]:
     ]
 
 
-# Hugo does not clean its destination (bin/build.sh passes no --cleanDestinationDir, and
-# `Cleaned │ 0` is what a rebuild reports), so the previous build's page for this record is still
-# sitting in the output dir — and `records publish` force-pushes that dir as it finds it.
-# Emptying it first is the difference between the page leaving the pages branch and not.
+# bin/build.sh passes --cleanDestinationDir, so a rebuild drops the record's old page from the
+# output dir; a hand-run `hugo` does not clean, so the advice names the script, not hugo.
 NEXT = [
-    "rm -rf public — the output dir keeps the last build's page for this record; "
-    "Hugo overwrites, it does not delete",
-    "bin/build.sh — rebuild the site and the books without it",
+    "bin/build.sh — rebuild the site and the books; it cleans the output dir, "
+    "so the record's old page leaves with it (a plain `hugo` run does not clean)",
     "records publish — deliver; publishTarget pages-branch force-pushes one commit built "
     "from that output dir, so the page leaves the branch with it",
     "records unpublish <record> --restore — put it back",

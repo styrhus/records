@@ -26,7 +26,7 @@ REGION_TOP, REGION_BOTTOM = 60, 500
 RULE_Y = 524
 
 # Fuglekasse's light palette; the site config overrides any subset (as book.lua does).
-LIGHT = {"bg": "#d5d6db", "fg": "#343b58", "dim": "#9699a3",
+LIGHT = {"bg": "#d5d6db", "fg": "#343b58", "dim": "#5a5d67",
          "accent": "#34548a", "surface": "#e5e6ea", "card": "#f5f5f7"}
 
 MONO = "DejaVu Sans Mono, Menlo, Consolas, monospace"

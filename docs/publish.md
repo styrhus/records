@@ -96,13 +96,14 @@ the record moves beside it as `<name>.withdrawn.md`, still a draft. The stub
 carries the original date (so it keeps its place) but neither the title nor a
 word of the conversation.
 
-**Empty the output directory before you publish.** Hugo overwrites its
-destination, it does not clean it, so the last build's page for the record is
-still sitting in `public/` — and `records publish` force-pushes that directory
-as it finds it. The withdrawn record would go straight back up:
+**Rebuild through `bin/build.sh` (which `records publish` does for you).** It
+passes `--cleanDestinationDir`, so the withdrawn record's old page leaves
+`public/` with the rebuild before the force-push. A hand-run `hugo` does not
+clean its destination — if you build that way, empty the directory yourself:
 
 ```bash
-rm -rf public && records publish
+records publish            # builds clean, then delivers
+rm -rf public && hugo ...  # only needed on hand-run hugo builds
 ```
 
 Nothing here is erasure, and the command says so on every run: git history

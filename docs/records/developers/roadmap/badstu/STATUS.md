@@ -76,6 +76,11 @@ the walking session's report; the load-bearing ones:
   Also failing: `.assistant-block a` **1.92:1** on the light panel, the panel body **4.35:1**,
   `section.assistant`'s `opacity:.75` → **4.16:1** on light `--bg`, dark `--dim` on cards
   **4.26:1**. Repairs are palette design decisions — argued in the open, not slipped in.
+  *Decided 2026-08-31 (tb4): light `--dim` → `#5a5d67` (4.53/5.27/6.03 on bg/surface/card) and
+  light `--hl-comment` → `#5f6370` (4.80 on surface), applied across both themes and every
+  mirror (tomls, doc examples, `book.lua`, `card.py`, `pdf.css`, `highlight.theme`). The
+  remaining eight failures — the assistant-panel link/body, `section.assistant`'s opacity, dark
+  `--dim` on cards — stay open design questions.*
 - **No-JS**: every kiste claim verified in the emitted HTML — search and sticky-nav ship
   `hidden`, the permalink degrades to a real anchor, the filter is a visible-but-inert
   `<details>` as designed, keyNav leaves only an attribute, Spotify keeps its `<noscript>`.

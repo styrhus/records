@@ -48,9 +48,9 @@ Walked 2026-08-31, in one parallel-session pass. 4 of 5 done; item 3 waits on a 
   would have kept the record. **The pages-branch assumption did not hold as written**: Hugo does
   not clean its destination (`Cleaned │ 0`) and `records publish` force-pushes `public/` as it
   finds it, so an unpublished record's page was still on the branch after the next publish; it left
-  only after `rm -rf public`. The command's `next` output now leads with that step. Follow-ups for
-  whoever wants them: a deliberate decision on `--cleanDestinationDir` in `bin/build.sh` (it also
-  affects renames and deletions, and deletes anything Hugo did not generate), and `records stick`
+  only after `rm -rf public`. *Decided 2026-08-31 (tb4): `bin/build.sh` now passes
+  `--cleanDestinationDir`; the `next` output, `docs/publish.md` and AGENTS.md follow. A hand-run
+  `hugo` still does not clean.* Remaining follow-up for whoever wants it: `records stick`
   on an unpublished record (`frontmatter.feature()` strips `draft:` but leaves `unpublished:` —
   refuse, or clear both). `book.lua`'s draft skipping is verified by reading plus a transcribed
   unit test; pandoc was absent, so no book was actually built.

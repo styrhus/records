@@ -86,7 +86,7 @@ local rawPrefix = repoURL .. "/" .. rawShapes[repoLinkStyle] .. "/" .. repoBranc
 local styleParams = params.style or {}
 local lightParams = styleParams.light or {}
 local light = {}
-for k, dflt in pairs({ bg = "#d5d6db", fg = "#343b58", dim = "#9699a3", accent = "#34548a", surface = "#e5e6ea" }) do
+for k, dflt in pairs({ bg = "#d5d6db", fg = "#343b58", dim = "#5a5d67", accent = "#34548a", surface = "#e5e6ea" }) do
   light[k] = str(lightParams[k]) or dflt
 end
 -- Assistant-panel text, accents and code fills come from the palette's dark half (as on the site).

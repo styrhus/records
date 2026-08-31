@@ -25,7 +25,7 @@ any key under `params.style`:
 ```yaml
 params:
   style:
-    light: { bg: "#d5d6db", fg: "#343b58", dim: "#9699a3", accent: "#34548a", surface: "#e5e6ea", card: "#f5f5f7" }
+    light: { bg: "#d5d6db", fg: "#343b58", dim: "#5a5d67", accent: "#34548a", surface: "#e5e6ea", card: "#f5f5f7" }
     dark:  { bg: "#282a36", fg: "#f8f8f2", dim: "#8b96c9", accent: "#bd93f9", surface: "#21222c", card: "#323445" }
 ```
 

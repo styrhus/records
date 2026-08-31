@@ -90,7 +90,7 @@ blockquote pre, blockquote code { background: var(--bg); } /* --surface on --sur
 .assistant-block tbody tr:nth-child(even) { background: var(--ab-code); }
 /* Syntax colours track light/dark. Light = Tokyo Night Light, dark = Dracula — matching params.style. */
 :root {
-  --hl-comment: #757985; --hl-keyword: #6c17b2; --hl-string: #085726;
+  --hl-comment: #5f6370; --hl-keyword: #6c17b2; --hl-string: #085726;
   --hl-number: #8b2800; --hl-func: #0c3bbf; --hl-builtin: #004f7b; --hl-var: #980d0d;
 }
 @media (prefers-color-scheme: dark) {

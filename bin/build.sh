@@ -95,7 +95,9 @@ case "$PAGE_MODE" in
   single|single-flowing) HUGO_CONFIG="hugo.yaml,one-page.yaml" ;;
 esac
 
-(cd "$ROOT/tools/hugo" && hugo --minify --config "$HUGO_CONFIG" --baseURL "$PAGES_URL" --destination "$OUTDIR")
+# --cleanDestinationDir: unpublished/renamed pages must leave the outdir, or they
+# ride the next pages-branch publish forever. Books/PWA/cards are re-added below.
+(cd "$ROOT/tools/hugo" && hugo --minify --cleanDestinationDir --config "$HUGO_CONFIG" --baseURL "$PAGES_URL" --destination "$OUTDIR")
 
 # Phone app: tools/pwa/ is copied in only when params.phoneApp names the path
 # segment to serve it at. Unset = not shipped, because the page holds a forge
