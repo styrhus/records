@@ -300,6 +300,7 @@ local function isTrue(v) return v == true or str(v) == "true" end
 local function isFalse(v) return v == false or str(v) == "false" end
 
 local introFile = nil
+local licenseFile = nil
 local chapterIndex = {}
 local records = {}
 
@@ -321,7 +322,10 @@ for _, f in ipairs(files) do
       elseif seg1 and f.rel == seg1 .. "/_index.md" then
         chapterIndex[seg1] = f.file
       end
-    elseif base ~= "LICENSE" and base ~= "404" then
+    elseif base == "LICENSE" then
+      -- Root LICENSE.md becomes book back matter; deeper copies stay excluded.
+      if f.rel == "LICENSE.md" then licenseFile = f.file end
+    elseif base ~= "404" then
       local fm, body = splitFrontmatter(slurp(f.file) or "")
       local meta = readMeta(fm)
       if not isTrue(meta.draft) then
@@ -594,6 +598,18 @@ for _, ch in ipairs(chapters) do
   end
   body:insert(pandoc.Header(1, inls, pandoc.Attr("chapter-" .. ch.name, { "chapter" })))
   for _, r in ipairs(ch.records) do addRecord(r) end
+end
+
+-- License back matter (mirrors the site footer link): titled like the footer
+-- (title: else "License"), before bakside so the back cover stays last.
+if licenseFile then
+  local fm, licBody = splitFrontmatter(slurp(licenseFile) or "")
+  local meta = readMeta(fm)
+  if not isTrue(meta.draft) then
+    local title = meta.title and pandoc.Inlines(meta.title) or pandoc.Inlines({ pandoc.Str("License") })
+    body:insert(pandoc.Header(2, title, pandoc.Attr("license", { "record-head" })))
+    body:insert(pandoc.Div(readBody(licBody):walk(contentFilter(path.directory(licenseFile))), pandoc.Attr("", { "license" })))
+  end
 end
 
 if special.bakside then addSpecial(special.bakside) end
