@@ -25,13 +25,14 @@ any key under `params.style`:
 ```yaml
 params:
   style:
-    light: { bg: "#d5d6db", fg: "#343b58", dim: "#9699a3", accent: "#34548a", surface: "#cbccd1" }
-    dark:  { bg: "#282a36", fg: "#f8f8f2", dim: "#8b96c9", accent: "#bd93f9", surface: "#44475a" }
+    light: { bg: "#d5d6db", fg: "#343b58", dim: "#9699a3", accent: "#34548a", surface: "#e5e6ea", card: "#f5f5f7" }
+    dark:  { bg: "#282a36", fg: "#f8f8f2", dim: "#8b96c9", accent: "#bd93f9", surface: "#21222c", card: "#323445" }
 ```
 
 `bg` background · `fg` text · `dim` quiet text (footer, labels) · `accent`
-links and the user border · `surface` code blocks. The raw CSS still sits at
-the top of `baseof.html` if you want to go deeper.
+links and the user border · `surface` code blocks · `card` single-mode record
+cards. The raw CSS still sits at the top of `baseof.html` if you want to go
+deeper.
 
 ## Fonts
 

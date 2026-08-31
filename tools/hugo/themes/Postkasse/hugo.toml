@@ -25,12 +25,15 @@ feedCount = 20          # how many records the RSS feed carries when it is enabl
 demoMode = false     # true: render theme-shipped demo records (front matter demo: true) while the site has no real records — the first real record auto-hides them; false never shows them
 # description = "Conversations with a machine, kept in the open."  # <meta name="description">; unset auto-cuts the opening 14 words of the newest record (per page: description: in front matter)
 # ogImage = "preview.png"  # link-preview image (og:image) in static/, ~1200x630; raster only — preview crawlers do not render SVG; unset emits no image
+ogCards = false      # per-record og:image quote cards: bin/build.sh runs `records card` into public/cards/ and head-meta.html points each record page at its card (Postkasse only; SVG — see README "Meta description and link previews")
 # dateTitleFormat = "02. January 2006"  # Go date layout for timestamp-fallback titles; unset keeps the raw slug
 # datePostFormat = "02. January 2006 15:04"  # show the record date bottom-right in each post; unset shows none
 showTags = true      # show front-matter tags as dim #labels under each post; a page opts out with showTags: false
 showRepoURL = true   # footer link to params.repoURL; false hides it (repoURL still rewrites record links)
 repoLinkStyle = "auto"  # raw/browse URL shape for repoURL links: auto (github.com/gitlab.com detected from repoURL, else Forgejo/Gitea) | forgejo | github | gitlab
 repoBranch = "main"     # branch the rewritten records/ links and the footer branch link point at (site and PDF/EPUB)
+# repoURL = "https://codeberg.org/you/yourrepo"  # your repo URL; drives the footer link and records/ raw-link rewrites; unset shows neither
+# insidesBranch = "main"  # second footer link to this branch (e.g. a development branch); unset shows none
 # pdf = "records.pdf"  # footer "Get PDF" link to the pandoc-built site PDF (see tools/pandoc/ in the records repo); unset shows none
 # epub = "records.epub"  # footer "Get EPUB" link to the pandoc-built site EPUB (see tools/pandoc/ in the records repo); unset shows none
 # booklet = "records-booklet.pdf"  # footer "Get booklet" link to the print booklet (A5 pages two-up on A4 landscape, folding order); unset shows none

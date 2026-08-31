@@ -128,8 +128,9 @@ hello world             plain text is appended as a Human turn
 
 The first word of a title may be a `#tag`; the record is then filed under that tag's folder.
 
-The CLI carries ten more commands that no editor panel exposes — `import`, `archive`, `verify`,
-`export`, `attach`, `pack`, `card`, `booth`, `doctor` and `watch`. `records doctor` is the one to
+The CLI carries fourteen more commands — `import`, `archive`, `verify`, `export`, `attach`, `pack`,
+`card`, `booth`, `doctor`, `watch`, `redact`, `unpublish`, `scan` and `ignore`. Only `watch` has a
+panel counterpart, and only in VS Code (`/watch`, `/watchstop`). `records doctor` is the one to
 run first if anything here misbehaves; it says what is wrong and what to do about it. They are all
 listed in [the engine's README](../tools/others/README.md#the-engines-own-commands).
 
@@ -151,7 +152,10 @@ Then point the editor at it:
 
 - **VS Code / VSCodium** — `records.ollamaEndpoint` (e.g. `http://localhost:11434`) and
   `records.ollamaModel` (e.g. `mistral:latest`); the gear (⚙) in the chat writes both.
-- **Neovim, Emacs** — not wired yet. `/record` behaves like `/all` there.
+  `records.stream` renders the reply token by token.
+- **Neovim** — `require("records").setup({ ollama_endpoint = …, ollama_model = … })`; add
+  `stream = true` to render the reply token by token.
+- **Emacs** — not wired yet. `/record` behaves like `/all` there.
 - **Directly** — `records ollama-reply` and `records ollama-chat` do the HTTP; see
   [tools/others/ollama/README.md](../tools/others/ollama/README.md).
 

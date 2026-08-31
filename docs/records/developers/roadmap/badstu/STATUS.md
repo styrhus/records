@@ -15,7 +15,7 @@ Cycle: this road is **now** (`CURRENT` = `0.12.3 badstu-cricket`).
 | 1 | flue | The roadmap and the handoff protocol | done | claude-opus-5 | `ls docs/records/developers/roadmap/*/ROADMAP.md \| wc -l` → 11 |
 | 2 | beetle | CI truth: GitHub + GitLab shims actually run | blocked | — | live Pages URL from each provider |
 | 3 | cricket | Runner image gains pypdf, rsync, openssh | open | — | CI log shows booklet built, not skipped |
-| 4 | moth | The audit: every doc claim checked against code | done | assistant | discrepancy list + diff |
+| 4 | moth | The audit: every doc claim checked against code | done | assistant; re-run Claude Opus 5, 2026-08-31 | ~135 claims — 17 doc fixes across 8 files, 7 code-side findings; `records --help` → 27 subcommands, `pytest -q` → 595 passed |
 | 5 | tadpole | Theme audited cold (no-JS, contrast, focus, print) | wip | Claude Opus 5, 2026-08-31 | findings list done — 17 findings, 18 computed contrast failures across 110 pairs; the browser half stays open |
 | 6 | snail | Weight: 100 / 1k / 10k records measured | done | Claude Opus 5, 2026-08-31 | measurement table in notes; book path stays unmeasured (pandoc absent — belongs with item 3's runner image) |
 
@@ -33,7 +33,25 @@ Cycle: this road is **now** (`CURRENT` = `0.12.3 badstu-cricket`).
   archaeology). Test-count claim "102" matches `grep -h "^\s*def test_" tests/*.py | wc -l`
   → 102 exactly (pytest unavailable here; note: one parametrized test would make
   `pytest --collect-only` report ~106 collected items).
-- **2 · beetle is blocked** on Actions being enabled for the `menneske/records-smoke` scratch repo.
+- **4 · moth re-run** (2026-08-31, Claude Opus 5), alone, after the day's sweep landed
+  redact/unpublish/scan/ignore, `--preset`/`--stream`, Postkasse's
+  search/backlinks/RSS/reading-chrome/attachments/OG-cards, Neovim's Ollama and the CI doctor
+  pre-flight: ~135 claims checked — 111 ok, **17 doc fixes** across 8 files, **7 code-side
+  findings**. Verified exactly: **27** subcommands, **595** tests passing, 222/527 name pools, 11
+  roads, 4 Fuglekasse templates. The load-bearing corrections: `docs/install.md`'s "ten more
+  commands that no editor panel exposes" was wrong twice over (fourteen, and VS Code exposes
+  `/watch`); `docs/attachments.md` documented `records new --bundle`, a flag that does not exist;
+  `tools/others/README.md`'s `records redact` invocation exited non-zero as written (the
+  `--replace|--remove` group is required); `docs/offline.md` said `records.pyz version` (not a
+  subcommand); AGENTS.md still called kiste 6 open in two places and `head-meta.html`
+  byte-identical across themes (`cmp` disagrees — the `ogCards` block). Two findings were fixed
+  in the wiring pass right after: `params.ogCards` now has its theme-toml default and its
+  commented `hugo.yaml` example, and Postkasse's toml gained the commented
+  `repoURL`/`insidesBranch` placeholders — the exact finding this item filed against Fuglekasse
+  on 2026-08-01, reintroduced by the newer theme. Still filed, unfixed:
+  `create.new_record(bundle=True)` is unreachable from the CLI; the mirrored-contract exception
+  in `head-meta.html` is undocumented and unenforced; `records booth`'s Ollama flags,
+  `ollama-reply --name`, `ignore --adopt` and `watch`'s own flags appear in no prose.
   That toggle belongs to the human — ask, don't route around it. Do not rehearse on `tb4/pages` or
   `blyant/records`.
 - **3 · cricket** touches a different repo (`tb4/hugo-runner-image`). The change is three Alpine

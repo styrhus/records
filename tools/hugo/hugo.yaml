@@ -192,6 +192,13 @@ params:
   # render SVG, which is why this does not fall back to params.logo.
   # ogImage: preview.png
 
+  # Per-record link-preview cards (theme: Postkasse only) — bin/build.sh runs
+  # `records card` over every record into public/cards/ and each record page's
+  # og:image points at its own 1200x630 SVG quote card; the home page keeps
+  # ogImage. Skipped in the one-page modes and when python3/recordkit is
+  # absent. SVG previews render in Slack/Discord but not on many crawlers.
+  # ogCards: true
+
   # Site-wide search (theme: Postkasse only) — a magnifier beside the site
   # title on every page, opening a panel that queries the build-time
   # /index.json in the browser. No service and no library; "/" opens it, and a

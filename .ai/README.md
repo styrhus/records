@@ -6,7 +6,8 @@ Agents find them through discovery symlinks at the repo root:
 
 ```
 .claude/skills -> ../.ai/skills    # Claude Code
-.agents/skills -> ../.ai/skills    # Codex, Mistral Vibe, other .agents/ readers
+.agents/skills -> ../.ai/skills    # Codex and other .agents/ readers
+.vibe/skills   -> ../.ai/skills    # Mistral Vibe
 ```
 
 A tool with a different discovery path gets another symlink, never a copy — `.ai/skills/` stays the single source. Cross-vendor portability notes (Claude-specific frontmatter keys, the `` !`command` `` injection syntax) are in the root `AGENTS.md`, which `CLAUDE.md` symlinks to.

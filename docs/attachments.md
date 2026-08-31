@@ -53,14 +53,9 @@ Your source file is **copied, never moved**. It stays where it was.
 Filenames are slugified and extensions preserved, and nothing is ever
 overwritten — a second `whiteboard.jpg` becomes `whiteboard-1.jpg`.
 
-To start a record that already expects attachments:
-
-```bash
-records new --bundle "Whiteboard session"
-```
-
 Flat records stay flat. A record only becomes a folder when it has something
-to carry.
+to carry, and `records attach` is the only command that converts one — there is
+no flag on `records new` for starting a bundle by hand.
 
 ## Size discipline
 
@@ -103,12 +98,17 @@ resolves it. A record pointing at a file that was moved or deleted renders as
 a broken image on the site and a missing figure in the PDF, silently — this is
 how you find out first. See [preservation](preservation.md).
 
-## Known limitation
+## Known limitation, under Fuglekasse
 
 In `pageMode: single` and `single-flowing`, every record renders on the front
 page, where a relative `image.png` resolves against `/` instead of the
 record's own URL and 404s — and those modes publish no per-record pages to
 fall back on (see the theme README). The attached files themselves are still
 published, at `/<slug>/image.png`. Bundles render correctly in the other
-modes and in the PDF and EPUB. The front-page fix belongs to the theme, and is
-on the roadmap.
+modes and in the PDF and EPUB.
+
+**Postkasse does not have this limitation.** Its `layouts/_markup/` render
+hooks resolve a destination through the record's own page resources, so the
+URL they emit is site-root-absolute and survives both one-page modes — along
+with players for video and audio, typed download links, and `srcset` on
+bundled images. Switch with `theme: Postkasse`; see that theme's README.

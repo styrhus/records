@@ -326,9 +326,10 @@ effect:
   count includes code blocks). Record pages, posts excerpts and single cards; not `single-flowing`.
 - `stickyNav` — `single-flowing` only: a slim bar naming the record you are scrolled into.
   Filled and revealed by JavaScript; a reader without it sees nothing, not an empty bar.
-- `permalinkButton` — replaces the record-level hover `#` with a visible link icon. Without
-  JavaScript it is an ordinary anchor; with it, a click copies the absolute URL and says so.
-- `keyNav` — `j`/`n` next record, `k`/`p` previous. Ignores modifier chords and typing in fields,
+- `permalinkButton` — `single`/`single-flowing` only: replaces the record-level hover `#` with a
+  visible link icon. Without JavaScript it is an ordinary anchor; with it, a click copies the
+  absolute URL and says so.
+- `keyNav` — `single`/`single-flowing` only: `j`/`n` next record, `k`/`p` previous. Ignores modifier chords and typing in fields,
   unfolds a collapsed chapter before scrolling, updates the hash. The keys are documented only
   here — there is no on-screen hint.
 

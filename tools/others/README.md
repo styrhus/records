@@ -120,7 +120,7 @@ These have no slash-command counterpart — they are the CLI's, and they need no
 | `records booth` | A stdlib-curses composing screen. Writes byte-identically to `records new` + `append`. |
 | `records doctor` | Report what will fail in this checkout — reporting only, never fixing. |
 | `records watch` | Rebuild when a record changes. Never commits, never pushes, never publishes. |
-| `records redact <record> --turn N` | Rewrite one turn in place, leaving a `[redacted]` seam. Shows the diff and asks first; never touches git, and every run states what remains. |
+| `records redact <record> --turn N (--remove \| --replace <text>)` | Rewrite one turn in place, leaving a `[redacted]` seam — `--remove` leaves the marker alone, `--replace` puts text beside it. Shows the diff and asks first (`--dry-run`, `--yes`); never touches git, and every run states what remains. |
 | `records unpublish <record>` | Draft a record out of the site, the books and the pages branch; `--tombstone` leaves a stub at the old URL, `--restore` brings it back. Empty the output dir before publishing — Hugo overwrites, it does not delete. |
 | `records scan [<path>]` | Look for credential-shaped strings in the records. Heuristic, and it says so; matches are masked, never printed in full. Non-zero exit on any finding. |
 | `records ignore [--check]` | Translate `records/.recordsignore` into the site config's generated `ignoreFiles:` block, so Hugo and `book.lua` both honour it. `--check` reports drift and writes nothing. |

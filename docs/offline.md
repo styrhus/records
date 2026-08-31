@@ -35,7 +35,7 @@ in-page anchors.
 ```bash
 ./records.pyz new "#travel a note from the train"
 ./records.pyz append --file records/travel/a-note-from-the-train.md --text "..."
-./records.pyz version
+./records.pyz --version
 ```
 
 Nothing is installed and nothing is left behind — the zipapp is one file
