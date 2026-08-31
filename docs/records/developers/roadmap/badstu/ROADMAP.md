@@ -8,7 +8,7 @@ tags: [developers, roadmap, badstu]
 
 > The sauna: heat, sweat, cold water. The room where people talk without titles.
 
-**This is the road under our feet.** `CURRENT` reads `0.12.1 badstu-flue`.
+**This is the road under our feet.** `CURRENT` reads `0.12.3 badstu-cricket`.
 
 Two things happen in the heat at once.
 

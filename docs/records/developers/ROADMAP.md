@@ -15,32 +15,33 @@ The answer has a shape: eleven roads, from the mailbox to the sauna, each one a 
 
 ## Where we stand
 
-`CURRENT` reads **`0.12.1 badstu-flue`** — the road under our feet.
+`CURRENT` reads **`0.12.3 badstu-cricket`** — the road under our feet.
 
 Behind it the roads are no longer unwalked. They are still not a queue: the werden major is a
 position in the name pool, not a percentage of anything, and a road is claimed by whoever arrives
 with time for it. Walk them in the order that suits the week.
 
-Where each one stands, as of 2026-08-01:
+Where each one stands, as of 2026-08-31 — the day the agent-workable remainder was walked in one
+parallel-session sweep:
 
 | Road | Walked | Left |
 |------|--------|------|
-| 2 · postkasse | — | all five: Ollama in Neovim, streaming, voice presets, `/stick` checkout-awareness, the walkthrough |
+| 2 · postkasse | 1 of 5, 3 more code-complete | the live halves — a real Neovim with a real Ollama for items 1–3 — and the walkthrough |
 | 3 · bikube | 3 of 5 | two uploads, both needing the human's tokens (PyPI, Open VSX) |
 | 4 · suitcase | 4 of 5 | ChatGPT + Claude export JSON, blocked for want of a real export file |
-| 5 · kiste | 1 of 6 | the theme exists and is empty: search, backlinks, RSS, reading chrome, attachment rendering |
+| 5 · kiste | **6 of 6** | — |
 | 6 · akvarium | 1 of 3 | two rungs waiting on a real phone |
-| 7 · hundehus | 2 of 4 | the bark's editor half, and the doctor's trip to CI |
+| 7 · hundehus | 3 of 4 | the bark's live run in a real editor |
 | 8 · schrank | **6 of 6** | — |
-| 9 · booth | 3 of 4 | Open Graph cards, unblocked by kiste 1 |
-| 10 · portaloo | 2 of 4 | books travelling, and the USB story walked on a borrowed machine |
-| 11 · utedo | — | all five |
-| 12 · badstu | 1 of 6 | CI truth, the runner image, the audit, the theme review, the weight test |
+| 9 · booth | **4 of 4** | — |
+| 10 · portaloo | 2 of 4 | books travelling (gated on badstu 3), and the USB story walked on a borrowed machine |
+| 11 · utedo | 4 of 5 | the oops procedure's review by someone who has done a history rewrite |
+| 12 · badstu | 4 of 6 | CI truth (a toggle only the human holds), the runner image, and item 5's browser half |
 
 What is already built: one build path (`bin/build.sh`) behind every provider, forks publishing with
-zero edits, an AI-free engine (`recordkit` 0.12.1, 416 tests) driving the mechanical commands from a
+zero edits, an AI-free engine (`recordkit` 0.12.3, 595 tests) driving the mechanical commands from a
 VSCode sidebar, a Neovim split, an Emacs buffer, or plain shell — and Ollama bringing the AI back,
-locally, when wanted. Twenty-two CLI commands now, ten of them from the roads above.
+locally, when wanted. Twenty-seven CLI commands now, fourteen of them from the roads above.
 
 And the sentence that sets the course: everyone's conversations are locked away in other people's
 apps, and nobody publishes them well. That is the whole gap we exist in.
