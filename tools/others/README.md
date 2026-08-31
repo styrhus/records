@@ -83,8 +83,8 @@ hello world
 
 | Editor | Open it | Notes |
 |---|---|---|
-| VS Code / VSCodium | birdhouse icon, `Ctrl/Cmd+Shift+R`, `Ctrl/Cmd+Shift+\`, or "Records: Open Chat" | the only one with Ollama wired |
-| Neovim | `:Records` | `:help records` |
+| VS Code / VSCodium | birdhouse icon, `Ctrl/Cmd+Shift+R`, `Ctrl/Cmd+Shift+\`, or "Records: Open Chat" | Ollama wired |
+| Neovim | `:Records` | `:help records` — Ollama wired via `ollama_endpoint`/`ollama_model` |
 | Emacs | `M-x records` | `RET` prompts for a line |
 
 ## Mechanical Skills (No AI Needed)
@@ -120,14 +120,20 @@ These have no slash-command counterpart — they are the CLI's, and they need no
 | `records booth` | A stdlib-curses composing screen. Writes byte-identically to `records new` + `append`. |
 | `records doctor` | Report what will fail in this checkout — reporting only, never fixing. |
 | `records watch` | Rebuild when a record changes. Never commits, never pushes, never publishes. |
+| `records redact <record> --turn N` | Rewrite one turn in place, leaving a `[redacted]` seam. Shows the diff and asks first; never touches git, and every run states what remains. |
+| `records unpublish <record>` | Draft a record out of the site, the books and the pages branch; `--tombstone` leaves a stub at the old URL, `--restore` brings it back. Empty the output dir before publishing — Hugo overwrites, it does not delete. |
+| `records scan [<path>]` | Look for credential-shaped strings in the records. Heuristic, and it says so; matches are masked, never printed in full. Non-zero exit on any finding. |
+| `records ignore [--check]` | Translate `records/.recordsignore` into the site config's generated `ignoreFiles:` block, so Hugo and `book.lua` both honour it. `--check` reports drift and writes nothing. |
 
-`doctor` and `watch` print human-readable text and own their flags (`--json` for machine output);
-every other command emits JSON on stdout like the rest of the CLI.
+`doctor`, `watch`, `scan` and `ignore` print human-readable text and own their flags (`--json`
+for machine output); every other command emits JSON on stdout like the rest of the CLI.
 
 ## Honest Degradations
 
 - **No AI `/record`**: falls back to `/all` (user-only). Two-sided recording returns when Ollama is configured.
 - **No AI commit message**: the plugins prompt you for `-m "message"` instead of auto-authoring one.
+- **No Python in CI**: `records doctor` runs as an optional early step in all three CI shims; a fork with no Python still builds, it just skips the check.
+- **OG cards are SVG** (poor crawler support outside Slack/Discord) and Postkasse-only; Fuglekasse sites keep the site-level `ogImage` only.
 
 ## Ollama (Optional)
 
@@ -141,7 +147,8 @@ ollama pull mistral
 ```
 
 `/record` becomes two-sided (user msg → model → reply + signature), with multi-turn context
-per recording session, via `records ollama-reply` (Neovim wiring pending). Workspace files
+per recording session, via `records ollama-reply` — in VSCode and, since postkasse-flue landed
+there, in Neovim (`require('records').setup{ollama_endpoint=…, ollama_model=…}`). Workspace files
 can ride along as model-only context (never written to the record):
 
 ```bash
@@ -161,6 +168,13 @@ records ollama-chat --endpoint http://localhost:11434 --model mistral:latest \
 
 In the VSCode extension the same flags back `@` file attachments and the active-editor
 context chip. See `ollama/README.md` for details.
+
+Both commands also take `--preset <name>` — a voice from `recordkit/presets/` (`pirate`, `poet`,
+`bff`), a deterministic system prompt composed ahead of the `--context-*` material and never
+written to the record — and `--stream`, which switches stdout to NDJSON (one `{"token": …}` line
+per chunk, then the usual final result line) so an editor can render the reply as it arrives; what
+lands in the record is byte-identical either way. Both plugins stream only when their `stream`
+setting is switched on.
 
 ## Development
 
@@ -246,5 +260,6 @@ keeps its own npm-semver in `package.json` — it is not the engine, and it is n
 
 ## Next Steps
 
-- **Wire Ollama in Neovim and Emacs** (the CLI's `ollama-reply` does the HTTP work; VSCode is done) and add the voice skills as system-prompt presets.
+- **Wire Ollama in Emacs** (the CLI's `ollama-reply` does the HTTP work; VSCode and Neovim are done — `records-ollama-endpoint` is still a reserved defcustom).
+- **Walk both plugins against a real site** — the postkasse 5 walkthrough: every command, VSCode and Neovim, on a scratch clone with a live Ollama.
 - **Upload the releases** — the packaging is done and the runbooks are above; PyPI and Open VSX need credentials.
