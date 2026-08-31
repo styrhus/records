@@ -121,3 +121,44 @@ if [ -n "$BOOKS" ]; then
     "$ROOT/tools/pandoc/build.sh" "$OUTDIR"
   fi
 fi
+
+# OG cards (Postkasse only): params.ogCards runs `records card` per record
+# into $OUTDIR/cards/<slug>.svg, for head-meta.html to point og:image at.
+# Needs only python3 — recordkit ships in-repo; skip cleanly, like the pandoc
+# step above, when it's missing. No-op off-Postkasse and in single(-flowing)
+# mode, which renders no per-record pages to link a card from.
+OG_CARDS="${HUGO_PARAMS_OGCARDS:-$(sed -n 's/^[[:space:]]*ogCards:[[:space:]]*//p' "$ROOT/tools/hugo/hugo.yaml" | head -1 | sed "s/[[:space:]]*#.*\$//; s/[\"']//g")}"
+THEME="$(sed -n 's/^theme:[[:space:]]*//p' "$ROOT/tools/hugo/hugo.yaml" | head -1 | sed "s/[[:space:]]*#.*\$//; s/[\"']//g")"
+if [ -n "$OG_CARDS" ] && [ "$OG_CARDS" != "false" ] && [ "$THEME" = "Postkasse" ]; then
+  case "$PAGE_MODE" in
+    single|single-flowing)
+      echo "bin/build.sh: params.ogCards set but pageMode is $PAGE_MODE — no per-record pages, skipping OG card generation" >&2
+      ;;
+    *)
+      if ! command -v python3 >/dev/null 2>&1 || [ ! -d "$ROOT/tools/others/python/recordkit" ]; then
+        echo "bin/build.sh: params.ogCards set but python3/recordkit is missing — skipping OG card generation" >&2
+      else
+        RECORDS_DIR="$(cd "$ROOT" && PYTHONPATH="$ROOT/tools/others/python" python3 -m recordkit config)" || RECORDS_DIR=""
+        RECORDS_DIR="$(printf '%s' "$RECORDS_DIR" | python3 -c 'import json, sys; print(json.load(sys.stdin)["records_dir"])' 2>/dev/null)" || RECORDS_DIR=""
+        if [ -n "$RECORDS_DIR" ] && [ -d "$RECORDS_DIR" ]; then
+          mkdir -p "$OUTDIR/cards"
+          CARD_COUNT=0
+          while IFS= read -r -d '' rec; do
+            base="$(basename "$rec" .md)"
+            case "$base" in
+              # doctor.py's reserved names, plus bookLook's cover pages.
+              _index|LICENSE|404|forside|side-1|bakside) continue ;;
+            esac
+            if PYTHONPATH="$ROOT/tools/others/python" python3 -m recordkit card "$rec" \
+                --out "$OUTDIR/cards/$base.svg" --repo "$ROOT" >/dev/null; then
+              CARD_COUNT=$((CARD_COUNT + 1))
+            else
+              echo "bin/build.sh: records card skipped $rec (no turns to draw from)" >&2
+            fi
+          done < <(find "$RECORDS_DIR" -name '*.md' -print0)
+          echo "bin/build.sh: wrote $CARD_COUNT OG card(s) to $OUTDIR/cards/" >&2
+        fi
+      fi
+      ;;
+  esac
+fi

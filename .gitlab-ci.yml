@@ -3,6 +3,15 @@
 pages:
   image: hugomods/hugo:debian-0.164.0
   script:
+    # Optional pre-flight: records doctor. recordkit ships in-repo, needs
+    # only python3; skip cleanly, like bin/build.sh's pandoc check, when
+    # it's missing.
+    - |
+      if command -v python3 >/dev/null 2>&1 && [ -d tools/others/python/recordkit ]; then
+        PYTHONPATH="$(pwd)/tools/others/python" python3 -m recordkit doctor --repo "$(pwd)"
+      else
+        echo "doctor: python3 or recordkit not found — skipping pre-flight (recordkit is optional)" >&2
+      fi
     - ./bin/build.sh public
   artifacts:
     paths:

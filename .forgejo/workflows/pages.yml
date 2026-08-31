@@ -38,6 +38,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Optional pre-flight: records doctor. recordkit ships in-repo, needs
+      # only python3; skip cleanly, like bin/build.sh's pandoc check, when
+      # it's missing.
+      - name: Doctor (optional pre-flight)
+        run: |
+          if command -v python3 >/dev/null 2>&1 && [ -d tools/others/python/recordkit ]; then
+            PYTHONPATH="$(pwd)/tools/others/python" python3 -m recordkit doctor --repo "$(pwd)"
+          else
+            echo "doctor: python3 or recordkit not found — skipping pre-flight (recordkit is optional)" >&2
+          fi
+
       # Site + books (pdf/epub/booklet self-gate on their params) into
       # public/; PAGES_URL reaches the deploy step via $GITHUB_ENV.
       - name: Build
