@@ -71,6 +71,89 @@ records publish             # build + deliver
 `records publish` never commits or pushes your source; that stays with
 `/gc`, `/gcp`, `/cpd`.
 
+## Taking a record back
+
+```bash
+records unpublish bicycles              # out of the site and the books
+records unpublish bicycles --tombstone  # …and leave a stub at the old URL
+records unpublish bicycles --restore    # put it back
+```
+
+Unpublishing sets `draft: true` in the record's own front matter. That is the
+one mechanism both halves of the build already honour: Hugo skips drafts
+(`bin/build.sh` never passes `--buildDrafts`), and `tools/pandoc/book.lua`
+drops any record whose `draft` is true, so the PDF, EPUB and booklet lose it
+too. `build.list: never` plus `build.render: never` would work for Hugo alone,
+but they are nested keys that the book build does not read. A second flat key,
+`unpublished: <timestamp>`, records that the tool did it, so `--restore` can
+tell it from a draft you wrote by hand; a record that is already a draft is
+refused rather than swallowed.
+
+`--tombstone` leaves a stub at the old URL — better than a 404 for anyone who
+linked to it, worse than a 404 for anyone who wanted it gone; you choose. The
+URL comes from the filename, so the stub takes the record's filename over and
+the record moves beside it as `<name>.withdrawn.md`, still a draft. The stub
+carries the original date (so it keeps its place) but neither the title nor a
+word of the conversation.
+
+**Empty the output directory before you publish.** Hugo overwrites its
+destination, it does not clean it, so the last build's page for the record is
+still sitting in `public/` — and `records publish` force-pushes that directory
+as it finds it. The withdrawn record would go straight back up:
+
+```bash
+rm -rf public && records publish
+```
+
+Nothing here is erasure, and the command says so on every run: git history
+still holds the record, so does every clone, fork and mirror made before now,
+and so do the forge's caches and whatever the internet already indexed. If what
+leaked was a credential, rotate it — a removal is cleanup, rotation is the fix.
+
+`records redact <record> --turn N --remove` is the smaller tool for the same
+problem: it rewrites one turn in place and leaves `[redacted]` where the text
+was — a seam a reader can see, not a silent edit. It shows the diff and asks
+first (`--dry-run` to look without being asked, `--yes` to skip the question),
+and it never touches git.
+
+## Never publishing it in the first place
+
+Patterns in `records/.recordsignore` — gitignore-shaped, one per line — keep
+files out of the build entirely:
+
+```
+# never publish these
+private/
+*.env
+scratch.md
+```
+
+```bash
+records ignore           # write the patterns into the site config
+records ignore --check   # CI: fail if the config is stale
+```
+
+`.recordsignore` is a front end to Hugo's `ignoreFiles`, not a second mechanism:
+`records ignore` translates the patterns into a generated `ignoreFiles:` block in
+`tools/hugo/hugo.yaml`, which Hugo and `tools/pandoc/book.lua` already read, so
+the site, the PDF and the EPUB all follow. The block is generated, which is why
+there is a `--check`: a stale one is a lie about what you publish. See the
+comments beside it in the site config for the pattern subset and how it interacts
+with `draft: true` and `demoMode`.
+
+An ignored file is still in your repository and still in git history. This is
+about not publishing, not about secrecy.
+
+## When it was a secret
+
+If what leaked was a credential, none of the above is the fix. **Rotate the key**,
+then work down [when a key lands in a transcript](oops.md) — it covers
+`records scan`, what a `git filter-repo` rewrite does and what it costs, and what
+nothing at all can reach.
+
+If what leaked was somebody else, [the other people in your
+records](other-people.md) is the page for that one.
+
 ## Wire it into /cpd
 
 ```yaml

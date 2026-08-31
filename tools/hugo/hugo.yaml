@@ -17,6 +17,38 @@ contentDir: ../../records
 # OR
 # contentDir: ../../docs/records
 
+# Files never to publish: write gitignore-shaped patterns in
+# records/.recordsignore (one per line, # for comments) and run `records
+# ignore`. It translates them into a generated `ignoreFiles:` block right here,
+# between "# records-ignore:begin" and "# records-ignore:end" markers — the one
+# exclusion mechanism the build already has. Hugo reads ignoreFiles; so does
+# tools/pandoc/book.lua, so the site, the PDF and the EPUB agree. The block is
+# generated: edit .recordsignore and re-run, never the block. `records ignore
+# --check` writes nothing and exits non-zero when the two have drifted, which is
+# what CI should run.
+#
+# Supported patterns: `private/` (that directory at any depth), `secret.md` or
+# `notes/draft.md` (that exact path, at any depth), `*.env` (a suffix), and
+# `re: <regex>` to pass a raw regex straight through. Not supported, each with a
+# message saying why: `!negation` (ignoreFiles is a block list), a leading `/`
+# (Hugo matches absolute paths, so "only at the root" cannot be expressed), and
+# `?`, `[…]` or a `*` anywhere but the start (book.lua's regex subset has no way
+# to match them). One pattern usually yields two regexes — Hugo matches against
+# absolute paths, book.lua against records-relative ones.
+#
+# Precedence and interactions:
+#   - ignoreFiles wins over everything. Hugo never reads the file, so front
+#     matter in it — draft:, build:, cascade — is never seen at all.
+#   - draft: true is the *reversible* route and the one `records unpublish`
+#     uses: Hugo and book.lua both skip drafts, but the file is still parsed.
+#     Ignore a file to keep it out of the build; draft it to withdraw a record.
+#   - params.demoMode counts real records, and an ignored file is not one. If
+#     you ignore your only record, the shipped demo content comes back.
+#   - The patterns are global to the build, not records-only: `private/` would
+#     also exclude static/private/. Name patterns you mean.
+#   - An ignored file is still in the repository and still in git history. This
+#     is about not publishing, not about secrecy — see docs/oops.md.
+
 # Repo-root static/ holds your own assets (logo, favicon, images) — like
 # records/, it is fork-owned: upstream never ships or moves files there.
 staticDir: [static, ../../static]
@@ -66,6 +98,14 @@ markup:
 # assistant signature lines through page summaries.
 # MIRRORED in one-page.yaml (list keys replace across config files) — edit both.
 disableKinds: [taxonomy, term, rss]
+# OR — with theme: Postkasse only, swap the line above for the one below to
+# publish /index.xml. Postkasse ships its own feed template (layouts/rss.xml)
+# that strips signature lines through the same partial record.html uses and
+# carries full record content. Fuglekasse has no such template: leaving RSS on
+# under Fuglekasse publishes Hugo's embedded feed, signatures and all — which
+# is why this is a knowing, theme-specific edit and not a default.
+# MIRROR this in one-page.yaml too. See tools/hugo/themes/Postkasse/README.md.
+# disableKinds: [taxonomy, term]
 
 # Tag folders (records/<tag>/) organise files only — never render their
 # auto-generated section pages, so /linux/ stays a 404 and stays out of the
