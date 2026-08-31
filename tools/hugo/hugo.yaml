@@ -116,8 +116,10 @@ disableKinds: [taxonomy, term, rss]
 # config, but `outputs` does not — the same reason RSS needs the edit above.
 # Under Fuglekasse this line is harmless but pointless: no json template
 # matches, so Hugo warns and writes nothing.
+# NOTE: `outputs` REPLACES Hugo's defaults — a site that enabled RSS above
+# must list it here too ([html, rss, json]) or the feed silently disappears.
 # outputs:
-#   home: [html, json]
+#   home: [html, json]           # with RSS enabled: [html, rss, json]
 
 # Tag folders (records/<tag>/) organise files only — never render their
 # auto-generated section pages, so /linux/ stays a 404 and stays out of the

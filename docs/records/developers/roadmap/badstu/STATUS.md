@@ -16,7 +16,7 @@ Cycle: this road is **now** (`CURRENT` = `0.12.3 badstu-cricket`).
 | 2 | beetle | CI truth: GitHub + GitLab shims actually run | blocked | — | live Pages URL from each provider |
 | 3 | cricket | Runner image gains pypdf, rsync, openssh | open | — | CI log shows booklet built, not skipped |
 | 4 | moth | The audit: every doc claim checked against code | done | assistant | discrepancy list + diff |
-| 5 | tadpole | Theme audited cold (no-JS, contrast, focus, print) | open | — | findings list + browser check |
+| 5 | tadpole | Theme audited cold (no-JS, contrast, focus, print) | wip | Claude Opus 5, 2026-08-31 | findings list done — 17 findings, 18 computed contrast failures across 110 pairs; the browser half stays open |
 | 6 | snail | Weight: 100 / 1k / 10k records measured | done | Claude Opus 5, 2026-08-31 | measurement table in notes; book path stays unmeasured (pandoc absent — belongs with item 3's runner image) |
 
 `State` ∈ `open` · `wip` · `done` · `blocked`
@@ -40,6 +40,44 @@ Cycle: this road is **now** (`CURRENT` = `0.12.3 badstu-cricket`).
   packages; keep the skip paths in `bin/build.sh` intact so forks on other images still exit 0.
 - **6 · snail** generates its synthetic records outside this repo. Nothing throwaway lands in
   `records/`.
+
+## 5 · tadpole — the cold audit (2026-08-31)
+
+Audited both themes — Postkasse for the first time, hours after it grew search, backlinks, RSS,
+reading chrome and attachment hooks. Findings only, except two one-attribute accessible-name
+repairs in Postkasse `_partials/record.html` (the mic icon gets `role="img" aria-label`, the
+per-turn `#` anchor gets the `aria-label` its two siblings already had); Fuglekasse carries both
+faults and was left alone, per the border. The full 17-finding list with computed ratios lives in
+the walking session's report; the load-bearing ones:
+
+- **Contrast** (computed, 110 pairs, both palettes): 18 below AA. The headline is one value —
+  light `--dim` `#9699a3` on `--bg` is **1.96:1** (needs 4.5) and carries the footer, dates,
+  tags, record heads, dinkus, lang badge, reading time, permalinks and every icon summary. The
+  dark `--dim` was lifted once for exactly this (its toml comment says so); the light one never
+  was. `--dim: #5a5d67` would fix ten of the eighteen and the short light `--hl-comment` with it.
+  Also failing: `.assistant-block a` **1.92:1** on the light panel, the panel body **4.35:1**,
+  `section.assistant`'s `opacity:.75` → **4.16:1** on light `--bg`, dark `--dim` on cards
+  **4.26:1**. Repairs are palette design decisions — argued in the open, not slipped in.
+- **No-JS**: every kiste claim verified in the emitted HTML — search and sticky-nav ship
+  `hidden`, the permalink degrades to a real anchor, the filter is a visible-but-inert
+  `<details>` as designed, keyNav leaves only an attribute, Spotify keeps its `<noscript>`.
+  One h1 and no skipped heading levels in any of the eight builds; no clickable divs, no
+  `tabindex` misuse, `no outline: none` anywhere.
+- **Structural gaps**: `page.html` lacks `baseof.html`'s title fallback, so a hand-written
+  record with no `title:` renders with zero h1 (recordkit always writes one); the chapter `#`
+  anchor is an interactive `<a>` nested inside `<summary>`; **neither theme has `@media print`**
+  — a dark-scheme reader printing risks white-on-white and five fixed widgets overlap the paper
+  (the pandoc route is the sound one: `pdf.css` mirrors the palette 5/5, the `--ab-*` fallbacks
+  5/5, the panel tokens 7/7, the chroma tokens 7/7 via `highlight.theme`; drifts: the
+  `@bottom-center` folio colour is a literal `book.lua` never overrides, and `.featured`,
+  `.record-lang` and the bookLook trough have no print counterpart).
+- **Found in passing, fixed**: `hugo.yaml`'s search comment told a site with RSS enabled to set
+  `outputs: home: [html, json]`, which *replaces* Hugo's defaults and silently removes the feed
+  (verified) — the comment now says `[html, rss, json]` for that case.
+- **The browser half stays open**: focus-ring visibility on summaries/buttons, `<details>`
+  fragment auto-expansion with JS off, keyboard reach of the summary-nested anchor, the Custom
+  Highlight API in situ, screen-reader flow, print preview in both schemes, and touch behaviour
+  of the hover-only `#` anchors.
 
 ## 6 · snail — the measurements (2026-08-31)
 
