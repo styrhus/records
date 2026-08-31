@@ -87,6 +87,18 @@ def test_chat_unreachable(tmp_path, monkeypatch):
     assert f.read_text() == "head\n"
 
 
+def test_reply_with_preset_unreachable_still_appends_nothing(tmp_path):
+    """The graceful no-model fallback, exercised with a preset set: this machine has no Ollama
+    listening on 11434 (real connection refused, no mock), same contract as test_chat_unreachable —
+    a preset changes the voice, never the failure behaviour. Nothing half-written reaches disk."""
+    f = tmp_path / "r.md"
+    f.write_text("head\n")
+    preset = ollama.load_preset("pirate")
+    with pytest.raises(RuntimeError, match="unreachable"):
+        ollama.reply(f, "http://localhost:11434", "m", "hi", preset=preset, timeout=2.0)
+    assert f.read_text() == "head\n"
+
+
 def test_chat_http_error(monkeypatch):
     def post(url, payload, timeout):
         raise urllib.error.HTTPError(url, 404, "Not Found", None, None)
@@ -340,6 +352,108 @@ def test_cli_context_flags(tmp_path, monkeypatch):
     assert system["role"] == "system"
     assert f"### File: {src}" in system["content"]
     assert f"### Directory: {d}" in system["content"]
+
+
+def test_load_preset_pirate():
+    text = ollama.load_preset("pirate")
+    assert "pirate" in text.lower()
+    assert text == text.strip()  # no leading/trailing whitespace left in
+
+
+def test_load_preset_poet():
+    assert "poetic" in ollama.load_preset("poet").lower()
+
+
+def test_load_preset_bff():
+    assert "best friend" in ollama.load_preset("bff").lower()
+
+
+def test_load_preset_unknown():
+    with pytest.raises(RuntimeError, match="unknown preset"):
+        ollama.load_preset("nope-not-a-voice")
+
+
+@pytest.mark.parametrize("name", ["", "../pirate", "sub/pirate", ".", ".."])
+def test_load_preset_rejects_path_traversal(name):
+    with pytest.raises(RuntimeError, match="unknown preset"):
+        ollama.load_preset(name)
+
+
+def test_reply_with_preset_is_a_system_message(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls))
+    f = tmp_path / "r.md"
+    f.write_text("---\ntitle: X\n---\n")
+    preset = ollama.load_preset("pirate")
+    ollama.reply(f, "http://localhost:11434", "m", "hi", preset=preset)
+    msgs = calls[0]["payload"]["messages"]
+    assert msgs[0] == {"role": "system", "content": preset}
+    assert msgs[-1] == {"role": "user", "content": "hi"}
+    # the record gets only the plain turn — the preset never touches the file
+    assert preset not in f.read_text()
+    assert f.read_text().endswith("\n## Human\n\nhi\n\n## Assistant\n\nyo\n\n— m\n")
+
+
+def test_reply_preset_precedes_context(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls))
+    f = tmp_path / "r.md"
+    f.write_text("---\ntitle: X\n---\n")
+    ollama.reply(f, "http://localhost:11434", "m", "hi", preset="VOICE", context="CTX")
+    msgs = calls[0]["payload"]["messages"]
+    assert msgs[0] == {"role": "system", "content": "VOICE"}
+    assert msgs[1] == {"role": "system", "content": "CTX"}
+    assert msgs[-1] == {"role": "user", "content": "hi"}
+
+
+def test_reply_preset_is_ephemeral(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls))
+    f = tmp_path / "r.md"
+    f.write_text("---\ntitle: X\n---\n")
+    ollama.reply(f, "http://localhost:11434", "m", "first", preset="VOICE")
+    ollama.reply(f, "http://localhost:11434", "m", "second")
+    assert all(m["role"] != "system" for m in calls[1]["payload"]["messages"])
+
+
+def test_ephemeral_reply_with_preset(monkeypatch):
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls))
+    preset = ollama.load_preset("poet")
+    r = ollama.ephemeral_reply("http://localhost:11434", "m", "hi", [], preset=preset)
+    assert r == {"model": "m", "reply": "yo", "appended": False}
+    msgs = calls[0]["payload"]["messages"]
+    assert msgs[0] == {"role": "system", "content": preset}
+    assert msgs[-1] == {"role": "user", "content": "hi"}
+
+
+def test_ephemeral_reply_preset_precedes_context(monkeypatch):
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls))
+    ollama.ephemeral_reply("http://localhost:11434", "m", "hi", [], preset="VOICE", context="CTX")
+    msgs = calls[0]["payload"]["messages"]
+    assert msgs[0] == {"role": "system", "content": "VOICE"}
+    assert msgs[1] == {"role": "system", "content": "CTX"}
+
+
+def test_ephemeral_reply_pirate_preset_payload_acceptance_equivalent(monkeypatch):
+    """Exercises the assembled request payload for `records ollama-chat --preset pirate
+    --human "hello"` (item 3's acceptance command). --preset is not yet wired into cli.py
+    (see the reported diff), so this drives the same call cli.main() would make once it is:
+    ollama.load_preset(name) -> ollama.ephemeral_reply(..., preset=text)."""
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls, content="Ahoy, matey!"))
+    preset = ollama.load_preset("pirate")
+    r = ollama.ephemeral_reply("http://localhost:11434", "m", "hello", [], preset=preset)
+    assert r == {"model": "m", "reply": "Ahoy, matey!", "appended": False}
+    assert calls[0]["payload"] == {
+        "model": "m",
+        "messages": [
+            {"role": "system", "content": preset},
+            {"role": "user", "content": "hello"},
+        ],
+        "stream": False,
+    }
 
 
 def test_cli_no_context_flags(tmp_path, monkeypatch):

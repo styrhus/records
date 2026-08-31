@@ -18,6 +18,20 @@ MAX_CONTEXT_BYTES = 262144
 MAX_DIR_ENTRIES = 500
 _DIR_IGNORE = {"node_modules", "__pycache__", ".git"}
 
+PRESETS_DIR = Path(__file__).parent / "presets"
+
+
+def load_preset(name: str) -> str:
+    """A voice preset's system-prompt text — deterministic, no model involved in the lookup.
+    One plain-text file per voice; `name` may not contain a path separator."""
+    if not name or "/" in name or "\\" in name or name in (".", ".."):
+        raise RuntimeError(f"unknown preset: {name!r}")
+    path = PRESETS_DIR / f"{name}.txt"
+    try:
+        return path.read_text(encoding="utf-8").strip()
+    except OSError as e:
+        raise RuntimeError(f"unknown preset: {name}") from e
+
 
 def _file_block(path: Path) -> str:
     try:
@@ -94,7 +108,8 @@ def chat(endpoint: str, model: str, messages: list[dict], timeout: float = DEFAU
 
 
 def ephemeral_reply(endpoint: str, model: str, human: str, history: list,
-                    timeout: float = DEFAULT_TIMEOUT, context: str | None = None) -> dict:
+                    timeout: float = DEFAULT_TIMEOUT, context: str | None = None,
+                    preset: str | None = None) -> dict:
     """Generate one reply from in-memory history; nothing is ever written to disk."""
     human = human.strip()
     if not human:
@@ -109,6 +124,9 @@ def ephemeral_reply(endpoint: str, model: str, human: str, history: list,
     if context:
         # model-only: sent as a system message, like reply()
         messages.insert(0, {"role": "system", "content": context})
+    if preset:
+        # the voice, ahead of any workspace context — same slot, composed alongside it
+        messages.insert(0, {"role": "system", "content": preset})
     messages.append({"role": "user", "content": human})
     assistant = chat(endpoint, model, messages, timeout)
     return {"model": model, "reply": assistant, "appended": False}
@@ -116,7 +134,7 @@ def ephemeral_reply(endpoint: str, model: str, human: str, history: list,
 
 def reply(file: Path, endpoint: str, model: str, human: str,
           timeout: float = DEFAULT_TIMEOUT, context: str | None = None,
-          name: str | None = None) -> dict:
+          name: str | None = None, preset: str | None = None) -> dict:
     """Generate + append one signed turn; nothing is written when generation fails."""
     human = human.strip()
     if not human:
@@ -126,6 +144,10 @@ def reply(file: Path, endpoint: str, model: str, human: str,
     if context:
         # model-only: sent as a system message, never appended to the record
         messages.insert(0, {"role": "system", "content": context})
+    if preset:
+        # the voice, ahead of any workspace context — same slot, composed alongside it;
+        # never appended to the record either, same as context
+        messages.insert(0, {"role": "system", "content": preset})
     messages.append({"role": "user", "content": human})
     assistant = chat(endpoint, model, messages, timeout)
     append_turn(file, human, assistant, model, name=name)

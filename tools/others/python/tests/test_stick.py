@@ -42,6 +42,48 @@ def test_ambiguity_survives_across_both_shapes(tmp_path):
     assert len(stick.find_record(tmp_path, "how-to")) == 2
 
 
+def test_find_record_in_checkout_resolves_via_hugo_config(tmp_path):
+    """/record, /all, /me, /cpd all resolve the records dir from a nested hugo.yaml's contentDir —
+    /stick must land on the exact same directory, not the caller's $PWD."""
+    hugo = tmp_path / "project" / "site" / "hugo"
+    hugo.mkdir(parents=True)
+    (hugo / "hugo.yaml").write_text("contentDir: ../records\n")
+    records = tmp_path / "project" / "site" / "records"
+    rec = _record(records, "how-to.md")
+
+    # `start` stands in for the caller's cwd — a parent workspace above the records checkout.
+    assert stick.find_record_in_checkout(tmp_path, "how-to") == [rec]
+
+
+def test_find_record_in_checkout_from_a_parent_project_workspace(tmp_path):
+    """The acceptance shape: run from a parent project directory that merely contains the
+    records checkout somewhere below it, same as /record's discovery walk."""
+    nested = tmp_path / "workspace" / "notes-clone"
+    hugo = nested / "tools" / "hugo"
+    hugo.mkdir(parents=True)
+    (hugo / "hugo.yaml").write_text("contentDir: ../../records\n")
+    records = nested / "records"
+    rec = _record(records, "linux/how-to.md")
+
+    assert stick.find_record_in_checkout(tmp_path / "workspace", "how-to") == [rec]
+
+
+def test_find_record_in_checkout_falls_back_to_records_dir(tmp_path):
+    """No hugo.yaml found anywhere below `start` → the same `records/` fallback config.py uses."""
+    rec = _record(tmp_path / "records", "how-to.md")
+    assert stick.find_record_in_checkout(tmp_path, "how-to") == [rec]
+
+
+def test_find_record_in_checkout_ambiguous_stays_explicit(tmp_path):
+    hugo = tmp_path / "hugo"
+    hugo.mkdir()
+    (hugo / "hugo.yaml").write_text("contentDir: ../records\n")
+    records = tmp_path / "records"
+    _record(records, "linux/how-to.md")
+    _record(records, "notes/how-to/index.md")
+    assert len(stick.find_record_in_checkout(tmp_path, "how-to")) == 2
+
+
 def test_a_record_attached_to_stays_findable(tmp_path):
     """The real regression: attach converts the record, stick used to lose it."""
     records = tmp_path / "records"
