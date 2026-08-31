@@ -1,0 +1,46 @@
+{{/* The whole record link graph, built once per site — call it through
+     partialCached, never directly. Returns a map: record slug → the records
+     linking to it, oldest first.
+
+     Read from .RawContent, the markdown source. record.html rewrites relative
+     records/ links to forge raw URLs while rendering, so by the time a record
+     is HTML the link no longer says it was internal — a pass over rendered
+     output finds an empty graph.
+
+     A link counts as internal when its last path segment names a record:
+     records/2026-07-06_23-25.md, ../2026-07-06_23-25.md, /2026-07-06_23-25/
+     and 2026-07-06_23-30/index.md all resolve to the same record. Links
+     carrying a scheme (http:, mailto:) or starting // are external and skipped,
+     as are bare #fragments and self-links. Two records with the same base name
+     in different folders are one node — timestamp names make that unlikely,
+     and the alternative is resolving relative paths Hugo cannot resolve here. */}}
+{{ $pages := where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" }}
+{{ $known := dict }}
+{{ range $pages }}{{ $known = merge $known (dict (lower (path.Base .RelPermalink)) true) }}{{ end }}
+{{ $map := dict }}
+{{ range $p := $pages }}
+  {{ $self := lower (path.Base $p.RelPermalink) }}
+  {{ $raw := $p.RawContent }}
+  {{/* Markdown ](target) and raw-HTML href="target" — unsafe: true content
+       carries links goldmark never sees as links. */}}
+  {{ $found := slice }}
+  {{ range findRE `\]\([^)\s]+` $raw }}{{ $found = $found | append (substr . 2) }}{{ end }}
+  {{ range findRE `href="[^"]+"` $raw }}{{ $found = $found | append (substr . 6 -1) }}{{ end }}
+  {{ $targets := slice }}
+  {{ range $found }}
+    {{ $t := index (split (index (split . "#") 0) "?") 0 }}
+    {{ if and $t (not (findRE `^(?:[a-zA-Z][a-zA-Z0-9+.\-]*:|//)` $t)) }}
+      {{ $t = strings.TrimSuffix "/" $t }}
+      {{ $t = strings.TrimSuffix "/index" (strings.TrimSuffix ".md" $t) }}
+      {{ $key := lower (path.Base $t) }}
+      {{ if and (ne $key $self) (index $known $key) }}{{ $targets = $targets | append $key }}{{ end }}
+    {{ end }}
+  {{ end }}
+  {{ range uniq $targets }}
+    {{ $cur := or (index $map .) slice }}
+    {{ $map = merge $map (dict . ($cur | append $p)) }}
+  {{ end }}
+{{ end }}
+{{ $sorted := dict }}
+{{ range $k, $v := $map }}{{ $sorted = merge $sorted (dict $k (sort $v "Date" "asc")) }}{{ end }}
+{{ return $sorted }}

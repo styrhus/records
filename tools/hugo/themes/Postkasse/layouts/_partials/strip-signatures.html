@@ -1,0 +1,15 @@
+{{/* Takes rendered record HTML, returns it without the assistant signature
+     paragraphs. The one place the rule lives in this theme — record.html and
+     rss.xml both call it, so a feed can never leak a "— model-name" line the
+     page hides. (tools/pandoc/book.lua mirrors it for the PDF/EPUB; those three
+     are the whole set and are kept in step by hand.)
+
+     Two passes: a single bare token after the em dash, then a signature naming
+     a known model or vendor in any spelling — hugo.Data.models is the shipped
+     list (repo-root data/models.json), models_local the gitignored extras. */}}
+{{ $c := . | replaceRE `<p>— [\w.-]+</p>` "" }}
+{{ $models := slice }}
+{{ with hugo.Data.models }}{{ $models = $models | append . }}{{ end }}
+{{ with hugo.Data.models_local }}{{ $models = $models | append . }}{{ end }}
+{{ with $models }}{{ $c = replaceRE (printf `(?i)<p>—\s+[^<]*(?:%s)[^<]*</p>` (delimit (uniq .) "|")) "" $c }}{{ end }}
+{{ return $c }}

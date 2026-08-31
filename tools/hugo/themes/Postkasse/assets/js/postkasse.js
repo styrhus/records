@@ -63,6 +63,88 @@
   window.addEventListener('hashchange', revealHashTarget);
   if (location.hash) revealHashTarget();
 
+  // Reading chrome (params.stickyNav / permalinkButton / keyNav). Every piece below is
+  // an enhancement: the markup it needs is only emitted when its param is on, and the
+  // page reads and navigates without any of it.
+
+  // Sticky record nav (single-flowing): names the record the reader is inside.
+  // The bar ships hidden, so no-JS readers get no empty chrome.
+  var stickyNav = document.querySelector('.sticky-nav');
+  var flows = document.querySelectorAll('article.record-flow[data-nav-title]');
+  if (stickyNav && flows.length) {
+    var navLink = stickyNav.querySelector('a');
+    var navTitle = stickyNav.querySelector('.sticky-nav-title');
+    var navCount = stickyNav.querySelector('.sticky-nav-count');
+    var navShown = -1;
+    function updateStickyNav() {
+      // The last record whose top has passed the bar is the one we are reading.
+      var i = 0;
+      for (var n = 0; n < flows.length; n++) {
+        if (flows[n].getBoundingClientRect().top < 60) i = n; else break;
+      }
+      if (i === navShown) return;
+      navShown = i;
+      navTitle.textContent = flows[i].getAttribute('data-nav-title');
+      navCount.textContent = (i + 1) + ' / ' + flows.length;
+      navLink.setAttribute('href', '#' + flows[i].id);
+    }
+    var navTicking = false;
+    window.addEventListener('scroll', function () {
+      if (navTicking) return;
+      navTicking = true;
+      requestAnimationFrame(function () { updateStickyNav(); navTicking = false; });
+    });
+    updateStickyNav();
+    stickyNav.hidden = false;
+  }
+
+  // Per-record permalink: a working anchor on its own, a copy button with JavaScript.
+  document.querySelectorAll('a.permalink[data-permalink]').forEach(function (a) {
+    var note = a.querySelector('.permalink-note');
+    a.addEventListener('click', function (e) {
+      if (!navigator.clipboard) return; // no clipboard API: let it navigate
+      e.preventDefault();
+      navigator.clipboard.writeText(a.getAttribute('data-permalink')).then(function () {
+        history.replaceState(null, '', a.getAttribute('href'));
+        if (note) note.textContent = 'Link copied';
+        a.classList.add('copied');
+        setTimeout(function () { a.classList.remove('copied'); if (note) note.textContent = ''; }, 1400);
+      }, function () {
+        location.hash = a.getAttribute('href');
+      });
+    });
+  });
+
+  // Keyboard navigation between records (params.keyNav, single/single-flowing):
+  // j or n forward, k or p back. Modifier chords and typing in a field are left alone.
+  if (document.querySelector('main[data-keynav]')) {
+    var records = document.querySelectorAll('main article.record-page[id], main article.record-flow[id]');
+    document.addEventListener('keydown', function (e) {
+      if (e.metaKey || e.ctrlKey || e.altKey || !records.length) return;
+      var t = e.target;
+      if (t && (t.isContentEditable || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) return;
+      var step = 0;
+      if (e.key === 'j' || e.key === 'n') step = 1;
+      else if (e.key === 'k' || e.key === 'p') step = -1;
+      else return;
+      e.preventDefault();
+      var cur = 0;
+      for (var i = 0; i < records.length; i++) {
+        if (records[i].getBoundingClientRect().top < 4) cur = i; else break;
+      }
+      var next = Math.min(records.length - 1, Math.max(0, cur + step));
+      var el = records[next];
+      // A record inside a collapsed chapter has to be unfolded before it can be reached.
+      var p = el.parentElement;
+      while (p) {
+        if (p.tagName === 'DETAILS' && !p.open) p.open = true;
+        p = p.parentElement;
+      }
+      el.scrollIntoView({ behavior: 'smooth' });
+      history.replaceState(null, '', '#' + el.id);
+    });
+  }
+
   // Load the Spotify embed on first open, so it measures the real panel size (a hidden load renders compact).
   var spotify = document.querySelector('details.spotify');
   if (spotify) spotify.addEventListener('toggle', function () {

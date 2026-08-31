@@ -1,0 +1,38 @@
+{{- /* Markdown links. A link whose destination names a file beside the record
+       (a leaf page bundle) is resolved through the page resource, which fixes
+       the same one-page path bug render-image.html fixes, and is then rendered
+       for what it is:
+
+         video (.mp4 .webm .ogv .m4v .mov)  → <video controls preload="none">
+         audio (.mp3 .ogg .wav .m4a .flac)  → <audio controls preload="none">
+         anything else (.pdf, .zip, …)      → a labelled download affordance
+         an image                           → an ordinary link to the file
+
+       preload="none" so a record full of clips costs nothing until it is
+       played, and no player library. <video>/<audio>/<a> are all phrasing
+       content, so none of this can break the paragraph the link sits in.
+
+       Every other link — external, in-page #anchor, site-absolute, and the
+       relative records/… links record.html rewrites to forge raw URLs — is
+       emitted exactly as it was written. */ -}}
+{{- $dest := .Destination -}}
+{{- $r := "" -}}
+{{- if not (findRE `^(?:[a-zA-Z][a-zA-Z0-9+.\-]*:|//|/|#)` $dest) -}}
+  {{- with .Page.Resources.Get $dest }}{{ $r = . }}{{ end -}}
+{{- end -}}
+{{- if $r -}}
+  {{- $kind := partial "media-kind.html" $r.Name -}}
+  {{- $url := $r.RelPermalink -}}
+  {{- $text := or .Text (path.Base $r.Name) -}}
+  {{- if eq $kind "video" -}}
+    <video class="record-media" controls preload="none" src="{{ $url }}"><a href="{{ $url }}">{{ $text | safeHTML }}</a></video>
+  {{- else if eq $kind "audio" -}}
+    <audio class="record-media" controls preload="none" src="{{ $url }}"><a href="{{ $url }}">{{ $text | safeHTML }}</a></audio>
+  {{- else if eq $kind "image" -}}
+    <a href="{{ $url }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ $text | safeHTML }}</a>
+  {{- else -}}
+    <a class="record-file" href="{{ $url }}" download>{{ $text | safeHTML }}<span class="record-file-meta">{{ upper (strings.TrimPrefix "." (path.Ext $r.Name)) }} · {{ partial "filesize.html" $r }}</span></a>
+  {{- end -}}
+{{- else -}}
+  <a href="{{ $dest | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
+{{- end -}}

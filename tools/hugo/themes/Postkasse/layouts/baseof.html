@@ -14,6 +14,11 @@
   {{- end }}
   <title>{{ $pageTitle }}{{ if not .IsHome }} · {{ site.Title }}{{ end }}</title>
   {{- partial "head-meta.html" (dict "page" . "title" $pageTitle) }}
+  {{- /* Only present when the site config leaves the rss kind enabled — see the
+         README: RSS is a knowing, Postkasse-only edit in hugo.yaml. */ -}}
+  {{- with .OutputFormats.Get "rss" }}
+  <link rel="alternate" type="{{ .MediaType.Type }}" href="{{ .Permalink }}" title="{{ site.Title }}">
+  {{- end }}
   {{/* The assets pipeline is what Postkasse exists for — the stylesheet stays a template because
        params.style feeds the palette; fingerprinting is cache-busting only (no SRI: an integrity
        hash needs CORS headers the CDN in params.cdnURL is not guaranteed to send). */}}
@@ -25,7 +30,8 @@
 </head>
 <body>
   <header><a href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a></header>
-  <main{{ with site.Params.pageMode }} class="mode-{{ . }}"{{ end }}>
+  {{- /* data-keynav is the whole switch for params.keyNav: no attribute, no key handler. */ -}}
+  <main{{ with site.Params.pageMode }} class="mode-{{ . }}"{{ end }}{{ if and site.Params.keyNav (in (slice "single" "single-flowing") (site.Params.pageMode | default "basic")) }} data-keynav{{ end }}>
     {{ block "main" . }}{{ end }}
   </main>
   <footer>

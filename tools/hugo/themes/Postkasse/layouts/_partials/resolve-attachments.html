@@ -1,0 +1,35 @@
+{{/* Takes {content, page}, returns the content with raw-HTML references to the
+     record's own attachments pointed at their published URLs.
+
+     The markdown render hooks in _markup/ already resolve every ![](file) and
+     [](file) through the page's resources. Raw HTML does not go through them:
+     with markup.goldmark.renderer.unsafe the parser hands <img src="shot.png">
+     straight to the output, so in single / single-flowing — where every record
+     renders on / — it would still ask for /shot.png and 404.
+
+     book.lua patches the same hole with a regex over every src=. This replaces
+     by name instead: only strings that are literally an attachment of this
+     record are touched, so nothing else in the markup can be caught by
+     accident. It covers src= and href= on any element (img, video, audio,
+     source, object, a). What it cannot cover is a raw reference to a file that
+     is not a resource of this record — ../other-record/shot.png stays as
+     written, exactly as it does today.
+
+     Second job, same reason — goldmark, not the author: it wraps a standalone
+     image in a <p>, and render-image.html's <figure> cannot legally live inside
+     one. A paragraph holding nothing but a captioned figure is unwrapped here.
+     A captioned image written mid-sentence is left alone, and the browser will
+     split that paragraph — so give a captioned image a line of its own. */}}
+{{ $c := .content }}
+{{ $c = replaceRE `(?s)<p>\s*(<figure class="record-figure">.*?</figure>)\s*</p>` "$1" $c }}
+{{ with .page }}
+  {{ range .Resources }}
+    {{ $n := .Name }}
+    {{ $u := .RelPermalink }}
+    {{ range $a := slice "src" "href" }}
+      {{ $c = replace $c (printf `%s="%s"` $a $n) (printf `%s="%s"` $a $u) }}
+      {{ $c = replace $c (printf `%s="./%s"` $a $n) (printf `%s="%s"` $a $u) }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+{{ return $c }}

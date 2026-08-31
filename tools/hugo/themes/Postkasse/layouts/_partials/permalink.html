@@ -1,0 +1,13 @@
+{{/* Per-record permalink (params.permalinkButton) — a visible link where the
+     hover "#" used to be. Takes {page, anchor}: anchor true points at the
+     in-page #slug (single / single-flowing), false at the record's own URL.
+
+     Progressive enhancement, both halves real: with no JavaScript it is an
+     ordinary anchor that navigates to the record and puts the address in the
+     URL bar; with JavaScript, clicking copies the absolute link instead and
+     says so. The absolute form is in data-permalink so the script never has to
+     guess the origin. */}}
+{{ $slug := path.Base .page.RelPermalink }}
+{{ $href := cond .anchor (printf "#%s" $slug) .page.RelPermalink }}
+{{ $abs := cond .anchor (printf "%s#%s" site.Home.Permalink $slug) .page.Permalink }}
+<a class="permalink" href="{{ $href }}" data-permalink="{{ $abs }}" aria-label="Link to this record" title="Link to this record"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span class="permalink-note" aria-live="polite"></span></a>

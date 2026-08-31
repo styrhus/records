@@ -37,3 +37,8 @@ cascade:
       render: link
 
 disableKinds: [taxonomy, term, rss, sitemap]
+# OR — with theme: Postkasse and RSS enabled in hugo.yaml, use this instead.
+# The feed still works in the one-page modes: no record page is built, so each
+# item links to its anchor on the front page (/#<slug>), which is how the theme
+# README tells you to link to a record in these modes anyway.
+# disableKinds: [taxonomy, term, sitemap]

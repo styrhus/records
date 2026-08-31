@@ -1,0 +1,9 @@
+{{/* Human-readable size of a page resource. Hugo exposes no .Size on a page
+     resource, so the bytes are counted — cheap for a document, real work for a
+     large video, which is why the attachment strip and the file affordance that
+     use this are both params and both off by default. */}}
+{{ $n := len .Content }}
+{{ $out := printf "%d B" $n }}
+{{ if ge $n 1048576 }}{{ $out = printf "%.1f MB" (div (float $n) 1048576.0) }}
+{{ else if ge $n 1024 }}{{ $out = printf "%.0f kB" (div (float $n) 1024.0) }}{{ end }}
+{{ return $out }}

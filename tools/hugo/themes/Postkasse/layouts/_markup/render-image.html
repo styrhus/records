@@ -1,0 +1,53 @@
+{{- /* Markdown images. The destination is resolved through the record's own page
+       resources first — a record carrying files is a leaf page bundle
+       (<slug>/index.md with the files beside it), and a resource's
+       .RelPermalink is site-root-absolute. That is the fix for the one-page
+       bug: in single / single-flowing every record renders on /, where the
+       relative image.png the author wrote resolves to /image.png and 404s.
+       Hooks run with page context, so all four render spots — record page,
+       posts excerpt, single card, flowing article — are fixed by this file.
+
+       Intrinsic width/height keep the page from jumping while the image loads;
+       params.responsiveImages adds a srcset (Hugo's image processing is
+       available here — it is not in Fuglekasse).
+
+       An image with a markdown title gets figure/figcaption treatment. One
+       without stays a bare <img>, because goldmark wraps a standalone image in
+       a <p> and a <figure> cannot live inside one — so give a captioned image a
+       line of its own. */ -}}
+{{- $dest := .Destination -}}
+{{- $alt := .PlainText -}}
+{{- $caption := .Title -}}
+{{- $r := "" -}}
+{{- if not (findRE `^(?:[a-zA-Z][a-zA-Z0-9+.\-]*:|//|/)` $dest) -}}
+  {{- with .Page.Resources.Get $dest }}{{ $r = . }}{{ end -}}
+{{- end -}}
+{{- $src := $dest -}}
+{{- $w := 0 -}}{{- $h := 0 -}}{{- $srcset := "" -}}
+{{- with $r -}}
+  {{- $src = .RelPermalink -}}
+  {{- /* .Width is an image-only method, and processing cannot touch svg or gif. */ -}}
+  {{- if eq .ResourceType "image" -}}
+    {{- if ne .MediaType.SubType "svg" -}}
+      {{- $w = .Width -}}{{- $h = .Height -}}
+      {{- if and site.Params.responsiveImages (in (slice "jpeg" "png" "webp") .MediaType.SubType) -}}
+        {{- $set := slice -}}
+        {{- range $step := slice 480 960 1440 -}}
+          {{- if lt $step $w -}}
+            {{- with $r.Resize (printf "%dx" $step) }}{{ $set = $set | append (printf "%s %dw" .RelPermalink .Width) }}{{ end -}}
+          {{- end -}}
+        {{- end -}}
+        {{- if $set }}{{ $srcset = delimit ($set | append (printf "%s %dw" $src $w)) ", " }}{{ end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $img := printf `<img src=%q alt=%q loading="lazy" decoding="async"` $src $alt -}}
+{{- if $w }}{{ $img = printf `%s width="%d" height="%d"` $img $w $h }}{{ end -}}
+{{- with $srcset }}{{ $img = printf `%s srcset=%q sizes="(max-width: 40rem) 100vw, 37rem"` $img . }}{{ end -}}
+{{- $tag := printf "%s>" $img -}}
+{{- with $caption -}}
+  {{- printf `<figure class="record-figure">%s<figcaption>%s</figcaption></figure>` $tag . | safeHTML -}}
+{{- else -}}
+  {{- $tag | safeHTML -}}
+{{- end -}}

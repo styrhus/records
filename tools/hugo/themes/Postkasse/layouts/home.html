@@ -24,6 +24,21 @@
   {{ if and $threeDotAnchor (ne $mode "single-flowing") }}
     {{ warnf "Postkasse: threeDotAnchor is only honoured in pageMode \"single-flowing\"" }}
   {{ end }}
+  {{/* Reading chrome (kiste 5) — each piece its own param, each off by default,
+       each only meaningful where records share a page. */}}
+  {{ $stickyNav := and (site.Params.stickyNav | default false) (eq $mode "single-flowing") }}
+  {{ if and site.Params.stickyNav (ne $mode "single-flowing") }}
+    {{ warnf "Postkasse: stickyNav is only honoured in pageMode \"single-flowing\"" }}
+  {{ end }}
+  {{ if and site.Params.permalinkButton (not (in (slice "single" "single-flowing") $mode)) }}
+    {{ warnf "Postkasse: permalinkButton is only honoured in pageMode \"single\" and \"single-flowing\"" }}
+  {{ end }}
+  {{ if and site.Params.keyNav (not (in (slice "single" "single-flowing") $mode)) }}
+    {{ warnf "Postkasse: keyNav is only honoured in pageMode \"single\" and \"single-flowing\"" }}
+  {{ end }}
+  {{ if and site.Params.showReadingTime (eq $mode "single-flowing") }}
+    {{ warnf "Postkasse: showReadingTime has no effect in pageMode \"single-flowing\", which shows no per-record metadata" }}
+  {{ end }}
 
   {{ $all := where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" }}
   {{/* demoMode: theme-shipped demo records (demo: true) render only while the
@@ -171,6 +186,11 @@
     {{/* Continuous conversation: intro, then bare turn streams split by a dinkus.
          With bookLook, forside stands in for the intro. */}}
     {{ if not $forside }}{{ .Content }}{{ end }}
+    {{/* Sticky record nav: hidden markup the script fills in and reveals, so a
+         no-JS reader sees nothing rather than an empty bar. */}}
+    {{ if and $stickyNav $flow }}
+      <div class="sticky-nav" hidden><a href="#"><span class="sticky-nav-title"></span><span class="sticky-nav-count"></span></a></div>
+    {{ end }}
     {{ range $i, $r := $flow }}
       {{ $isSpecial := and $bookLook (not $r.Section) (in (slice "forside" "side-1" "bakside") $r.File.ContentBaseName) }}
       {{ if $threeDotAnchor }}
@@ -189,8 +209,10 @@
       {{ else if $i }}<div class="record-sep" aria-hidden="true">· · ·</div>{{ end }}
       {{ $book := "" }}
       {{ if $isSpecial }}{{ $book = printf " book-%s" $r.File.ContentBaseName }}{{ end }}
-      <article class="record-flow{{ $book }}{{ if $r.Params.featured }} featured{{ end }}" id="{{ path.Base $r.RelPermalink }}"{{ with $r.Params.language }} lang="{{ . }}"{{ end }}>
-        {{ partial "record.html" (dict "content" $r.Content "prefix" (path.Base $r.RelPermalink) "voice" $r.Params.voiceRecorded) }}
+      <article class="record-flow{{ $book }}{{ if $r.Params.featured }} featured{{ end }}" id="{{ path.Base $r.RelPermalink }}"{{ with $r.Params.language }} lang="{{ . }}"{{ end }}{{ if $stickyNav }} data-nav-title="{{ partial "inline/record-title.html" $r | plainify }}"{{ end }}>
+        {{ if site.Params.permalinkButton }}{{ partial "permalink.html" (dict "page" $r "anchor" true) }}{{ end }}
+        {{ partial "record.html" (dict "content" $r.Content "prefix" (path.Base $r.RelPermalink) "voice" $r.Params.voiceRecorded "page" $r) }}
+        {{ partial "attachments.html" (dict "page" $r) }}
       </article>
     {{ end }}
   {{ else if eq $mode "posts" }}
@@ -199,7 +221,8 @@
     {{ range $paginator.Pages }}
       <article class="post">
         <h2><a href="{{ .RelPermalink }}">{{ partial "inline/record-title.html" . }}</a></h2>
-        {{ partial "record.html" (dict "content" .Summary "prefix" (path.Base .RelPermalink) "voice" .Params.voiceRecorded) }}
+        {{ partial "record.html" (dict "content" .Summary "prefix" (path.Base .RelPermalink) "voice" .Params.voiceRecorded "page" .) }}
+        {{ partial "reading-time.html" . }}
         {{ if .Truncated }}<p class="more"><a href="{{ .RelPermalink }}">Read more →</a></p>{{ end }}
         {{ if and $showTags (ne .Params.showTags false) .Params.tags }}<p class="post-tags">{{ range .Params.tags }}<span>#{{ . }}</span> {{ end }}</p>{{ end }}
         {{ if and $dfmt (ne .Params.showDate false) }}<p class="post-date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format $dfmt .Date }}</time></p>{{ end }}
@@ -230,8 +253,11 @@
   {{ $id := path.Base .RelPermalink }}
   <article class="record-page{{ if .Params.featured }} featured{{ end }}"{{ with .Params.language }} lang="{{ . }}"{{ end }}{{ with .Params.tags }} data-tags="{{ delimit . "," }}"{{ end }} data-date="{{ .Date.Format "2006-01-02" }}">
     {{ partial "lang-badge.html" . }}
-    <h2 class="record-head" id="{{ $id }}">{{ partial "inline/record-title.html" . }}<a class="anchor" href="#{{ $id }}" aria-label="Link to this record">#</a></h2>
-    {{ partial "record.html" (dict "content" .Content "prefix" $id "voice" .Params.voiceRecorded) }}
+    <h2 class="record-head" id="{{ $id }}">{{ partial "inline/record-title.html" . }}{{ if site.Params.permalinkButton }}{{ partial "permalink.html" (dict "page" . "anchor" true) }}{{ else }}<a class="anchor" href="#{{ $id }}" aria-label="Link to this record">#</a>{{ end }}</h2>
+    {{ partial "record.html" (dict "content" .Content "prefix" $id "voice" .Params.voiceRecorded "page" .) }}
+    {{ partial "attachments.html" (dict "page" .) }}
+    {{ partial "backlinks.html" (dict "page" . "anchor" true) }}
+    {{ partial "reading-time.html" . }}
     {{ if and site.Params.showTags (ne .Params.showTags false) .Params.tags }}<p class="post-tags">{{ range .Params.tags }}<span>#{{ . }}</span> {{ end }}</p>{{ end }}
     {{ if and site.Params.datePostFormat (ne .Params.showDate false) }}<p class="post-date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format site.Params.datePostFormat .Date }}</time></p>{{ end }}
     {{ partial "comment-link.html" . }}

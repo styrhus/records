@@ -1,0 +1,68 @@
+{{- /* The honest feed. RSS is disabled site-wide because Hugo's embedded
+       template leaks the assistant signature lines through page summaries —
+       a template problem, so this is the template that fixes it. It runs the
+       same strip-signatures.html partial record.html runs, which is the only
+       place that rule lives in this theme; a signature the page hides can
+       therefore never reach the feed.
+
+       Full content, not summaries: a summary of a conversation is its first
+       exchange out of context, which is worse than useless. The whole record
+       goes out, with attachments resolved to their published URLs, relative
+       records/ links sent to the forge exactly as on the page, and every
+       remaining site-absolute URL made absolute so a reader offline from the
+       site still resolves images and files.
+
+       Postkasse-only, and off until the site config says otherwise: a theme
+       cannot set disableKinds (Hugo ignores root keys in theme configs), so
+       enabling the feed is one edit in tools/hugo/hugo.yaml. Fuglekasse keeps
+       RSS disabled. */ -}}
+{{- $all := where site.RegularPages "File.ContentBaseName" "ne" "LICENSE" -}}
+{{- $real := where $all "Params.demo" "!=" true -}}
+{{- if or $real (not site.Params.demoMode) }}{{ $all = $real }}{{ end -}}
+{{- $items := sort $all "Date" "desc" -}}
+{{- $limit := int (site.Params.feedCount | default 20) -}}
+{{- if gt (len $items) $limit }}{{ $items = first $limit $items }}{{ end -}}
+{{- /* In single / single-flowing every record lives on the front page, so an
+       item points at its anchor there rather than at a URL that is not built. */ -}}
+{{- $onePage := in (slice "single" "single-flowing") (site.Params.pageMode | default "basic") -}}
+{{- $u := urls.Parse site.Home.Permalink -}}
+{{- $origin := printf "%s://%s" $u.Scheme $u.Host -}}
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>{{ site.Title | transform.XMLEscape | safeHTML }}</title>
+    <link>{{ site.Home.Permalink }}</link>
+    {{- with or site.Params.description site.Title }}
+    <description>{{ . | transform.XMLEscape | safeHTML }}</description>
+    {{- end }}
+    <language>{{ site.Language.Locale }}</language>
+    <generator>blyant records</generator>
+    {{- with $items }}
+    <lastBuildDate>{{ (index . 0).Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</lastBuildDate>
+    {{- end }}
+    {{- with .OutputFormats.Get "rss" }}
+    <atom:link href="{{ .Permalink }}" rel="self" type="application/rss+xml"/>
+    {{- end }}
+    {{- range $items }}
+    {{- /* Display title, same rule as baseof.html: the hand-written one, else
+           the timestamp slug through dateTitleFormat. Plain text, no markup. */ -}}
+    {{- $title := .Title -}}
+    {{- if not $title }}{{ $title = .File.ContentBaseName }}{{ end -}}
+    {{- with site.Params.dateTitleFormat }}{{ if findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $title }}{{ $title = time.Format . $.Date }}{{ end }}{{ end -}}
+    {{- $link := cond $onePage (printf "%s#%s" site.Home.Permalink (path.Base .RelPermalink)) .Permalink -}}
+    {{- $c := partial "strip-signatures.html" .Content -}}
+    {{- $c = partial "resolve-attachments.html" (dict "content" $c "page" .) -}}
+    {{- $c = partial "rewrite-record-links.html" $c -}}
+    {{- $c = replaceRE `(src|href)="/([^"]*)"` (printf `$1="%s/$2"` $origin) $c }}
+    <item>
+      <title>{{ $title | transform.XMLEscape | safeHTML }}</title>
+      <link>{{ $link }}</link>
+      <guid isPermaLink="false">{{ .Permalink }}</guid>
+      <pubDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</pubDate>
+      {{- range .Params.tags }}
+      <category>{{ . | transform.XMLEscape | safeHTML }}</category>
+      {{- end }}
+      <description>{{ $c | transform.XMLEscape | safeHTML }}</description>
+    </item>
+    {{- end }}
+  </channel>
+</rss>

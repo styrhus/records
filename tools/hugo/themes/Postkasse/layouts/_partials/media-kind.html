@@ -1,0 +1,10 @@
+{{/* Takes a file name or path, returns how the theme renders it:
+     "image" | "video" | "audio" | "file". Extension, not media type — Hugo maps
+     .ogg to audio/ogg, and .ogg carrying video is rare enough that guessing
+     audio is the better default; name a video .ogv or .webm. */}}
+{{ $ext := lower (strings.TrimPrefix "." (path.Ext .)) }}
+{{ $kind := "file" }}
+{{ if in (slice "png" "jpg" "jpeg" "gif" "webp" "avif" "svg" "bmp" "tif" "tiff") $ext }}{{ $kind = "image" }}
+{{ else if in (slice "mp4" "m4v" "webm" "ogv" "mov") $ext }}{{ $kind = "video" }}
+{{ else if in (slice "mp3" "m4a" "wav" "flac" "oga" "opus" "ogg") $ext }}{{ $kind = "audio" }}{{ end }}
+{{ return $kind }}

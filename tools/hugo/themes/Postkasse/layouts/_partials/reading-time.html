@@ -1,0 +1,6 @@
+{{/* Reading time and record length (params.showReadingTime), both computed at
+     build from Hugo's own .ReadingTime and .WordCount. Takes the page.
+     Not rendered in single-flowing, which shows no per-record metadata at all. */}}
+{{ if site.Params.showReadingTime }}
+  <p class="reading-time">{{ .ReadingTime }} min · {{ .WordCount }} words</p>
+{{ end }}
