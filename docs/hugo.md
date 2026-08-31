@@ -35,8 +35,25 @@ hugo server
 - **Taxonomies** — no tags, no categories, no clutter. Remove them from
   `disableKinds` in `tools/hugo/hugo.yaml` to turn them back on.
 - **RSS** — Hugo's built-in feed template would leak the signature lines
-  through page summaries. Add your own `tools/hugo/layouts/rss.xml` if you
-  want a feed.
+  through page summaries. Postkasse ships its own `layouts/rss.xml` that
+  strips them; enabling it is a one-line `disableKinds` edit documented in
+  `tools/hugo/hugo.yaml`. Under Fuglekasse, leave it off or add your own
+  `tools/hugo/layouts/rss.xml`.
+
+## How far it scales
+
+Measured on a seeded synthetic corpus (mean 4.9 kB per record, hugo 0.165,
+8 cores): build time is never the wall — 10 000 records build in 7.5 s
+(`basic`) — but peak memory is about 2.5 GB there, which is the real CI
+constraint. The one-page modes are the wall: `single` and `single-flowing`
+put roughly 10 kB of HTML and 254 DOM elements per record on one page. They
+stay comfortable to about 250 records, the gzipped front page crosses 1 MB
+around 530, and at 10 000 the page is 93 MB and has stopped being a web
+page. Above a few hundred records switch to `basic` — 10 000 records make a
+929 kB front index and one ~23 kB page each — and prefer Postkasse, whose
+external CSS/JS keeps the output at 120 MB where Fuglekasse's inlining
+reaches 279 MB. Avoid `posts` at that scale: pagination re-runs the record
+sort per page and takes minutes where `basic` takes seconds.
 
 ## Go further
 

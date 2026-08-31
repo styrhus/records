@@ -15,8 +15,8 @@ and `postkasse-beetle` before turning to badstu. The items below are what remain
 |---|---|---|---|---|---|
 | 1 | flue | Ollama reaches Neovim | open | — | live `/record` turn in Neovim + fallback with Ollama stopped |
 | 2 | beetle | Replies learn to stream | open | — | `python -m pytest tests/test_ollama.py` + visible streaming in both plugins |
-| 3 | cricket | Voice skills become presets | open | — | `records ollama-chat --preset pirate --human "hello"` |
-| 4 | moth | `/stick` checkout-aware + `test_stick.py` | open | — | `cd tools/others/python && python -m pytest` |
+| 3 | cricket | Voice skills become presets | wip | Claude Sonnet 5, 2026-08-31 | preset loading, composition and fallback proven by tests (`pytest tests/test_ollama.py` green); the live acceptance run waits on a reachable Ollama |
+| 4 | moth | `/stick` checkout-aware + `test_stick.py` | done | Claude Sonnet 5, 2026-08-31 | `cd tools/others/python && python -m pytest` → 570 passed |
 | 5 | tadpole | Both plugins walked against a real site | open | — | walkthrough log, 11 commands × 2 plugins |
 
 `State` ∈ `open` · `wip` · `done` · `blocked`
@@ -39,6 +39,20 @@ and `postkasse-beetle` before turning to badstu. The items below are what remain
   Extend the existing function and test file; do not replace them.
 - **Parallel-session collisions:** **1 · flue** shares `neovim/lua/records/init.lua` with
   [hundehus 3](../hundehus/ROADMAP.md), which is still open — coordinate before touching it.
+- **3 · cricket, walked 2026-08-31:** `/pirate`, `/poet` and `/bff` became
+  `recordkit/presets/*.txt` — each SKILL.md was already a static persona with no tool use, so a
+  fixed system prompt is lossless, and the skills now point at the preset files instead of
+  restating them. **`/eq` stays AI-only**: its cap-your-reply-to-my-token-length rule is a live
+  per-turn self-measurement, not a tone — a local model that silently fails it has no way to be
+  caught by the engine. `/werden`'s verse also stays AI-only: it must name the specific old→new
+  cycle at the moment of turning, which is runtime state, not fixed prompt text. The preset rides
+  the existing system-message slot ahead of `--context-*`, is never written to the record, and the
+  row stays `wip` only for the live Ollama run.
+- **4 · moth, walked 2026-08-31:** the surprise was that `cli.py`'s `stick` handler has resolved
+  the records dir via `config.resolve_records_dir` since 2026-07-21 — the real `$PWD`-scoping
+  lived in the `/stick` skill's hardcoded `find records …`, now replaced with the same discovery
+  block its siblings carry. `stick.py` gained `find_record_in_checkout` (engine-level, testable);
+  `test_stick.py` extended 7 → 11 tests, schrank 3's work intact.
 
 ## Picking one up
 
