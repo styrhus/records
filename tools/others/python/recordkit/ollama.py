@@ -84,6 +84,39 @@ def _http_post(url: str, payload: dict, timeout: float) -> dict:
         return json.loads(resp.read().decode("utf-8"))
 
 
+def _http_post_stream(url: str, payload: dict, timeout: float):
+    """Yield each parsed line of Ollama's line-delimited JSON stream. Opens the connection
+    eagerly (a refused connection raises here, at the first `next()`, same as `_http_post`)."""
+    req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"),
+                                 headers={"Content-Type": "application/json"})
+    resp = urllib.request.urlopen(req, timeout=timeout)
+
+    def _lines():
+        with resp:
+            for raw in resp:
+                line = raw.strip()
+                if line:
+                    yield json.loads(line.decode("utf-8"))
+    return _lines()
+
+
+def _translate_http_errors(e: BaseException, endpoint: str, timeout: float) -> RuntimeError:
+    """Shared with chat()/chat_stream(): both wrap the same urllib error shapes the same way."""
+    if isinstance(e, urllib.error.HTTPError):
+        try:
+            detail = json.loads(e.read().decode("utf-8")).get("error", "")
+        except Exception:
+            detail = e.reason
+        return RuntimeError(f"ollama HTTP {e.code}: {detail}")
+    if isinstance(e, (TimeoutError, socket.timeout)):
+        return RuntimeError(f"ollama timed out after {timeout:g}s")
+    if isinstance(e, urllib.error.URLError):
+        if isinstance(e.reason, (TimeoutError, socket.timeout)):
+            return RuntimeError(f"ollama timed out after {timeout:g}s")
+        return RuntimeError(f"ollama unreachable at {endpoint}: {e.reason}")
+    return RuntimeError(str(e))
+
+
 def chat(endpoint: str, model: str, messages: list[dict], timeout: float = DEFAULT_TIMEOUT) -> str:
     endpoint = endpoint.rstrip("/")
     try:
@@ -105,6 +138,21 @@ def chat(endpoint: str, model: str, messages: list[dict], timeout: float = DEFAU
     if not isinstance(content, str) or not content.strip():
         raise RuntimeError("ollama returned a malformed response")
     return content.strip()
+
+
+def chat_stream(endpoint: str, model: str, messages: list[dict], timeout: float = DEFAULT_TIMEOUT):
+    """Same request as chat(), `stream: true` — yields each content token as it arrives instead
+    of waiting for the full reply. Raises the same RuntimeErrors as chat(), on the first `next()`
+    for a connection failure, or on any later one for a fault mid-stream."""
+    endpoint = endpoint.rstrip("/")
+    try:
+        for obj in _http_post_stream(f"{endpoint}/api/chat",
+                                     {"model": model, "messages": messages, "stream": True}, timeout):
+            content = obj.get("message", {}).get("content") if isinstance(obj, dict) else None
+            if content:
+                yield content
+    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, socket.timeout) as e:
+        raise _translate_http_errors(e, endpoint, timeout) from e
 
 
 def ephemeral_reply(endpoint: str, model: str, human: str, history: list,
@@ -132,6 +180,41 @@ def ephemeral_reply(endpoint: str, model: str, human: str, history: list,
     return {"model": model, "reply": assistant, "appended": False}
 
 
+def ephemeral_reply_stream(endpoint: str, model: str, human: str, history: list,
+                           timeout: float = DEFAULT_TIMEOUT, context: str | None = None,
+                           preset: str | None = None):
+    """Streaming twin of ephemeral_reply(): yields each token; nothing is ever written to disk.
+    Raises "empty message" / "invalid history" up front, before any request is made, same as the
+    non-streaming path — a generator only runs its body once iterated, so callers still see these
+    on the first `next()`, not the call itself."""
+    human = human.strip()
+    if not human:
+        raise RuntimeError("empty message")
+    if not isinstance(history, list) or not all(
+        isinstance(m, dict) and m.get("role") in ("user", "assistant")
+        and isinstance(m.get("content"), str)
+        for m in history
+    ):
+        raise RuntimeError("invalid history")
+    messages = list(history)
+    if context:
+        messages.insert(0, {"role": "system", "content": context})
+    if preset:
+        messages.insert(0, {"role": "system", "content": preset})
+    messages.append({"role": "user", "content": human})
+    chunks: list[str] = []
+    for token in chat_stream(endpoint, model, messages, timeout):
+        chunks.append(token)
+        yield token
+    assistant = "".join(chunks).strip()
+    if not assistant:
+        raise RuntimeError("ollama returned a malformed response")
+    # a generator's `return value` becomes StopIteration.value — the caller drives this generator
+    # to completion (e.g. `result = yield from ...` or catching StopIteration) to get the same
+    # {"model", "reply", "appended": False} shape ephemeral_reply() returns directly.
+    return {"model": model, "reply": assistant, "appended": False}
+
+
 def reply(file: Path, endpoint: str, model: str, human: str,
           timeout: float = DEFAULT_TIMEOUT, context: str | None = None,
           name: str | None = None, preset: str | None = None) -> dict:
@@ -151,4 +234,33 @@ def reply(file: Path, endpoint: str, model: str, human: str,
     messages.append({"role": "user", "content": human})
     assistant = chat(endpoint, model, messages, timeout)
     append_turn(file, human, assistant, model, name=name)
+    return {"file": str(file), "model": model, "reply": assistant, "appended": True}
+
+
+def reply_stream(file: Path, endpoint: str, model: str, human: str,
+                 timeout: float = DEFAULT_TIMEOUT, context: str | None = None,
+                 name: str | None = None, preset: str | None = None):
+    """Streaming twin of reply(): yields each token as it arrives; the signed turn is appended
+    only once, after the stream completes — a caller that stops early, or a fault mid-stream,
+    reaches append_turn never, so a half-written turn never lands on disk (same contract as
+    reply()). The joined, stripped tokens are byte-identical to what reply() would have written."""
+    human = human.strip()
+    if not human:
+        raise RuntimeError("empty message")
+    file = Path(file)
+    messages = parse_turns(file.read_text(encoding="utf-8"))
+    if context:
+        messages.insert(0, {"role": "system", "content": context})
+    if preset:
+        messages.insert(0, {"role": "system", "content": preset})
+    messages.append({"role": "user", "content": human})
+    chunks: list[str] = []
+    for token in chat_stream(endpoint, model, messages, timeout):
+        chunks.append(token)
+        yield token
+    assistant = "".join(chunks).strip()
+    if not assistant:
+        raise RuntimeError("ollama returned a malformed response")
+    append_turn(file, human, assistant, model, name=name)
+    # see ephemeral_reply_stream()'s note: this becomes StopIteration.value for the caller
     return {"file": str(file), "model": model, "reply": assistant, "appended": True}

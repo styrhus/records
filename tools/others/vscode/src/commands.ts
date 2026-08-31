@@ -18,4 +18,6 @@ export const COMMANDS: CommandSpec[] = [
   { name: "mucke", args: "", description: "Stamp the now-playing track" },
   { name: "airtime", args: "", description: "Human vs Assistant token share" },
   { name: "config", args: "", description: "Show the resolved records directory" },
+  { name: "watch", args: "", description: "Start records watch in the background" },
+  { name: "watchstop", args: "", description: "Stop records watch" },
 ];

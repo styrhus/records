@@ -35,6 +35,15 @@ def _records_dir(args: argparse.Namespace) -> Path:
     return Path(args.dir) if args.dir else config.resolve_records_dir(Path("."))
 
 
+def _drain_stream(gen) -> dict:
+    """Emit one {"token": ...} NDJSON line per chunk; return the generator's final result."""
+    while True:
+        try:
+            _emit({"token": next(gen)})
+        except StopIteration as stop:
+            return stop.value
+
+
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="records",
                                 description="Run the mechanical records skills without AI.")
@@ -72,6 +81,9 @@ def _build_parser() -> argparse.ArgumentParser:
                     help="directory whose file listing goes to the model only (repeatable)")
     ol.add_argument("--preset", help="voice preset name (recordkit/presets/<name>.txt); "
                     "composed as a system message ahead of --context-*")
+    ol.add_argument("--stream", action="store_true",
+                    help="NDJSON on stdout: one {\"token\": ...} line per chunk, then the usual "
+                         "final result line — unset, the JSON-on-stdout contract is unchanged")
     ol.add_argument("--name", help="human name for the heading; default: the saved /myname name")
 
     oc = sub.add_parser("ollama-chat", help="ephemeral chat turn via a local Ollama model — no file")
@@ -87,6 +99,9 @@ def _build_parser() -> argparse.ArgumentParser:
                     help="directory whose file listing goes to the model only (repeatable)")
     oc.add_argument("--preset", help="voice preset name (recordkit/presets/<name>.txt); "
                     "composed as a system message ahead of --context-*")
+    oc.add_argument("--stream", action="store_true",
+                    help="NDJSON on stdout: one {\"token\": ...} line per chunk, then the usual "
+                         "final result line — unset, the JSON-on-stdout contract is unchanged")
 
     st = sub.add_parser("stick", help="feature a record (/stick)")
     grp = st.add_mutually_exclusive_group(required=True)
@@ -232,10 +247,17 @@ def main(argv: list[str] | None = None) -> int:
             context = ollama.build_context([Path(p) for p in args.context_files],
                                            [Path(p) for p in args.context_dirs])
             preset = ollama.load_preset(args.preset) if args.preset else None
-            _emit(ollama.reply(Path(args.file), args.endpoint, args.model,
-                               _stdin_or(args.human), timeout=args.timeout,
-                               context=context or None, preset=preset,
-                               name=args.name or myname.load()))
+            if args.stream:
+                _emit(_drain_stream(ollama.reply_stream(
+                    Path(args.file), args.endpoint, args.model,
+                    _stdin_or(args.human), timeout=args.timeout,
+                    context=context or None, preset=preset,
+                    name=args.name or myname.load())))
+            else:
+                _emit(ollama.reply(Path(args.file), args.endpoint, args.model,
+                                   _stdin_or(args.human), timeout=args.timeout,
+                                   context=context or None, preset=preset,
+                                   name=args.name or myname.load()))
         elif args.cmd == "ollama-chat":
             context = ollama.build_context([Path(p) for p in args.context_files],
                                            [Path(p) for p in args.context_dirs])
@@ -244,9 +266,15 @@ def main(argv: list[str] | None = None) -> int:
             except json.JSONDecodeError as e:
                 raise RuntimeError(f"invalid history JSON: {e}") from e
             preset = ollama.load_preset(args.preset) if args.preset else None
-            _emit(ollama.ephemeral_reply(args.endpoint, args.model, _stdin_or(args.human),
-                                         history, timeout=args.timeout,
-                                         context=context or None, preset=preset))
+            if args.stream:
+                _emit(_drain_stream(ollama.ephemeral_reply_stream(
+                    args.endpoint, args.model, _stdin_or(args.human),
+                    history, timeout=args.timeout,
+                    context=context or None, preset=preset)))
+            else:
+                _emit(ollama.ephemeral_reply(args.endpoint, args.model, _stdin_or(args.human),
+                                             history, timeout=args.timeout,
+                                             context=context or None, preset=preset))
         elif args.cmd == "stick":
             if args.file:
                 _emit(stick.feature_file(Path(args.file)))

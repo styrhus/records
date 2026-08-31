@@ -10,6 +10,7 @@ CONTENTS                                                     *records-contents*
     5. Commands ............................. |records-commands|
     6. Chat commands ........................ |records-chat-commands|
     7. Ollama ............................... |records-ollama|
+    8. Watch ................................ |records-watch|
 
 ==============================================================================
 1. INTRODUCTION                                          *records-introduction*
@@ -70,10 +71,23 @@ require("records").setup({opts})
                      `records` is not on Neovim's PATH.
 
     ollama_endpoint  string   nil
-                     Reserved. Two-sided /record in Neovim is not wired yet;
-                     setting this changes nothing today. The plugin is
-                     mechanical only: every command works, and none of them
-                     needs a model.
+                     Ollama base URL, e.g. "http://localhost:11434". Unset
+                     (or empty) disables Ollama entirely — every command
+                     stays mechanical.
+
+    ollama_model     string   nil
+                     Model tag for ollama_endpoint, e.g.
+                     "qwen2.5-coder:latest". Required alongside
+                     ollama_endpoint; without it /record records user-only
+                     and says so.
+
+    stream           boolean  false
+                     Token-by-token replies via `records ollama-reply/-chat
+                     --stream`. Off by default: that flag is not wired into
+                     the shared cli.py yet. Turning this on before it lands
+                     makes every Ollama turn fail the same way an
+                     unreachable endpoint does — gracefully, with the
+                     human's words still appended user-only.
 
 ==============================================================================
 5. COMMANDS                                                  *records-commands*
@@ -112,11 +126,64 @@ single argument, never through a shell.
 ==============================================================================
 7. OLLAMA                                                      *records-ollama*
 
-A local Ollama model is optional everywhere in this project, and in Neovim it
-is not yet available at all: `records ollama-reply` exists in the CLI, but the
-plugin does not call it. /record therefore behaves like /all here.
+A local Ollama model is optional everywhere in this project. With
+ollama_endpoint and ollama_model both set: >
 
-Nothing degrades because of this. Every command above is mechanical and
-deterministic, and its output byte-matches what the AI-driven skills produce.
+    require("records").setup({
+      ollama_endpoint = "http://localhost:11434",
+      ollama_model = "qwen2.5-coder:latest",
+    })
+<
+/record becomes a real two-sided turn. Your line is sent to
+`records ollama-reply --endpoint … --model … --file … --human …`, run as a
+background job so typing more never blocks on the model; the reply is
+appended to the record and signed with the model tag. The endpoint and model
+are captured when the recording starts and held for its whole session —
+changing settings mid-recording changes nothing until the next /record.
+
+A failed or unreachable model degrades to exactly what /all would have
+written: your words are still appended, mechanically, and a warning explains
+why there is no reply. Nothing is ever lost — the CLI never writes a record
+when generation fails, so there is nothing to lose in the first place.
+
+Without an active recording, and with a model configured, a plain message
+becomes an ephemeral chat via `records ollama-chat` instead — the same turn
+the VS Code sidebar offers when nothing is being recorded. Nothing from an
+ephemeral chat is ever written to disk. /esc clears both the recording and
+the ephemeral chat's history.
+
+Set `stream = true` for token-by-token replies instead of one message landing
+all at once. It is off by default: streaming needs a `--stream` flag on
+`ollama-reply`/`ollama-chat` that the shared CLI does not have yet. Until it
+does, turning this on does not break anything — a turn made with --stream
+against a CLI that doesn't understand it fails exactly like an unreachable
+model does, appending the human's words user-only.
+
+==============================================================================
+8. WATCH                                                        *records-watch*
+
+`records watch` (see the hundehus road in this repo's roadmap) is a separate,
+long-running process that rebuilds the site when a record changes. It is
+started and read independently of the chat panel:
+
+                                                              *:RecordsWatch*
+:RecordsWatch          Start `records watch --json` in the background.
+
+                                                          *:RecordsWatchStop*
+:RecordsWatchStop      Stop it.
+
+                                                        *:RecordsWatchStatus*
+:RecordsWatchStatus    Show the watcher's status — running or not, and the
+                        last build's outcome — via |vim.notify|.
+
+                                                *records.watch_status()*
+require("records").watch_status()
+                        The same status line as :RecordsWatchStatus, as a
+                        string, for building your own statusline component.
+
+`records watch` writes no state file of its own; status comes from the
+`--json` events the plugin's own watch process emits on stdout, not from
+anything read out of `recordkit/watch.py`. The watcher never commits, pushes
+or publishes — this plugin only ever reads what it reports.
 
 vim:tw=78:ts=8:ft=help:norl:

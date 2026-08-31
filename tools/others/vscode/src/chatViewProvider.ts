@@ -31,7 +31,9 @@ type MessageToView = {
     | "file-list"
     | "active-editor"
     | "settings-values"
-    | "focus-input";
+    | "focus-input"
+    | "stream-token"
+    | "watch-status";
   content?: string;
   error?: string;
   model?: string;
@@ -68,6 +70,10 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
   private recording: RecordingSession | undefined;
   private chatHistory: { role: "user" | "assistant"; content: string }[] = [];
   private pendingFocus = false;
+  // hundehus 3: the dog's editor half. `records watch` writes no state file, so status comes from
+  // parsing the --json events of the watch process this provider itself spawns — watch.py untouched.
+  private watchProc: child_process.ChildProcessWithoutNullStreams | undefined;
+  private watchBuf = "";
 
   constructor(private readonly extensionUri: vscode.Uri) {}
 
@@ -99,6 +105,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       configListener.dispose();
       editorListener.dispose();
       this.view = undefined;
+      this.watchProc?.kill();
+      this.watchProc = undefined;
     });
 
     void this.probeCLI();
@@ -184,22 +192,30 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  private streamEnabled(): boolean {
+    return vscode.workspace.getConfiguration("records").get<boolean>("stream") || false;
+  }
+
   private async ephemeralChat(text: string, contextFiles: string[], contextDirs: string[]) {
     const { endpoint, model } = this.ollamaConfig()!;
     this.postMessage({ type: "busy", content: `${model} is thinking… (not recorded)` });
     try {
-      const result = await this.runCLI(
-        "ollama-chat",
-        {
-          endpoint,
-          model,
-          human: text,
-          history: "-",
-          "context-file": contextFiles,
-          "context-dir": contextDirs,
-        },
-        JSON.stringify(this.chatHistory)
-      );
+      const opts = {
+        endpoint,
+        model,
+        human: text,
+        history: "-",
+        "context-file": contextFiles,
+        "context-dir": contextDirs,
+      };
+      const result = this.streamEnabled()
+        ? await this.runCLIStream(
+            "ollama-chat",
+            { ...opts, stream: true },
+            (token) => this.postMessage({ type: "stream-token", content: token }),
+            JSON.stringify(this.chatHistory)
+          )
+        : await this.runCLI("ollama-chat", opts, JSON.stringify(this.chatHistory));
       const reply = result.reply as string;
       this.chatHistory.push({ role: "user", content: text }, { role: "assistant", content: reply });
       this.postMessage({ type: "response", content: reply });
@@ -246,6 +262,12 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         break;
       case "config":
         await this.config();
+        break;
+      case "watch":
+        this.watchStart();
+        break;
+      case "watchstop":
+        this.watchStop();
         break;
       default:
         this.postMessage({ type: "error", error: `Unknown command: ${cmd}` });
@@ -359,14 +381,19 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     const { endpoint, model } = ollama!;
     this.postMessage({ type: "busy", content: `${model} is thinking…` });
     try {
-      const result = await this.runCLI("ollama-reply", {
+      const opts = {
         file,
         endpoint,
         model,
         human: text,
         "context-file": contextFiles,
         "context-dir": contextDirs,
-      });
+      };
+      const result = this.streamEnabled()
+        ? await this.runCLIStream("ollama-reply", { ...opts, stream: true }, (token) =>
+            this.postMessage({ type: "stream-token", content: token })
+          )
+        : await this.runCLI("ollama-reply", opts);
       this.postMessage({ type: "response", content: result.reply as string });
     } catch (e) {
       await this.runCLI("append", { file, text });
@@ -491,16 +518,16 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     }
   }
 
-  private async runCLI(
-    command: string,
-    opts: Record<string, string | boolean | string[]>,
-    stdinData?: string
-  ): Promise<Record<string, unknown>> {
-    const cfg = vscode.workspace.getConfiguration("records");
-    const bin = cfg.get<string>("binaryPath") || "records";
-    // CLI discovers the records dir from cwd — run it from the workspace, not the extension host
-    const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+  private cliBin(): string {
+    return vscode.workspace.getConfiguration("records").get<string>("binaryPath") || "records";
+  }
 
+  // CLI discovers the records dir from cwd — run it from the workspace, not the extension host.
+  private cliCwd(): string | undefined {
+    return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+  }
+
+  private buildArgs(command: string, opts: Record<string, string | boolean | string[]>): string[] {
     const args: string[] = [command];
     for (const [k, v] of Object.entries(opts)) {
       if (k === "arguments") {
@@ -513,6 +540,17 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         args.push(`--${k}`, v);
       }
     }
+    return args;
+  }
+
+  private async runCLI(
+    command: string,
+    opts: Record<string, string | boolean | string[]>,
+    stdinData?: string
+  ): Promise<Record<string, unknown>> {
+    const bin = this.cliBin();
+    const cwd = this.cliCwd();
+    const args = this.buildArgs(command, opts);
 
     return new Promise((resolve, reject) => {
       const child = child_process.execFile(bin, args, { encoding: "utf-8", cwd }, (err, stdout) => {
@@ -541,6 +579,133 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         child.stdin?.end();
       }
     });
+  }
+
+  // Streaming twin of runCLI(): `command` is expected to emit NDJSON on stdout — one
+  // {"token": "…"} object per chunk, then one final object shaped like the non-streaming reply
+  // (the postkasse 2 cli.py contract, reported but not yet applied — see the road's notes).
+  // onToken fires per chunk; the returned promise resolves with the same shape runCLI() would
+  // have resolved with, or rejects the same way, so callers don't need to know which path ran.
+  private async runCLIStream(
+    command: string,
+    opts: Record<string, string | boolean | string[]>,
+    onToken: (token: string) => void,
+    stdinData?: string
+  ): Promise<Record<string, unknown>> {
+    const bin = this.cliBin();
+    const cwd = this.cliCwd();
+    const args = this.buildArgs(command, opts);
+
+    return new Promise((resolve, reject) => {
+      const child = child_process.spawn(bin, args, { cwd });
+      let buf = "";
+      let finalObj: Record<string, unknown> | undefined;
+      let errMsg: string | undefined;
+      let stderrText = "";
+
+      child.stdout.setEncoding("utf-8");
+      child.stdout.on("data", (chunk: string) => {
+        buf += chunk;
+        const lines = buf.split("\n");
+        buf = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line) continue;
+          try {
+            const obj = JSON.parse(line);
+            if (typeof obj?.token === "string") {
+              onToken(obj.token);
+            } else if (typeof obj?.error === "string") {
+              errMsg = obj.error;
+            } else {
+              finalObj = obj;
+            }
+          } catch {
+            // NDJSON is the contract — a non-JSON line here means a bug upstream, not user input
+          }
+        }
+      });
+      child.stderr.setEncoding("utf-8");
+      child.stderr.on("data", (chunk: string) => {
+        stderrText += chunk;
+      });
+      child.on("error", (err) => reject(err));
+      child.on("close", (code) => {
+        if (errMsg) {
+          reject(new Error(errMsg));
+        } else if (finalObj) {
+          resolve(finalObj);
+        } else if (code !== 0) {
+          reject(new Error(stderrText.trim() || `records ${command} exited ${code}`));
+        } else {
+          reject(new Error(`no result from records ${command}`));
+        }
+      });
+
+      if (stdinData !== undefined) {
+        child.stdin.write(stdinData);
+        child.stdin.end();
+      }
+    });
+  }
+
+  // hundehus 3: start/stop `records watch --json` ourselves and read its events — recordkit's
+  // watch.py itself is untouched and stays state-file-free; this is purely a reader of its stdout.
+  private watchStart() {
+    if (this.watchProc) {
+      this.postMessage({ type: "output", content: "records watch is already running." });
+      return;
+    }
+    const child = child_process.spawn(this.cliBin(), ["watch", "--json"], { cwd: this.cliCwd() });
+    this.watchProc = child;
+    this.watchBuf = "";
+    this.postWatchStatus("running — no build yet");
+
+    child.stdout.setEncoding("utf-8");
+    child.stdout.on("data", (chunk: string) => {
+      this.watchBuf += chunk;
+      const lines = this.watchBuf.split("\n");
+      this.watchBuf = lines.pop() ?? "";
+      for (const line of lines) {
+        if (!line) continue;
+        try {
+          this.handleWatchEvent(JSON.parse(line));
+        } catch {
+          // not a JSON line — ignore
+        }
+      }
+    });
+    child.on("exit", () => {
+      this.watchProc = undefined;
+      this.postWatchStatus("not running");
+    });
+    child.on("error", () => {
+      this.watchProc = undefined;
+      this.postWatchStatus("failed to start — is the recordkit CLI installed?");
+    });
+  }
+
+  private watchStop() {
+    if (!this.watchProc) {
+      this.postMessage({ type: "output", content: "records watch is not running." });
+      return;
+    }
+    this.watchProc.kill();
+    this.watchProc = undefined;
+    this.postWatchStatus("not running");
+  }
+
+  private handleWatchEvent(event: Record<string, unknown>) {
+    if (event.event === "missing") {
+      this.postWatchStatus(`running — ${event.message}`);
+      return;
+    }
+    const ok = event.ok as boolean;
+    const time = event.time as string;
+    this.postWatchStatus(`running — ${ok ? "last build ok" : "last build FAILED"} (${time})`);
+  }
+
+  private postWatchStatus(content: string) {
+    this.postMessage({ type: "watch-status", content: `records watch: ${content}` });
   }
 
   private postMessage(message: MessageToView) {

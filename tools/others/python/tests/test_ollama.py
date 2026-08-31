@@ -456,6 +456,248 @@ def test_ephemeral_reply_pirate_preset_payload_acceptance_equivalent(monkeypatch
     }
 
 
+def _mock_stream(calls, chunks=None):
+    """Line-delimited chunks, mirroring Ollama's /api/chat stream=true response."""
+    if chunks is None:
+        chunks = [{"message": {"content": "he"}, "done": False},
+                  {"message": {"content": "llo"}, "done": False},
+                  {"message": {"content": ""}, "done": True}]
+
+    def post(url, payload, timeout):
+        calls.append({"url": url, "payload": payload, "timeout": timeout})
+        return iter(chunks)
+    return post
+
+
+def test_chat_stream_yields_tokens_and_assembles(monkeypatch):
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post_stream", _mock_stream(calls))
+    tokens = list(ollama.chat_stream("http://localhost:11434", "m",
+                                     [{"role": "user", "content": "hi"}], 5.0))
+    assert tokens == ["he", "llo"]
+    assert calls[0]["url"] == "http://localhost:11434/api/chat"
+    assert calls[0]["payload"] == {
+        "model": "m",
+        "messages": [{"role": "user", "content": "hi"}],
+        "stream": True,
+    }
+
+
+def test_chat_stream_skips_empty_content_chunks(monkeypatch):
+    calls = []
+    chunks = [{"message": {"content": ""}, "done": False},
+             {"message": {"content": "ok"}, "done": False},
+             {"done": True}]
+    monkeypatch.setattr(ollama, "_http_post_stream", _mock_stream(calls, chunks))
+    tokens = list(ollama.chat_stream("http://localhost:11434", "m",
+                                     [{"role": "user", "content": "hi"}], 5.0))
+    assert tokens == ["ok"]
+
+
+def test_chat_stream_http_error(monkeypatch):
+    def post(url, payload, timeout):
+        raise urllib.error.HTTPError(url, 404, "Not Found", None, None)
+    monkeypatch.setattr(ollama, "_http_post_stream", post)
+    with pytest.raises(RuntimeError, match="404"):
+        list(ollama.chat_stream("http://localhost:11434", "nope",
+                                [{"role": "user", "content": "hi"}], 5.0))
+
+
+def test_chat_stream_timeout(monkeypatch):
+    def post(url, payload, timeout):
+        raise TimeoutError()
+    monkeypatch.setattr(ollama, "_http_post_stream", post)
+    with pytest.raises(RuntimeError, match="timed out"):
+        list(ollama.chat_stream("http://localhost:11434", "m",
+                                [{"role": "user", "content": "hi"}], 5.0))
+
+
+def test_chat_stream_fault_mid_stream(monkeypatch):
+    """A chunk arrives, then the connection drops — the caller still sees a RuntimeError."""
+    def flaky():
+        yield {"message": {"content": "he"}, "done": False}
+        raise urllib.error.URLError("connection reset")
+
+    def post(url, payload, timeout):
+        return flaky()
+    monkeypatch.setattr(ollama, "_http_post_stream", post)
+    gen = ollama.chat_stream("http://localhost:11434", "m", [{"role": "user", "content": "hi"}], 5.0)
+    assert next(gen) == "he"
+    with pytest.raises(RuntimeError, match="unreachable"):
+        next(gen)
+
+
+def test_chat_stream_unreachable_real_connection(monkeypatch):
+    """No mock: a real connection-refused/no-listener failure, same contract as
+    test_chat_unreachable but exercised through the streaming path."""
+    with pytest.raises(RuntimeError, match="unreachable|timed out"):
+        list(ollama.chat_stream("http://localhost:1", "m", [{"role": "user", "content": "hi"}], 2.0))
+
+
+def test_reply_stream_yields_then_appends_once(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post_stream", _mock_stream(calls))
+    f = tmp_path / "r.md"
+    f.write_text("---\ntitle: X\n---\n")
+    gen = ollama.reply_stream(f, "http://localhost:11434", "m:latest", "hi")
+    tokens = list(gen)
+    assert tokens == ["he", "llo"]
+    # nothing appended until the generator is fully drained
+    assert f.read_text().endswith("\n## Human\n\nhi\n\n## Assistant\n\nhello\n\n— m:latest\n")
+    assert calls[0]["payload"] == {
+        "model": "m:latest",
+        "messages": [{"role": "user", "content": "hi"}],
+        "stream": True,
+    }
+
+
+def test_reply_stream_byte_identical_to_reply(tmp_path, monkeypatch):
+    """The determinism border: streamed tokens joined + stripped must match the non-streaming
+    write byte for byte."""
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls, content="hello"))
+    f1 = tmp_path / "r1.md"
+    f1.write_text("---\ntitle: X\n---\n")
+    ollama.reply(f1, "http://localhost:11434", "m", "hi")
+
+    stream_calls = []
+    monkeypatch.setattr(ollama, "_http_post_stream", _mock_stream(stream_calls))
+    f2 = tmp_path / "r2.md"
+    f2.write_text("---\ntitle: X\n---\n")
+    list(ollama.reply_stream(f2, "http://localhost:11434", "m", "hi"))
+
+    assert f1.read_text() == f2.read_text()
+
+
+def test_reply_stream_appends_nothing_before_drained(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post_stream", _mock_stream(calls))
+    f = tmp_path / "r.md"
+    f.write_text("head\n")
+    gen = ollama.reply_stream(f, "http://localhost:11434", "m", "hi")
+    next(gen)  # pulls one token — the record must still be untouched
+    assert f.read_text() == "head\n"
+
+
+def test_reply_stream_fault_mid_stream_appends_nothing(tmp_path, monkeypatch):
+    def flaky():
+        yield {"message": {"content": "he"}, "done": False}
+        raise urllib.error.URLError("connection reset")
+    monkeypatch.setattr(ollama, "_http_post_stream", lambda url, payload, timeout: flaky())
+    f = tmp_path / "r.md"
+    f.write_text("head\n")
+    gen = ollama.reply_stream(f, "http://localhost:11434", "m", "hi")
+    next(gen)
+    with pytest.raises(RuntimeError, match="unreachable"):
+        next(gen)
+    assert f.read_text() == "head\n"
+
+
+def test_reply_stream_empty_message(tmp_path):
+    f = tmp_path / "r.md"
+    f.write_text("")
+    with pytest.raises(RuntimeError, match="empty message"):
+        list(ollama.reply_stream(f, "http://localhost:11434", "m", "   "))
+
+
+def test_reply_stream_unreachable_real_connection_appends_nothing(tmp_path):
+    """Same graceful-fallback contract as test_chat_unreachable, through the streaming path and
+    with no mock at all — a real refused/absent connection."""
+    f = tmp_path / "r.md"
+    f.write_text("head\n")
+    with pytest.raises(RuntimeError, match="unreachable|timed out"):
+        list(ollama.reply_stream(f, "http://localhost:1", "m", "hi", timeout=2.0))
+    assert f.read_text() == "head\n"
+
+
+def test_ephemeral_reply_stream_yields_and_returns_nothing_written(monkeypatch):
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post_stream", _mock_stream(calls))
+    tokens = list(ollama.ephemeral_reply_stream("http://localhost:11434", "m:latest", "hi", []))
+    assert tokens == ["he", "llo"]
+    assert calls[0]["payload"]["messages"] == [{"role": "user", "content": "hi"}]
+
+
+def test_ephemeral_reply_stream_with_history_and_context(monkeypatch):
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post_stream", _mock_stream(calls))
+    history = [{"role": "user", "content": "first"}, {"role": "assistant", "content": "yo"}]
+    list(ollama.ephemeral_reply_stream("http://localhost:11434", "m", "second", history,
+                                       context="CTX"))
+    msgs = calls[0]["payload"]["messages"]
+    assert msgs[0] == {"role": "system", "content": "CTX"}
+    assert [m["content"] for m in msgs[1:]] == ["first", "yo", "second"]
+    # the caller's list is not mutated, same contract as ephemeral_reply()
+    assert len(history) == 2
+
+
+def test_ephemeral_reply_stream_with_preset(monkeypatch):
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post_stream", _mock_stream(calls))
+    preset = ollama.load_preset("pirate")
+    list(ollama.ephemeral_reply_stream("http://localhost:11434", "m", "hi", [], preset=preset))
+    msgs = calls[0]["payload"]["messages"]
+    assert msgs[0] == {"role": "system", "content": preset}
+
+
+def test_ephemeral_reply_stream_empty_message():
+    with pytest.raises(RuntimeError, match="empty message"):
+        list(ollama.ephemeral_reply_stream("http://localhost:11434", "m", "   ", []))
+
+
+def test_ephemeral_reply_stream_invalid_history():
+    with pytest.raises(RuntimeError, match="invalid history"):
+        list(ollama.ephemeral_reply_stream("http://localhost:11434", "m", "hi", "not a list"))
+
+
+def _drive(gen):
+    """Fully consume a streaming generator, returning (tokens, stop_value) — the shape a CLI
+    driver (or a plugin) uses to get both the live tokens and the final result dict."""
+    tokens = []
+    try:
+        while True:
+            tokens.append(next(gen))
+    except StopIteration as stop:
+        return tokens, stop.value
+
+
+def test_reply_stream_return_value_matches_reply(tmp_path, monkeypatch):
+    """The generator's `return` becomes StopIteration.value — this is what a cli.py --stream
+    driver would emit as the final NDJSON line, and it must match reply()'s return exactly."""
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls, content="hello"))
+    f1 = tmp_path / "r1.md"
+    f1.write_text("---\ntitle: X\n---\n")
+    expected = ollama.reply(f1, "http://localhost:11434", "m", "hi")
+
+    stream_calls = []
+    monkeypatch.setattr(ollama, "_http_post_stream", _mock_stream(stream_calls))
+    f2 = tmp_path / "r2.md"
+    f2.write_text("---\ntitle: X\n---\n")
+    tokens, result = _drive(ollama.reply_stream(f2, "http://localhost:11434", "m", "hi"))
+    assert tokens == ["he", "llo"]
+    assert result == {**expected, "file": str(f2)}
+
+
+def test_ephemeral_reply_stream_return_value_matches_ephemeral_reply(monkeypatch):
+    calls = []
+    monkeypatch.setattr(ollama, "_http_post", _mock_post(calls, content="hello"))
+    expected = ollama.ephemeral_reply("http://localhost:11434", "m", "hi", [])
+
+    stream_calls = []
+    monkeypatch.setattr(ollama, "_http_post_stream", _mock_stream(stream_calls))
+    tokens, result = _drive(ollama.ephemeral_reply_stream("http://localhost:11434", "m", "hi", []))
+    assert tokens == ["he", "llo"]
+    assert result == expected
+
+
+def test_ephemeral_reply_stream_malformed_empty_reply(monkeypatch):
+    monkeypatch.setattr(ollama, "_http_post_stream",
+                        lambda url, payload, timeout: iter([{"done": True}]))
+    with pytest.raises(RuntimeError, match="malformed"):
+        list(ollama.ephemeral_reply_stream("http://localhost:11434", "m", "hi", []))
+
+
 def test_cli_no_context_flags(tmp_path, monkeypatch):
     from recordkit import cli
 

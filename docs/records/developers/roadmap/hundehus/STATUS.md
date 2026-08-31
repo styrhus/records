@@ -14,13 +14,18 @@ Half walked, 2026-08-01. The dog is awake; it does not yet bark in an editor, an
 |---|---|---|---|---|---|
 | 1 | flue | `records doctor` — checkout diagnostics | done | `72a7396` | run against this repo + a broken scratch checkout |
 | 2 | beetle | `records watch` — polling rebuild watcher | done | `72a7396` | one rebuild per save; survives a broken build |
-| 3 | cricket | The bark — notifications + editor status | open | — | one notification per failure; no-op without `notify-send` |
+| 3 | cricket | The bark — notifications + editor status | wip | Claude Sonnet 5, 2026-08-31 | notify-send half landed with `watch.py`; editor status added to both plugins (`:RecordsWatch*`, VSCode `/watch` on the dim `status` class), unverified live — no editor on the walking box |
 | 4 | moth | Doctor as an optional CI pre-flight | done | Claude Sonnet 5, 2026-08-31 | misconfigured scratch checkout fails the step (3 errors, exit 1) under `-eo pipefail`; passes with python3 masked (skip note, exit 0); this repo: 7 ok · 1 warning · 0 errors |
 
 `State` ∈ `open` · `wip` · `done` · `blocked`
 
 ## Notes
 
+- **3 · cricket, editor half walked 2026-08-31:** Neovim gained `watch_start`/`watch_stop`/
+  `watch_status` plus `:RecordsWatch`, `:RecordsWatchStop`, `:RecordsWatchStatus`, spawning
+  `records watch --json` and tracking its NDJSON events; VSCode gained `/watch`/`/watchstop`
+  rendering a persistent status line with the existing dim `status` class, killed on webview
+  dispose. `watch.py` untouched, as specified. Stays `wip` until someone runs it in a real editor.
 - **3 · cricket is half-built already, and the built half is not the hard half.** `watch.py` carries
   `notify()` — freedesktop `notify-send` when present, a silent no-op when not — and a `--notify
   {fail,all,none}` flag defaulting to `fail`, which satisfies the desktop side of the acceptance.

@@ -150,11 +150,12 @@ export function getWebviewContent(commandsJson: string): string {
       font-family: monospace;
     }
     #input:focus { outline: none; border-color: var(--vscode-focusBorder-background); }
-    #model-line {
+    #model-line, #watch-line {
       font-size: 0.75rem;
       color: var(--vscode-descriptionForeground);
       padding: 0.3rem 0.2rem 0;
     }
+    #watch-line:empty { display: none; }
     button {
       padding: 0.3rem 0.8rem;
       background: var(--vscode-button-background);
@@ -204,6 +205,7 @@ export function getWebviewContent(commandsJson: string): string {
     </div>
   </div>
   <div id="model-line"></div>
+  <div id="watch-line" class="status"></div>
   <script>
     const vscode = acquireVsCodeApi();
     const output = document.getElementById("output");
@@ -214,6 +216,7 @@ export function getWebviewContent(commandsJson: string): string {
     const contextBar = document.getElementById("context-bar");
     const editorChip = document.getElementById("editor-chip");
     const modelLine = document.getElementById("model-line");
+    const watchLine = document.getElementById("watch-line");
     const settingsPanel = document.getElementById("settings-panel");
     const spEndpoint = document.getElementById("sp-endpoint");
     const spModel = document.getElementById("sp-model");
@@ -224,6 +227,7 @@ export function getWebviewContent(commandsJson: string): string {
     let fileCache = null;
     let attachments = [];
     let activeEditor = { path: null, enabled: true };
+    let streamEl = null; // the in-progress streamed response div, while one is arriving
 
     window.addEventListener("message", (e) => {
       const msg = e.data;
@@ -260,6 +264,19 @@ export function getWebviewContent(commandsJson: string): string {
         const div = addLine(msg.content, "busy");
         div.id = "busy";
         input.disabled = true;
+        streamEl = null;
+        return;
+      }
+      if (msg.type === "watch-status") {
+        watchLine.textContent = msg.content;
+        return;
+      }
+      if (msg.type === "stream-token") {
+        const busyDiv = document.getElementById("busy");
+        if (busyDiv) busyDiv.remove();
+        if (!streamEl) streamEl = addLine("", "response");
+        streamEl.textContent += msg.content;
+        output.scrollTop = output.scrollHeight;
         return;
       }
       clearBusy();
@@ -270,7 +287,9 @@ export function getWebviewContent(commandsJson: string): string {
       } else if (msg.type === "output") {
         addLine(msg.content, "output");
       } else if (msg.type === "response") {
-        addLine(msg.content, "response");
+        // a streamed reply is already fully rendered, token by token — don't duplicate it
+        if (!streamEl) addLine(msg.content, "response");
+        streamEl = null;
       } else if (msg.type === "setup") {
         addSetup(msg.error);
       }

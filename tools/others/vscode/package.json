@@ -89,6 +89,11 @@
           "type": "string",
           "default": "",
           "description": "Ollama model tag for two-sided /record (e.g., qwen2.5-coder:latest). Required when ollamaEndpoint is set."
+        },
+        "records.stream": {
+          "type": "boolean",
+          "default": false,
+          "description": "Token-by-token Ollama replies via `records ollama-reply/-chat --stream`. Off by default — that flag is not wired into the shared recordkit CLI yet; enabling this ahead of that lands makes every Ollama turn fail the same way an unreachable endpoint does (gracefully, recording the message user-only)."
         }
       }
     }

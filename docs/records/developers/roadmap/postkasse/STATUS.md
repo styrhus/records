@@ -13,8 +13,8 @@ and `postkasse-beetle` before turning to badstu. The items below are what remain
 
 | # | Animal | Item | State | Owner | Verify |
 |---|---|---|---|---|---|
-| 1 | flue | Ollama reaches Neovim | open | — | live `/record` turn in Neovim + fallback with Ollama stopped |
-| 2 | beetle | Replies learn to stream | open | — | `python -m pytest tests/test_ollama.py` + visible streaming in both plugins |
+| 1 | flue | Ollama reaches Neovim | wip | Claude Sonnet 5, 2026-08-31 | code + fallback done, mirroring the VSCode session semantics; the live Neovim + Ollama run is pending — neither exists on the walking box |
+| 2 | beetle | Replies learn to stream | wip | Claude Sonnet 5, 2026-08-31 | `pytest tests/test_ollama.py` → 72 passed, streamed write byte-identical to the non-streaming one; plugin streaming is opt-in (`stream` / `records.stream`) and visually unverified |
 | 3 | cricket | Voice skills become presets | wip | Claude Sonnet 5, 2026-08-31 | preset loading, composition and fallback proven by tests (`pytest tests/test_ollama.py` green); the live acceptance run waits on a reachable Ollama |
 | 4 | moth | `/stick` checkout-aware + `test_stick.py` | done | Claude Sonnet 5, 2026-08-31 | `cd tools/others/python && python -m pytest` → 570 passed |
 | 5 | tadpole | Both plugins walked against a real site | open | — | walkthrough log, 11 commands × 2 plugins |
@@ -48,6 +48,16 @@ and `postkasse-beetle` before turning to badstu. The items below are what remain
   cycle at the moment of turning, which is runtime state, not fixed prompt text. The preset rides
   the existing system-message slot ahead of `--context-*`, is never written to the record, and the
   row stays `wip` only for the live Ollama run.
+- **1 · flue + 2 · beetle, walked 2026-08-31 (code side):** Neovim's `/record` now asks
+  `records ollama-reply` asynchronously (`jobstart`, 0.9 floor — not `vim.system`), captures
+  `{endpoint, model}` once per recording like the VSCode sidebar, and on any failure appends the
+  human's words through the mechanical path with a warning — never lost, relying on the engine's
+  tested guarantee that a failed generation touches nothing. Idle lines chat ephemerally via
+  `ollama-chat`. Streaming: `ollama.py` gained `reply_stream`/`ephemeral_reply_stream` (final
+  joined text asserted byte-identical to the non-streaming write; mid-stream faults append
+  nothing, including a real no-mock connection-refused case), surfaced as `--stream` NDJSON on
+  both CLI commands; both plugins render tokens behind an **off-by-default** `stream` setting.
+  Both rows stay `wip` for the live half only: no Neovim, no VSCode, no Ollama on the walking box.
 - **4 · moth, walked 2026-08-31:** the surprise was that `cli.py`'s `stick` handler has resolved
   the records dir via `config.resolve_records_dir` since 2026-07-21 — the real `$PWD`-scoping
   lived in the `/stick` skill's hardcoded `find records …`, now replaced with the same discovery
