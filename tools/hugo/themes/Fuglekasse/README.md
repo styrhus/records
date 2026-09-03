@@ -88,7 +88,9 @@ text is Markdown for a heading, not a rule.
 
 Set `params.threeDotAnchor: true` (single-flowing only) to turn the `· · ·`
 dividers into clickable anchors, and to add one above the very first record —
-so every point in the stream is a shareable link. Each divider becomes an
+so every point in the stream is a shareable link. With **Book look** on, the
+`forside`, `side-1` and `bakside` pages never carry a divider (with or without
+this option), so the covers sit flush against the stream, as in the book. Each divider becomes an
 `<a href="#XXXXX">` whose id is five characters from the URL-safe alphabet
 `A–Z a–z 0–9 - . _ ~` (66 characters, `66⁵ ≈ 1.25 billion` possible ids).
 

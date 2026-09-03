@@ -217,9 +217,9 @@
         {{ end }}
       {{ end }}
       {{ if $threeDotAnchor }}
-        {{/* Anchored dinkus above every record incl. the first; not above a bookLook cover.
+        {{/* Anchored dinkus above every record incl. the first; never above a bookLook special.
              id: 5 base-66 chars from an FNV-1a hash of the slug — stable across builds. */}}
-        {{ if not (and (eq $i 0) $isSpecial) }}
+        {{ if not $isSpecial }}
           {{ $abc := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~" }}
           {{ $seed := hash.FNV32a (path.Base $r.RelPermalink) }}
           {{ $id := "" }}
@@ -229,7 +229,7 @@
           {{ end }}
           <a class="record-sep" href="#{{ $id }}" id="{{ $id }}" aria-label="Link to this point">· · ·</a>
         {{ end }}
-      {{ else if $i }}<div class="record-sep" aria-hidden="true">· · ·</div>{{ end }}
+      {{ else if and $i (not $isSpecial) }}<div class="record-sep" aria-hidden="true">· · ·</div>{{ end }}
       {{ $book := "" }}
       {{ if $isSpecial }}{{ $book = printf " book-%s" $r.File.ContentBaseName }}{{ end }}
       <article class="record-flow{{ $book }}{{ if $r.Params.featured }} featured{{ end }}" id="{{ path.Base $r.RelPermalink }}"{{ with $r.Params.language }} lang="{{ . }}"{{ end }}{{ if $stickyNav }} data-nav-title="{{ partial "inline/record-title.html" $r | plainify }}"{{ end }}>
