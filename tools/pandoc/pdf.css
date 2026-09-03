@@ -69,6 +69,9 @@ h6.speaker { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em
 .record > :first-child > :first-child { margin-top: 0; }
 /* single-flowing mode: dimmed dinkus between records */
 .record-sep { text-align: center; color: var(--dim); letter-spacing: 0.5em; text-indent: 0.5em; margin: 2rem 0; }
+/* showTimeEarlier: dim caption above the dinkus */
+.time-earlier { text-align: center; font-size: 0.85em; color: var(--dim); margin: 2rem 0 0; }
+.time-earlier + .record-sep { margin-top: 0.35rem; }
 /* bookLook specials: forside/side-1 close their page, bakside opens a fresh one */
 .book-forside, .book-side-1 { page-break-after: always; }
 .book-bakside { page-break-before: always; }

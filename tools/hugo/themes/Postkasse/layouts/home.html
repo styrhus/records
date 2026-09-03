@@ -24,6 +24,10 @@
   {{ if and $threeDotAnchor (ne $mode "single-flowing") }}
     {{ warnf "Postkasse: threeDotAnchor is only honoured in pageMode \"single-flowing\"" }}
   {{ end }}
+  {{ $showTimeEarlier := and (site.Params.showTimeEarlier | default false) (eq $mode "single-flowing") }}
+  {{ if and site.Params.showTimeEarlier (ne $mode "single-flowing") }}
+    {{ warnf "Postkasse: showTimeEarlier is only honoured in pageMode \"single-flowing\"" }}
+  {{ end }}
   {{/* Reading chrome (kiste 5) — each piece its own param, each off by default,
        each only meaningful where records share a page. */}}
   {{ $stickyNav := and (site.Params.stickyNav | default false) (eq $mode "single-flowing") }}
@@ -115,6 +119,7 @@
   {{ $bookLook := site.Params.bookLook | default false }}
   {{ $forside := false }}
   {{ $flow := slice }}
+  {{ $anchor := false }}
   {{ if eq $mode "single-flowing" }}
     {{ $side1 := false }}
     {{ $bakside := false }}
@@ -127,6 +132,12 @@
         {{ else }}{{ $rest = $rest | append . }}{{ end }}
       {{ end }}
       {{ $loose = $rest }}
+    {{ end }}
+    {{/* showTimeEarlier "now" anchor: the newest real record — bookLook specials are
+         already extracted, and a dateless record (zero .Date) never anchors or labels. */}}
+    {{ if and $showTimeEarlier $loose }}
+      {{ $newest := index (sort $loose "Date" "desc") 0 }}
+      {{ if not $newest.Date.IsZero }}{{ $anchor = $newest }}{{ end }}
     {{ end }}
     {{ with $forside }}{{ $flow = $flow | append . }}{{ end }}
     {{ with $side1 }}{{ $flow = $flow | append . }}{{ end }}
@@ -193,6 +204,11 @@
     {{ end }}
     {{ range $i, $r := $flow }}
       {{ $isSpecial := and $bookLook (not $r.Section) (in (slice "forside" "side-1" "bakside") $r.File.ContentBaseName) }}
+      {{/* showTimeEarlier: the gap back from the newest record, riding above this record's dinkus. */}}
+      {{ $earlier := "" }}
+      {{ if and $anchor (not $isSpecial) (ne $r $anchor) (not $r.Date.IsZero) }}
+        {{ $earlier = partial "inline/time-earlier.html" (sub $anchor.Date.Unix $r.Date.Unix) }}
+      {{ end }}
       {{ if $threeDotAnchor }}
         {{/* Anchored dinkus above every record incl. the first; not above a bookLook cover.
              id: 5 base-66 chars from an FNV-1a hash of the slug — stable across builds. */}}
@@ -204,9 +220,10 @@
             {{ $id = printf "%s%s" $id (substr $abc (mod $seed 66) 1) }}
             {{ $seed = int (div $seed 66) }}
           {{ end }}
+          {{ with $earlier }}<div class="time-earlier">{{ . }}</div>{{ end }}
           <a class="record-sep" href="#{{ $id }}" id="{{ $id }}" aria-label="Link to this point">· · ·</a>
         {{ end }}
-      {{ else if $i }}<div class="record-sep" aria-hidden="true">· · ·</div>{{ end }}
+      {{ else if $i }}{{ with $earlier }}<div class="time-earlier">{{ . }}</div>{{ end }}<div class="record-sep" aria-hidden="true">· · ·</div>{{ end }}
       {{ $book := "" }}
       {{ if $isSpecial }}{{ $book = printf " book-%s" $r.File.ContentBaseName }}{{ end }}
       <article class="record-flow{{ $book }}{{ if $r.Params.featured }} featured{{ end }}" id="{{ path.Base $r.RelPermalink }}"{{ with $r.Params.language }} lang="{{ . }}"{{ end }}{{ if $stickyNav }} data-nav-title="{{ partial "inline/record-title.html" $r | plainify }}"{{ end }}>
@@ -326,4 +343,38 @@
   {{- $key := .File.ContentBaseName -}}
   {{- if not (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $key) }}{{ $key = .Date.Format "2006-01-02_15-04" }}{{ end -}}
   {{- if and .Title (ne .Title $key) }}{{ .Title }}{{ else }}<time datetime="{{ substr $key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .Date }}{{ else }}{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}{{ end }}</time>{{ end -}}
+{{ end }}
+
+{{/* showTimeEarlier: seconds back from the newest record → "3 days earlier",
+     "2 months and 4 days earlier" (30-day months, 12-month years — a sense of
+     distance, not a timestamp). Mirrored by timeEarlier() in
+     tools/pandoc/book.lua — change both together. */}}
+{{ define "_partials/inline/time-earlier.html" }}
+  {{ $s := "" }}
+  {{ if lt . 3600 }}
+    {{ $n := div . 60 }}
+    {{ if lt $n 1 }}{{ $n = 1 }}{{ end }}
+    {{ $s = printf "%d minute%s earlier" $n (cond (eq $n 1) "" "s") }}
+  {{ else if lt . 86400 }}
+    {{ $n := div . 3600 }}
+    {{ $s = printf "%d hour%s earlier" $n (cond (eq $n 1) "" "s") }}
+  {{ else }}
+    {{ $days := div . 86400 }}
+    {{ if lt $days 30 }}
+      {{ $s = printf "%d day%s earlier" $days (cond (eq $days 1) "" "s") }}
+    {{ else }}
+      {{ $months := div $days 30 }}
+      {{ if lt $months 12 }}
+        {{ $s = printf "%d month%s" $months (cond (eq $months 1) "" "s") }}
+        {{ with mod $days 30 }}{{ $s = printf "%s and %d day%s" $s . (cond (eq . 1) "" "s") }}{{ end }}
+        {{ $s = printf "%s earlier" $s }}
+      {{ else }}
+        {{ $years := div $months 12 }}
+        {{ $s = printf "%d year%s" $years (cond (eq $years 1) "" "s") }}
+        {{ with mod $months 12 }}{{ $s = printf "%s and %d month%s" $s . (cond (eq . 1) "" "s") }}{{ end }}
+        {{ $s = printf "%s earlier" $s }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+  {{ return $s }}
 {{ end }}

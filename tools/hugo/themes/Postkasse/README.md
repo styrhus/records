@@ -169,6 +169,19 @@ copied link survives a rebuild. They collide only on a slug-hash collision, negl
 **Off by default**; ignored (with a build warning) in every other page mode, and the PDF/EPUB book
 is unaffected — this is web-only.
 
+## Time-gap labels
+
+Set `params.showTimeEarlier: true` (single-flowing only) to caption each `· · ·` divider with the
+distance back from the newest record: a small dim line reading `3 days earlier`, `2 months and 4
+days earlier` or `1 year and 2 months earlier` sits directly above the dots. The newest record is
+"now" and carries no label; bookLook's cover pages never carry one and never serve as the anchor;
+and a record without a divider shows none — which means the first record in the stream, unless
+`threeDotAnchor` gives it one. The arithmetic is deliberately approximate — 30-day months,
+twelve-month years, anything under a minute rounded up to one — a sense of distance rather than a
+timestamp, recomputed on every build so the labels follow the newest record. The PDF and EPUB
+caption their dividers the same way. **Off by default**; ignored (with a build warning) in every
+other page mode.
+
 ## Chapters
 
 Name a first-level folder in your content directory after a number — arabic (`records/2/`) or roman

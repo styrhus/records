@@ -71,6 +71,9 @@ local flowing = str(params.pageMode) == "single-flowing"
 -- bookLook (flowing only): forside/side-1/bakside at the records root become
 -- front cover, page 1 and back cover; forside replaces the intro and the cover page.
 local bookLook = boolOr(params.bookLook, false)
+-- showTimeEarlier (flowing only): dim "N days earlier" caption above each dinkus,
+-- the gap back to the newest record (mirrors Postkasse's inline/time-earlier.html).
+local showTimeEarlier = boolOr(params.showTimeEarlier, false)
 local showTags = boolOr(params.showTags, true)
 local repoURL = os.getenv("HUGO_PARAMS_REPOURL") or str(params.repoURL) or ""
 -- Raw-link URL shape per forge; auto/unknown = detect from the repoURL host (mirrors repo-link.html).
@@ -170,6 +173,43 @@ local function parseDate(s)
   }
   t.key = string.format("%04d%02d%02d%02d%02d%02d", t.year, t.month, t.day, t.hour, t.min, t.sec)
   return t
+end
+
+-- Naive seconds since 1970-01-01 (days-from-civil, no zone — a mixed-offset
+-- corpus can sit an hour off the web at a tier boundary; accepted).
+local function naiveSecs(t)
+  local y = t.month <= 2 and t.year - 1 or t.year
+  local era = (y >= 0 and y or y - 399) // 400
+  local yoe = y - era * 400
+  local doy = (153 * ((t.month + 9) % 12) + 2) // 5 + t.day - 1
+  local doe = yoe * 365 + yoe // 4 - yoe // 100 + doy
+  return (era * 146097 + doe - 719468) * 86400 + t.hour * 3600 + t.min * 60 + t.sec
+end
+
+-- "3 days earlier", "2 months and 4 days earlier": tiers mirror
+-- inline/time-earlier.html exactly (30-day months, 12-month years) — change both together.
+local function plural(n, unit) return n .. " " .. unit .. (n == 1 and "" or "s") end
+local function timeEarlier(secs)
+  if secs < 3600 then
+    local n = secs // 60
+    if n < 1 then n = 1 end
+    return plural(n, "minute") .. " earlier"
+  elseif secs < 86400 then
+    return plural(secs // 3600, "hour") .. " earlier"
+  end
+  local days = secs // 86400
+  if days < 30 then return plural(days, "day") .. " earlier" end
+  local months = days // 30
+  if months < 12 then
+    local s = plural(months, "month")
+    local rem = days % 30
+    if rem > 0 then s = s .. " and " .. plural(rem, "day") end
+    return s .. " earlier"
+  end
+  local s = plural(months // 12, "year")
+  local remM = months % 12
+  if remM > 0 then s = s .. " and " .. plural(remM, "month") end
+  return s .. " earlier"
 end
 
 local MONTHS = { "January", "February", "March", "April", "May", "June",
@@ -382,6 +422,15 @@ for _, r in ipairs(records) do
 end
 table.sort(loose, byDate)
 
+-- showTimeEarlier "now" anchor: the newest dated record in the flowing stream
+-- (specials were diverted above and never anchor; undated records never label).
+local anchor = nil
+if flowing and showTimeEarlier then
+  for _, r in ipairs(loose) do
+    if r.dateT and (not anchor or r.key > anchor.key) then anchor = r end
+  end
+end
+
 local arabic, roman = {}, {}
 for _, ch in pairs(chapterMap) do
   table.sort(ch.records, byDate)
@@ -569,6 +618,10 @@ local function addRecord(r)
   local recDir = path.directory(r.file)
   if flowing then
     if not firstRecord then
+      if anchor and r ~= anchor and r.dateT then
+        body:insert(pandoc.Div({ pandoc.Plain({ pandoc.Str(timeEarlier(naiveSecs(anchor.dateT) - naiveSecs(r.dateT))) }) },
+          pandoc.Attr("", { "time-earlier" })))
+      end
       body:insert(pandoc.Div({ pandoc.Plain({ pandoc.Str("· · ·") }) }, pandoc.Attr("", { "record-sep" })))
     end
     firstRecord = false
