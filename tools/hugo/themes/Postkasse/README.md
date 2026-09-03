@@ -171,15 +171,15 @@ is unaffected — this is web-only.
 
 ## Time-gap labels
 
-Set `params.showTimeEarlier: true` (single-flowing only) to caption each `· · ·` divider with the
-distance back from the newest record: a small dim line reading `3 days earlier`, `2 months and 4
-days earlier` or `1 year and 2 months earlier` sits directly above the dots. The newest record is
-"now" and carries no label; bookLook's cover pages never carry one and never serve as the anchor;
-and a record without a divider shows none — which means the first record in the stream, unless
-`threeDotAnchor` gives it one. The arithmetic is deliberately approximate — 30-day months,
+Set `params.showTimeEarlier: true` (single-flowing only) to label each record with the distance
+back from the newest one: a small dim line reading `3 days earlier`, `2 months and 4 days earlier`
+or `1 year and 2 months earlier` floats in the record's top-right corner, beside its first turn
+(to the left of the `permalinkButton` icon when that is on too). The newest record is "now" and
+carries no label, and bookLook's cover pages never carry one and never serve as the anchor. The
+arithmetic is deliberately approximate — 30-day months,
 twelve-month years, anything under a minute rounded up to one — a sense of distance rather than a
 timestamp, recomputed on every build so the labels follow the newest record. The PDF and EPUB
-caption their dividers the same way. **Off by default**; ignored (with a build warning) in every
+label their records the same way. **Off by default**; ignored (with a build warning) in every
 other page mode.
 
 ## Chapters

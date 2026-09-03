@@ -254,8 +254,8 @@ params:
   # build). Off by default; uncomment to enable.
   # threeDotAnchor: true
 
-  # Time-gap labels (single-flowing mode only): a small dim line above each
-  # · · · separator saying how much earlier that record is than the newest one
+  # Time-gap labels (single-flowing mode only): a small dim line in each
+  # record's top-right corner saying how much earlier it is than the newest one
   # — "3 days earlier", "1 year and 2 months earlier". Approximate by design
   # (30-day months, twelve-month years) and recomputed every build, so the
   # labels follow the newest record. Web rendering is Postkasse-only; the

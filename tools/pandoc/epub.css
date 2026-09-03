@@ -33,8 +33,7 @@ img { max-width: 100%; }
 /* single-flowing mode: dinkus between records */
 .record-sep { text-align: center; margin: 2em 0; }
 /* showTimeEarlier: caption above the dinkus */
-.time-earlier { text-align: center; font-size: 0.85em; margin: 2em 0 0; }
-.time-earlier + .record-sep { margin-top: 0.35em; }
+.time-earlier { float: right; font-size: 0.85em; margin: 0 0 0.35em 1em; }
 /* bookLook specials: page breaks where the reader honours them */
 .book-forside, .book-side-1 { page-break-after: always; }
 .book-bakside { page-break-before: always; }

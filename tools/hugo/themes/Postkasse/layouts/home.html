@@ -204,7 +204,7 @@
     {{ end }}
     {{ range $i, $r := $flow }}
       {{ $isSpecial := and $bookLook (not $r.Section) (in (slice "forside" "side-1" "bakside") $r.File.ContentBaseName) }}
-      {{/* showTimeEarlier: the gap back from the newest record, riding above this record's dinkus. */}}
+      {{/* showTimeEarlier: the gap back from the newest record, riding at the record's top right. */}}
       {{ $earlier := "" }}
       {{ if and $anchor (not $isSpecial) (ne $r $anchor) (not $r.Date.IsZero) }}
         {{ $earlier = partial "inline/time-earlier.html" (sub $anchor.Date.Unix $r.Date.Unix) }}
@@ -220,14 +220,14 @@
             {{ $id = printf "%s%s" $id (substr $abc (mod $seed 66) 1) }}
             {{ $seed = int (div $seed 66) }}
           {{ end }}
-          {{ with $earlier }}<div class="time-earlier">{{ . }}</div>{{ end }}
           <a class="record-sep" href="#{{ $id }}" id="{{ $id }}" aria-label="Link to this point">· · ·</a>
         {{ end }}
-      {{ else if $i }}{{ with $earlier }}<div class="time-earlier">{{ . }}</div>{{ end }}<div class="record-sep" aria-hidden="true">· · ·</div>{{ end }}
+      {{ else if $i }}<div class="record-sep" aria-hidden="true">· · ·</div>{{ end }}
       {{ $book := "" }}
       {{ if $isSpecial }}{{ $book = printf " book-%s" $r.File.ContentBaseName }}{{ end }}
       <article class="record-flow{{ $book }}{{ if $r.Params.featured }} featured{{ end }}" id="{{ path.Base $r.RelPermalink }}"{{ with $r.Params.language }} lang="{{ . }}"{{ end }}{{ if $stickyNav }} data-nav-title="{{ partial "inline/record-title.html" $r | plainify }}"{{ end }}>
         {{ if site.Params.permalinkButton }}{{ partial "permalink.html" (dict "page" $r "anchor" true) }}{{ end }}
+        {{ with $earlier }}<div class="time-earlier">{{ . }}</div>{{ end }}
         {{ partial "record.html" (dict "content" $r.Content "prefix" (path.Base $r.RelPermalink) "voice" $r.Params.voiceRecorded "page" $r) }}
         {{ partial "attachments.html" (dict "page" $r) }}
       </article>

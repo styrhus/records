@@ -71,7 +71,7 @@ local flowing = str(params.pageMode) == "single-flowing"
 -- bookLook (flowing only): forside/side-1/bakside at the records root become
 -- front cover, page 1 and back cover; forside replaces the intro and the cover page.
 local bookLook = boolOr(params.bookLook, false)
--- showTimeEarlier (flowing only): dim "N days earlier" caption above each dinkus,
+-- showTimeEarlier (flowing only): dim "N days earlier" caption at each record's top right,
 -- the gap back to the newest record (mirrors Postkasse's inline/time-earlier.html).
 local showTimeEarlier = boolOr(params.showTimeEarlier, false)
 local showTags = boolOr(params.showTags, true)
@@ -618,14 +618,16 @@ local function addRecord(r)
   local recDir = path.directory(r.file)
   if flowing then
     if not firstRecord then
-      if anchor and r ~= anchor and r.dateT then
-        body:insert(pandoc.Div({ pandoc.Plain({ pandoc.Str(timeEarlier(naiveSecs(anchor.dateT) - naiveSecs(r.dateT))) }) },
-          pandoc.Attr("", { "time-earlier" })))
-      end
       body:insert(pandoc.Div({ pandoc.Plain({ pandoc.Str("· · ·") }) }, pandoc.Attr("", { "record-sep" })))
     end
     firstRecord = false
-    body:insert(pandoc.Div(turnDivs(readBody(r.body), isTrue(r.meta.voiceRecorded)):walk(contentFilter(recDir)), pandoc.Attr("", { "record" })))
+    local blocks = turnDivs(readBody(r.body), isTrue(r.meta.voiceRecorded)):walk(contentFilter(recDir))
+    -- showTimeEarlier rides at the record's top right, so it goes inside the record div.
+    if anchor and r ~= anchor and r.dateT then
+      blocks:insert(1, pandoc.Div({ pandoc.Plain({ pandoc.Str(timeEarlier(naiveSecs(anchor.dateT) - naiveSecs(r.dateT))) }) },
+        pandoc.Attr("", { "time-earlier" })))
+    end
+    body:insert(pandoc.Div(blocks, pandoc.Attr("", { "record" })))
     return
   end
   body:insert(pandoc.Header(2, titleInlines(r), pandoc.Attr(r.base, { "record-head" })))
