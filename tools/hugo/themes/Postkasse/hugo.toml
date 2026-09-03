@@ -17,7 +17,7 @@ searchWords = 0         # how much of each record reaches that index: 0 = the wh
 showBacklinks = true    # "Referenced by" under a record, listing the records that link to it (computed at build); no effect in single-flowing, which shows no per-record metadata
 showReadingTime = false # reading time + word count under a record (record pages, posts excerpts, single cards)
 stickyNav = false       # single-flowing: a sticky bar naming the record you are currently inside (JavaScript; invisible without it)
-showTimeEarlier = false # single-flowing: a dim "3 days earlier" label at each record's top right — the gap back to the newest record (PDF/EPUB follow the param too)
+showTimeEarlier = false # single-flowing: a dim "3 days earlier" label at each record's top right — the gap back to the newest record, which shows its own date instead (PDF/EPUB follow the param too)
 permalinkButton = false # a visible per-record permalink that copies the link when JavaScript is on, replacing the hover "#" on the record itself
 keyNav = false          # single/single-flowing: j / k (and n / p) move between records
 showAttachments = false # list a record's bundled files at its foot, including the ones never linked inline

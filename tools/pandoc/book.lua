@@ -622,10 +622,19 @@ local function addRecord(r)
     end
     firstRecord = false
     local blocks = turnDivs(readBody(r.body), isTrue(r.meta.voiceRecorded)):walk(contentFilter(recDir))
-    -- showTimeEarlier rides at the record's top right, so it goes inside the record div.
-    if anchor and r ~= anchor and r.dateT then
-      blocks:insert(1, pandoc.Div({ pandoc.Plain({ pandoc.Str(timeEarlier(naiveSecs(anchor.dateT) - naiveSecs(r.dateT))) }) },
-        pandoc.Attr("", { "time-earlier" })))
+    -- showTimeEarlier rides at the record's top right, so it goes inside the record div;
+    -- the anchor states its own date instead of a gap (mirrors home.html).
+    if anchor and r.dateT then
+      local label, classes
+      if r == anchor then
+        classes = { "time-earlier", "time-now" }
+        label = dateTitleFormat and goFormat(dateTitleFormat, r.dateT)
+          or string.format("%04d-%02d-%02d", r.dateT.year, r.dateT.month, r.dateT.day)
+      else
+        classes = { "time-earlier" }
+        label = timeEarlier(naiveSecs(anchor.dateT) - naiveSecs(r.dateT))
+      end
+      blocks:insert(1, pandoc.Div({ pandoc.Plain({ pandoc.Str(label) }) }, pandoc.Attr("", classes)))
     end
     body:insert(pandoc.Div(blocks, pandoc.Attr("", { "record" })))
     return

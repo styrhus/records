@@ -174,13 +174,15 @@ is unaffected — this is web-only.
 Set `params.showTimeEarlier: true` (single-flowing only) to label each record with the distance
 back from the newest one: a small dim line reading `3 days earlier`, `2 months and 4 days earlier`
 or `1 year and 2 months earlier` floats in the record's top-right corner, beside its first turn
-(to the left of the `permalinkButton` icon when that is on too). The newest record is "now" and
-carries no label, and bookLook's cover pages never carry one and never serve as the anchor. The
-arithmetic is deliberately approximate — 30-day months,
-twelve-month years, anything under a minute rounded up to one — a sense of distance rather than a
-timestamp, recomputed on every build so the labels follow the newest record. The PDF and EPUB
-label their records the same way. **Off by default**; ignored (with a build warning) in every
-other page mode.
+(to the left of the `permalinkButton` icon when that is on too). The newest record is "now", so it
+states its own date there instead — formatted with `params.dateTitleFormat`, falling back to
+`2006-01-02` when that is unset, and wrapped in a `<time datetime>` element. It carries the extra
+class `time-now` (styled like the rest by default; a fork's stylesheet can pick it out), and
+bookLook's cover pages carry no label at all and never serve as the anchor. The gap arithmetic is
+deliberately approximate — 30-day months, twelve-month years, anything under a minute rounded up
+to one — a sense of distance rather than a timestamp, recomputed on every build so the labels
+follow the newest record. The PDF and EPUB label their records the same way. **Off by default**;
+ignored (with a build warning) in every other page mode.
 
 ## Chapters
 
