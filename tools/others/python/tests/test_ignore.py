@@ -6,7 +6,10 @@ It proves the generated block survives that reader and matches what it should; i
 book.lua itself ran. The site side is proved for real by a hugo build — see the session report.
 """
 
+import os
 import re
+import stat
+from pathlib import Path
 
 import pytest
 
@@ -285,3 +288,49 @@ def test_main_exit_codes(tmp_path, capsys):
     out = capsys.readouterr().out
     assert "excluded private/x.md" in out and "written" in out
     assert ignore.main(["--repo", str(repo), "--check"]) == 0
+
+
+# --- both rewrites are atomic -------------------------------------------------
+
+def _break_the_swap(monkeypatch, name):
+    """Fail `os.replace` for one target only; --adopt rewrites the ignore file and the
+    config in the same run, so each has to hold on its own."""
+    real = os.replace
+
+    def guard(src, dst, *a, **k):
+        if Path(dst).name == name:
+            raise OSError("swap failed")
+        return real(src, dst, *a, **k)
+
+    monkeypatch.setattr(os, "replace", guard)
+
+
+def test_the_config_survives_a_failed_write(tmp_path, monkeypatch):
+    """The site config is hand-written YAML around a generated block — losing it to a
+    truncate loses the user's own settings, not just the block."""
+    repo = _repo(tmp_path, ignorefile="private/\n", records=("keep.md", "private/x.md"))
+    _break_the_swap(monkeypatch, "hugo.yaml")
+    with pytest.raises(OSError):
+        ignore.sync(repo)
+    assert _config_text(tmp_path) == CONFIG
+    assert sorted(p.name for p in (tmp_path / "tools" / "hugo").iterdir()) == ["hugo.yaml"]
+
+
+def test_the_ignore_file_survives_a_failed_write(tmp_path, monkeypatch):
+    """--adopt prepends to whatever the user already wrote in .recordsignore."""
+    repo = _repo(tmp_path, config=HAND, ignorefile="private/\n", records=("old.bak",))
+    _break_the_swap(monkeypatch, ignore.IGNORE_FILE)
+    with pytest.raises(OSError):
+        ignore.sync(repo, adopt=True)
+    ignore_path = tmp_path / "records" / ignore.IGNORE_FILE
+    assert ignore_path.read_text(encoding="utf-8") == "private/\n"
+    assert _config_text(tmp_path) == HAND      # the config write comes after; it never ran
+
+
+def test_the_config_keeps_its_permissions(tmp_path):
+    repo = _repo(tmp_path, ignorefile="private/\n", records=("keep.md", "private/x.md"))
+    cfg = tmp_path / "tools" / "hugo" / "hugo.yaml"
+    cfg.chmod(0o640)
+    assert ignore.sync(repo)["ok"] is True
+    assert stat.S_IMODE(cfg.stat().st_mode) == 0o640
+    assert "ignoreFiles:" in cfg.read_text(encoding="utf-8")

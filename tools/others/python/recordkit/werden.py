@@ -7,6 +7,8 @@ import re
 from json import loads
 from pathlib import Path
 
+from .atomicio import atomic_write_text
+
 _MARKER = re.compile(r"<!-- werden:[^>]*-->")
 _FASE = re.compile(r"^> Fase — .*$", re.MULTILINE)
 _VERSION = re.compile(r'^__version__ = ".*"$', re.MULTILINE)
@@ -53,7 +55,7 @@ def _stamp_docs(repo: Path, line: str) -> list[str]:
             if b"\0" in raw[:8192] or b"<!-- werden:" not in raw:
                 continue
             text = raw.decode("utf-8", errors="surrogateescape")
-            f.write_text(_MARKER.sub(line, text), encoding="utf-8", errors="surrogateescape")
+            atomic_write_text(f, _MARKER.sub(line, text), errors="surrogateescape")
             updated.append(rel)
     return sorted(updated)
 
@@ -66,7 +68,7 @@ def _stamp_version(repo: Path, num: str) -> bool:
     text = f.read_text(encoding="utf-8")
     new_text, n = _VERSION.subn(f'__version__ = "{num}"', text, count=1)
     if n:
-        f.write_text(new_text, encoding="utf-8")
+        atomic_write_text(f, new_text)
     return bool(n)
 
 
@@ -107,7 +109,7 @@ def cycle(repo: Path, structure: str | None = None, stamp: bool = False) -> dict
     new = f"{struct}-{animal}"
     maj = structures.index(struct) + 1 if struct in structures else 0
     num = f"{epoch}.{maj}.{animals.index(animal) + 1}"
-    state.write_text(f"{num} {new}\n", encoding="utf-8")
+    atomic_write_text(state, f"{num} {new}\n")
 
     updated = _stamp_docs(repo, f"<!-- werden: {num} {new} -->")
     version_stamped = _stamp_version(repo, num)
@@ -116,7 +118,7 @@ def cycle(repo: Path, structure: str | None = None, stamp: bool = False) -> dict
     text = readme.read_text(encoding="utf-8") if readme.is_file() else ""
     fase_line = bool(_FASE.search(text))
     if fase_line:
-        readme.write_text(_FASE.sub(f"> Fase — {num} {new}", text), encoding="utf-8")
+        atomic_write_text(readme, _FASE.sub(f"> Fase — {num} {new}", text))
 
     result = {"old": f"{old_num} {old}".strip(), "new": f"{num} {new}",
               "state": str(state), "markers_updated": updated,

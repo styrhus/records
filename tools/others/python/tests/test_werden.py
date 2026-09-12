@@ -1,4 +1,7 @@
 import json
+import os
+import stat
+from pathlib import Path
 
 import pytest
 
@@ -125,3 +128,82 @@ def test_no_markers_reports_empty(tmp_path):
     out = werden.cycle(repo)
     assert out["markers_updated"] == []
     assert not out["fase_line"]
+
+
+# --- every rewrite is atomic --------------------------------------------------
+
+def _break_the_swap(monkeypatch, name):
+    """Fail `os.replace` for one target only — a cycle rewrites several files in a row,
+    and each of them has to be provably safe on its own."""
+    real = os.replace
+
+    def guard(src, dst, *a, **k):
+        if Path(dst).name == name:
+            raise OSError("swap failed")
+        return real(src, dst, *a, **k)
+
+    monkeypatch.setattr(os, "replace", guard)
+
+
+def _doc(repo, rel, text):
+    p = repo / rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(text, encoding="utf-8")
+    return p
+
+
+def test_current_survives_a_failed_write(tmp_path, monkeypatch):
+    repo = _repo(tmp_path, "0.1.1 fuglekasse-flue\n")
+    _break_the_swap(monkeypatch, "CURRENT")
+    with pytest.raises(OSError):
+        werden.cycle(repo)
+    assert (repo / "CURRENT").read_text() == "0.1.1 fuglekasse-flue\n"
+
+
+def test_a_stamped_doc_survives_a_failed_write(tmp_path, monkeypatch):
+    repo = _repo(tmp_path, "0.1.1 fuglekasse-flue\n")
+    doc = _doc(repo, "docs/guide.md", "# Guide\n\n<!-- werden: 0.1.1 fuglekasse-flue -->\n")
+    _break_the_swap(monkeypatch, "guide.md")
+    with pytest.raises(OSError):
+        werden.cycle(repo)
+    assert doc.read_text() == "# Guide\n\n<!-- werden: 0.1.1 fuglekasse-flue -->\n"
+    assert sorted(p.name for p in (repo / "docs").iterdir()) == ["guide.md"]
+
+
+def test_the_readme_survives_a_failed_write(tmp_path, monkeypatch):
+    repo = _repo(tmp_path, "0.1.1 fuglekasse-flue\n")
+    readme = _doc(repo, "README.md", "# R\n\n> Fase — 0.1.1 fuglekasse-flue\n")
+    _break_the_swap(monkeypatch, "README.md")
+    with pytest.raises(OSError):
+        werden.cycle(repo)
+    assert readme.read_text() == "# R\n\n> Fase — 0.1.1 fuglekasse-flue\n"
+
+
+def test_the_engine_version_file_survives_a_failed_write(tmp_path, monkeypatch):
+    repo = _repo(tmp_path, "0.1.1 fuglekasse-flue\n")
+    init = _doc(repo, "tools/others/python/recordkit/__init__.py",
+                '"""doc."""\n\n__version__ = "0.0.0"\n')
+    _break_the_swap(monkeypatch, "__init__.py")
+    with pytest.raises(OSError):
+        werden.cycle(repo)
+    assert init.read_text() == '"""doc."""\n\n__version__ = "0.0.0"\n'
+
+
+def test_stamping_still_survives_undecodable_bytes(tmp_path):
+    """`_stamp_docs` reads bytes with surrogateescape; the write has to give them back
+    unchanged, or a doc with one stray byte is corrupted by a version bump."""
+    repo = _repo(tmp_path, "0.1.1 fuglekasse-flue\n")
+    doc = repo / "odd.md"
+    doc.write_bytes(b"caf\xe9\n\n<!-- werden: 0.1.1 fuglekasse-flue -->\n")
+    out = werden.cycle(repo)
+    assert "odd.md" in out["markers_updated"]
+    assert doc.read_bytes() == b"caf\xe9\n\n<!-- werden: 0.1.2 fuglekasse-beetle -->\n"
+
+
+def test_stamping_keeps_the_doc_permissions(tmp_path):
+    repo = _repo(tmp_path, "0.1.1 fuglekasse-flue\n")
+    doc = _doc(repo, "docs/guide.md", "<!-- werden: 0.1.1 fuglekasse-flue -->\n")
+    doc.chmod(0o640)
+    werden.cycle(repo)
+    assert stat.S_IMODE(doc.stat().st_mode) == 0o640
+    assert "0.1.2 fuglekasse-beetle" in doc.read_text()

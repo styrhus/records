@@ -1,4 +1,8 @@
+import os
+import stat
 from pathlib import Path
+
+import pytest
 
 from recordkit import attach, stick
 
@@ -99,3 +103,36 @@ def test_a_record_attached_to_stays_findable(tmp_path):
     assert found == [records / "how-to" / "index.md"]
     assert stick.feature_file(found[0])["featured"] is True
     assert "featured: true" in found[0].read_text(encoding="utf-8")
+
+
+# --- the rewrite is atomic ----------------------------------------------------
+
+def _break_the_swap(monkeypatch, name):
+    """Fail `os.replace` for one target only, so the rest of a run behaves normally."""
+    real = os.replace
+
+    def guard(src, dst, *a, **k):
+        if Path(dst).name == name:
+            raise OSError("swap failed")
+        return real(src, dst, *a, **k)
+
+    monkeypatch.setattr(os, "replace", guard)
+
+
+def test_featuring_leaves_the_record_whole_when_the_write_fails(tmp_path, monkeypatch):
+    """The record is the user's own conversation — a failed rewrite must lose none of it."""
+    p = _record(tmp_path, "how-to.md")
+    before = p.read_text(encoding="utf-8")
+    _break_the_swap(monkeypatch, "how-to.md")
+    with pytest.raises(OSError):
+        stick.feature_file(p)
+    assert p.read_text(encoding="utf-8") == before
+    assert [q.name for q in tmp_path.iterdir()] == ["how-to.md"]  # no leftover temp file
+
+
+def test_featuring_keeps_the_record_permissions(tmp_path):
+    p = _record(tmp_path, "how-to.md")
+    p.chmod(0o640)
+    stick.feature_file(p)
+    assert stat.S_IMODE(p.stat().st_mode) == 0o640
+    assert "featured: true" in p.read_text(encoding="utf-8")

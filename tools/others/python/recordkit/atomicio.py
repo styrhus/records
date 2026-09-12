@@ -17,13 +17,19 @@ import tempfile
 from pathlib import Path
 
 
-def atomic_write_text(path: Path, text: str, encoding: str = "utf-8") -> None:
-    """Replace `path`'s content with `text`, atomically. Leaves `path` untouched on any failure."""
+def atomic_write_text(path: Path, text: str, encoding: str = "utf-8",
+                      errors: str | None = None) -> None:
+    """Replace `path`'s content with `text`, atomically. Leaves `path` untouched on any failure.
+
+    `errors` is passed straight to the encoder, for the one caller that rewrites documents which
+    may hold undecodable bytes (`werden._stamp_docs`, `surrogateescape`). The default is `None`,
+    which is the encoder's own default — strict — so every other caller is unaffected.
+    """
     path = Path(path)
     fd, tmp_name = tempfile.mkstemp(dir=str(path.parent), prefix=f".{path.name}.", suffix=".tmp")
     try:
         # fdopen takes ownership of fd straight away, so nothing below can leak it.
-        with os.fdopen(fd, "w", encoding=encoding) as f:
+        with os.fdopen(fd, "w", encoding=encoding, errors=errors) as f:
             # mkstemp makes the temp file 0600 regardless of umask; match the replaced file's
             # mode (or the platform default when there isn't one yet) so redact/unpublish don't
             # quietly tighten permissions on every rewrite.

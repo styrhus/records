@@ -26,6 +26,7 @@ import json
 import re
 from pathlib import Path
 
+from .atomicio import atomic_write_text
 from .config import find_hugo_configs, read_content_dir, resolve_records_dir
 
 IGNORE_FILE = ".recordsignore"
@@ -274,8 +275,8 @@ def sync(repo: Path = Path("."), check: bool = False, adopt: bool = False) -> di
         body = "".join(f"re: {item}\n" for item in adopted)
         prior = ignore_path.read_text(encoding="utf-8") if ignore_path.exists() else ""
         ignore_path.parent.mkdir(parents=True, exist_ok=True)
-        ignore_path.write_text(header + body + prior, encoding="utf-8")
-    cfg.write_text(updated, encoding="utf-8")
+        atomic_write_text(ignore_path, header + body + prior)
+    atomic_write_text(cfg, updated)
     return {**result, "ok": True, "drift": True, "written": True}
 
 

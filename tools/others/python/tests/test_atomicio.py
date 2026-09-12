@@ -59,3 +59,24 @@ def test_original_untouched_when_the_mode_copy_fails(tmp_path, monkeypatch):
         atomic_write_text(f, "new content")
     assert f.read_text() == "original"
     assert [p.name for p in tmp_path.iterdir()] == ["r.md"]  # no leftover temp file
+
+
+def test_errors_are_passed_to_the_encoder(tmp_path):
+    """`werden._stamp_docs` rewrites docs that may hold undecodable bytes, so it needs
+    surrogateescape all the way through the swap — not just on the read side."""
+    f = tmp_path / "doc.md"
+    f.write_bytes(b"marker \xff tail")
+    text = f.read_bytes().decode("utf-8", errors="surrogateescape")
+    atomic_write_text(f, text.replace("marker", "stamped"), errors="surrogateescape")
+    assert f.read_bytes() == b"stamped \xff tail"
+
+
+def test_the_default_stays_strict(tmp_path):
+    """No `errors` argument must behave exactly as before: the encoder's own default."""
+    f = tmp_path / "doc.md"
+    f.write_bytes(b"original \xff")
+    text = f.read_bytes().decode("utf-8", errors="surrogateescape")
+    with pytest.raises(UnicodeEncodeError):
+        atomic_write_text(f, text)
+    assert f.read_bytes() == b"original \xff"
+    assert [p.name for p in tmp_path.iterdir()] == ["doc.md"]

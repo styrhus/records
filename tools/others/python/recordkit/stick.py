@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from . import frontmatter, naming
+from .atomicio import atomic_write_text
 from .config import resolve_records_dir
 
 
@@ -30,5 +31,5 @@ def find_record_in_checkout(start: Path, slug_or_name: str) -> list[Path]:
 
 def feature_file(path: Path) -> dict:
     p = Path(path)
-    p.write_text(frontmatter.feature(p.read_text(encoding="utf-8")), encoding="utf-8")
+    atomic_write_text(p, frontmatter.feature(p.read_text(encoding="utf-8")))
     return {"path": str(p), "featured": True}
