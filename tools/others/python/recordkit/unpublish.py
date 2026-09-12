@@ -24,6 +24,7 @@ from datetime import datetime
 from pathlib import Path
 
 from . import frontmatter, naming
+from .atomicio import atomic_write_text
 from .attach import resolve_record
 from .stick import find_record
 
@@ -161,10 +162,10 @@ def unpublish(record: str | Path, tombstone: bool = False, records_dir: Path | N
     if tombstone:
         if stash.exists():
             raise RuntimeError(f"{stash} already exists — refusing to overwrite it")
-        stash.write_text(marked, encoding="utf-8")
-        path.write_text(tombstone_text(text, stamp), encoding="utf-8")
+        atomic_write_text(stash, marked)
+        atomic_write_text(path, tombstone_text(text, stamp))
     else:
-        path.write_text(marked, encoding="utf-8")
+        atomic_write_text(path, marked)
     result["written"] = True
     return result
 
@@ -195,7 +196,7 @@ def restore(record: str | Path, records_dir: Path | None = None, dry_run: bool =
     if dry_run:
         result["restored"] = False
         return result
-    path.write_text(restored, encoding="utf-8")
+    atomic_write_text(path, restored)
     if from_stash:
         stash.unlink()
     result["written"] = True

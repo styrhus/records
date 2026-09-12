@@ -19,6 +19,7 @@ import sys
 from pathlib import Path
 
 from . import turns as turns_mod
+from .atomicio import atomic_write_text
 from .attach import resolve_record
 
 MARKER = "[redacted]"
@@ -154,7 +155,7 @@ def redact(record: Path, turn: int, replace: str | None = None, remove: bool = F
     if not (yes or (confirm(patch) if confirm else ask(patch))):
         result["cancelled"] = True
         return result
-    path.write_text(after, encoding="utf-8")
+    atomic_write_text(path, after)
     result["written"] = True
     _notice(path)
     return result
