@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+from .atomicio import atomic_write_text
 from .config import resolve_records_dir
 
 _NOTE = """---
@@ -55,4 +56,6 @@ def _upsert_pointer(memory_md: Path, name: str) -> None:
     if kept and not kept[-1].endswith("\n"):
         kept[-1] += "\n"
     kept.append(line)
-    memory_md.write_text("".join(kept), encoding="utf-8")
+    # Read-modify-write over a file the user owns: every line they wrote is read here and
+    # written back, so a truncate-then-write that dies in the middle loses the lot (gap 1).
+    atomic_write_text(memory_md, "".join(kept))
