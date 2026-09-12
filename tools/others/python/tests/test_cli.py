@@ -11,6 +11,7 @@ and the process exit code. Nothing below executes real work.
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -316,12 +317,15 @@ def test_unpublish_restore(capsys, monkeypatch):
 # subparser. The wiring to check is exactly that: the right module, the rest of argv untouched
 # (options included), and the module's own exit code returned rather than swallowed.
 
-@pytest.mark.parametrize("name, argv, rest", [
+_PASSTHROUGH_CASES = [
     ("doctor", ["doctor", "--repo", "/r"], ["--repo", "/r"]),
     ("watch", ["watch", "--interval", "2"], ["--interval", "2"]),
     ("scan", ["scan", "--dir", "/rec"], ["--dir", "/rec"]),
     ("ignore", ["ignore", "--check"], ["--check"]),
-])
+]
+
+
+@pytest.mark.parametrize("name, argv, rest", _PASSTHROUGH_CASES)
 def test_passthrough_commands(capsys, monkeypatch, name, argv, rest):
     spy = Spy(0)
     monkeypatch.setattr(cli._PASSTHROUGH[name], "main", spy)
@@ -395,3 +399,46 @@ class _Stdin:
 
     def read(self) -> str:
         return self._text
+
+
+# --- the file is only "one smoke test per subcommand" while something checks it ------
+#
+# AGENTS.md asks for a row here whenever a subcommand is added. Nothing enforced that, so a
+# 28th subcommand would have gone green with no test at all. This asks the parser itself what
+# it accepts and fails naming whatever has no test, rather than trusting a count someone took
+# by hand once.
+
+def _registered_subcommands() -> set[str]:
+    """Every command the CLI accepts, read off the parser rather than off a list kept by hand."""
+    action = next(a for a in cli._build_parser()._actions
+                  if isinstance(a, argparse._SubParsersAction))
+    return set(action.choices) | set(cli._PASSTHROUGH)
+
+
+def _tested_subcommands() -> set[str]:
+    """Commands this module has a smoke test for: `test_<slug>`, `test_<slug>_…`, or a
+    passthrough case. `-` in a subcommand is `_` in a test name (`append-turn`)."""
+    names = {n for n in globals() if n.startswith("test_")}
+    covered = {name for name, _argv, _rest in _PASSTHROUGH_CASES}
+    for cmd in _registered_subcommands():
+        stem = "test_" + cmd.replace("-", "_")
+        if any(n == stem or n.startswith(stem + "_") for n in names):
+            covered.add(cmd)
+    return covered
+
+
+def test_every_subcommand_has_a_smoke_test():
+    missing = sorted(_registered_subcommands() - _tested_subcommands())
+    assert not missing, (
+        "subcommands with no smoke test in this file: " + ", ".join(missing)
+        + " — add one per AGENTS.md, or a row to _PASSTHROUGH_CASES if it owns its output"
+    )
+
+
+def test_the_coverage_check_reads_the_parser_and_not_a_hardcoded_list():
+    """Guards the guard: if `_registered_subcommands` stopped seeing the parser, the check
+    above would pass vacuously. It must find the commands that are actually registered."""
+    found = _registered_subcommands()
+    assert len(found) >= 27, found
+    assert {"new", "append-turn", "unpublish"} <= found       # ordinary subparsers
+    assert set(cli._PASSTHROUGH) <= found                     # and the four passthroughs
