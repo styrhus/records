@@ -71,6 +71,9 @@ records publish             # build + deliver
 `records publish` never commits or pushes your source; that stays with
 `/gc`, `/gcp`, `/cpd`.
 
+When a deploy stops working, or a publish force-pushes over something you
+wanted back, the recovery steps are in [when the deploy breaks](recover.md).
+
 ## Taking a record back
 
 ```bash
