@@ -19,7 +19,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from .config import find_hugo_configs, read_content_dir, read_theme, resolve_records_dir
+from .config import discover_records_dir, find_hugo_configs, read_content_dir, read_theme
 from .publish import _TARGETS, _checkout_root, _param
 
 _HUGO_MIN = (0, 158)  # the theme's site.Language.Locale needs it
@@ -91,9 +91,15 @@ def _parseable_date(value: str) -> bool:
     return False
 
 
-def _config_check(cfg: Path | None, records_dir: Path | None, repo: Path) -> dict:
+def _config_check(cfg: Path | None, records_dir: Path | None, repo: Path,
+                  source: str = "config") -> dict:
     if cfg is None:
-        return _check("config", "error", f"no */hugo/hugo.yaml under {repo}",
+        # The records dir still has an answer without a config, and it is either a directory
+        # found on disk or the conventional name assumed. Every skill writes to it, so the
+        # report says which of the two it is instead of printing the path as a finding.
+        where = (f"{records_dir} exists, but nothing configures it" if source == "discovered"
+                 else f"{records_dir} is assumed, not found")
+        return _check("config", "error", f"no */hugo/hugo.yaml under {repo} — {where}",
                       "every build and every skill resolves the site through it — "
                       "is this a records checkout?")
     if records_dir is None or not records_dir.is_dir():
@@ -282,10 +288,13 @@ def diagnose(repo: Path = Path("."), env=None) -> dict:
     cfg = configs[0] if configs else None
     text = cfg.read_text(encoding="utf-8") if cfg else ""
     root = _checkout_root(cfg).resolve() if cfg else repo
-    records_dir = ((cfg.parent / read_content_dir(cfg)).resolve() if cfg
-                   else resolve_records_dir(repo))
+    if cfg:
+        records_dir, records_dir_source = (cfg.parent / read_content_dir(cfg)).resolve(), "config"
+    else:
+        records_dir, discovered = discover_records_dir(repo)
+        records_dir_source = "discovered" if discovered else "assumed"
 
-    checks = [_config_check(cfg, records_dir, repo)]
+    checks = [_config_check(cfg, records_dir, repo, records_dir_source)]
     if cfg:
         checks += _theme_check(cfg)
     checks += _records_checks(records_dir, text)
@@ -298,7 +307,8 @@ def diagnose(repo: Path = Path("."), env=None) -> dict:
     errors = sum(1 for c in checks if c["level"] == "error")
     warnings = sum(1 for c in checks if c["level"] == "warn")
     return {"repo": str(root), "config": str(cfg) if cfg else None,
-            "records_dir": str(records_dir), "checks": checks,
+            "records_dir": str(records_dir), "records_dir_source": records_dir_source,
+            "checks": checks,
             "errors": errors, "warnings": warnings, "ok": errors == 0}
 
 

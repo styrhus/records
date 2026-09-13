@@ -67,24 +67,43 @@ def read_theme(hugo_yaml: Path, default: str = DEFAULT_THEME) -> str:
     return default
 
 
-def resolve_records_dir(start: Path = Path(".")) -> Path:
-    """The records content directory, following the skills' priority order."""
+def discover_records_dir(start: Path = Path(".")) -> tuple[Path, bool]:
+    """(records content directory, discovered?) — the skills' priority order, and whether
+    anything in the checkout actually pointed at the answer.
+
+    Every rung but the last is a discovery: a site config's contentDir, or a directory that
+    is there on disk. The last rung is an assumption — `<start>/records`, the conventional
+    name, returned whether or not it exists. It has to stay, because it is also the right
+    answer for a fresh clone where the directory has not been created yet and `records new`
+    is about to create it. What it must not do is look like a finding, which is what the
+    second element is for: callers that need certainty can ask, and `records config` and
+    `records doctor` say which of the two answers they are giving.
+    """
     start = Path(start)
     configs = find_hugo_configs(start)
     if configs:
         hugo_yaml = configs[0]
-        return (hugo_yaml.parent / read_content_dir(hugo_yaml)).resolve()
+        return (hugo_yaml.parent / read_content_dir(hugo_yaml)).resolve(), True
     if (start / "records").is_dir():
-        return (start / "records").resolve()
+        return (start / "records").resolve(), True
     if (start / "docs").is_dir():
-        return (start / "docs" / "records").resolve()
+        return (start / "docs" / "records").resolve(), True
     for name in _DOCS_NAMES[1:]:
         if (start / name).is_dir():
-            return (start / name / "records").resolve()
+            return (start / name / "records").resolve(), True
     children = sorted(c for c in start.iterdir() if c.is_dir() and not c.name.startswith(".")) \
         if start.is_dir() else []
     for name in _DOCS_NAMES:
         for child in children:
             if (child / name).is_dir():
-                return (child / name / "records").resolve()
-    return (start / "records").resolve()
+                return (child / name / "records").resolve(), True
+    return (start / "records").resolve(), False
+
+
+def resolve_records_dir(start: Path = Path(".")) -> Path:
+    """The records content directory, following the skills' priority order.
+
+    Answers without saying whether it found the directory or assumed it —
+    `discover_records_dir` is the one to use when that difference matters.
+    """
+    return discover_records_dir(start)[0]

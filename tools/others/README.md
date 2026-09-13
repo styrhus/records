@@ -47,7 +47,9 @@ Installing the editor plugins is one page: [docs/install.md](../../docs/install.
 records new "#linux #hw How To"
 # Output: {"path": "records/linux/how-to.md", "title": "How To", "tags": ["linux", "hw"], …}
 
-# Show the records dir
+# Show the records dir — "source" says whether it was found in the checkout
+# ("discovered"), stated with --dir, or is the conventional name assumed
+# ("assumed", with "exists": false on a checkout that has none yet)
 records config
 
 # Append a user message

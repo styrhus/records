@@ -106,6 +106,31 @@ def test_missing_hugo_config_is_an_error(tmp_path, monkeypatch):
     assert result["ok"] is False and result["errors"] >= 1
 
 
+# gap 8: the report must not present an assumed records dir as a finding.
+def test_doctor_says_the_records_dir_was_assumed(tmp_path, monkeypatch):
+    _healthy(monkeypatch)
+    result = doctor.diagnose(tmp_path, env={"BASE_URL": "https://x/"})
+    assert result["records_dir_source"] == "assumed"
+    c = _check(result, "config")
+    assert c["level"] == "error" and "is assumed, not found" in c["message"]
+    assert str((tmp_path / "records").resolve()) in c["message"]
+
+
+def test_doctor_says_the_records_dir_was_found_without_a_config(tmp_path, monkeypatch):
+    _healthy(monkeypatch)
+    (tmp_path / "records").mkdir()
+    result = doctor.diagnose(tmp_path, env={"BASE_URL": "https://x/"})
+    assert result["records_dir_source"] == "discovered"
+    c = _check(result, "config")
+    assert c["level"] == "error" and "nothing configures it" in c["message"]
+
+
+def test_doctor_calls_a_contentdir_answer_config(tmp_path, monkeypatch):
+    _healthy(monkeypatch)
+    repo = _repo(tmp_path, config="contentDir: ../../records\n")
+    assert doctor.diagnose(repo, env={"BASE_URL": "https://x/"})["records_dir_source"] == "config"
+
+
 def test_content_dir_pointing_nowhere_is_an_error(tmp_path, monkeypatch):
     _healthy(monkeypatch)
     repo = _repo(tmp_path, config="contentDir: ../../nowhere\n")

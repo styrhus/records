@@ -80,3 +80,43 @@ def test_read_theme_default_parameter(tmp_path):
     p = tmp_path / "hugo.yaml"
     p.write_text("baseURL: /\n")
     assert config.read_theme(p, default="") == ""
+
+
+# --- gap 8: the last rung is an assumption, and says so -----------------------
+#
+# resolve_records_dir returns `<start>/records` whether or not it exists, which is
+# correct for a fresh clone about to create it and a lie everywhere else. The path
+# does not change; what is new is that a caller can ask which answer it got.
+
+def test_discovery_reports_a_contentdir_as_found(tmp_path):
+    hugo = tmp_path / "site" / "hugo"
+    hugo.mkdir(parents=True)
+    (hugo / "hugo.yaml").write_text("contentDir: ../records\n", encoding="utf-8")
+    assert config.discover_records_dir(tmp_path) == ((tmp_path / "site" / "records").resolve(), True)
+
+
+def test_discovery_reports_a_records_dir_on_disk_as_found(tmp_path):
+    (tmp_path / "records").mkdir()
+    assert config.discover_records_dir(tmp_path) == ((tmp_path / "records").resolve(), True)
+
+
+def test_discovery_reports_a_docs_dir_on_disk_as_found(tmp_path):
+    """The docs/ rung is a discovery even though docs/records/ itself need not exist yet."""
+    (tmp_path / "docs").mkdir()
+    assert config.discover_records_dir(tmp_path) == \
+        ((tmp_path / "docs" / "records").resolve(), True)
+
+
+def test_discovery_admits_the_last_rung_is_an_assumption(tmp_path):
+    """Nothing in the checkout points anywhere: the path is the convention, not a finding."""
+    path, discovered = config.discover_records_dir(tmp_path)
+    assert path == (tmp_path / "records").resolve()
+    assert discovered is False
+    assert not path.exists()
+
+
+def test_resolve_records_dir_is_unchanged_by_the_split(tmp_path):
+    """Every existing caller keeps the old one-value answer, assumption included."""
+    assert config.resolve_records_dir(tmp_path) == config.discover_records_dir(tmp_path)[0]
+    (tmp_path / "records").mkdir()
+    assert config.resolve_records_dir(tmp_path) == config.discover_records_dir(tmp_path)[0]

@@ -193,7 +193,7 @@ def test_werden(capsys, monkeypatch):
 
 def test_config(capsys):
     code, out = run(capsys, ["config", "--dir", "/rec"])
-    assert (code, out) == (0, {"records_dir": "/rec"})
+    assert (code, out) == (0, {"records_dir": "/rec", "source": "--dir", "exists": False})
 
 
 def test_import(capsys, monkeypatch):

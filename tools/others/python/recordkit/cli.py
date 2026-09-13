@@ -309,7 +309,14 @@ def main(argv: list[str] | None = None) -> int:
         elif args.cmd == "werden":
             _emit(werden.cycle(Path(args.repo), args.structure, stamp=args.stamp))
         elif args.cmd == "config":
-            _emit({"records_dir": str(_records_dir(args))})
+            # --dir is stated outright; without it, say whether the path was found in the
+            # checkout or is the conventional name assumed (it is returned either way).
+            if args.dir:
+                d, source = Path(args.dir), "--dir"
+            else:
+                d, discovered = config.discover_records_dir(Path("."))
+                source = "discovered" if discovered else "assumed"
+            _emit({"records_dir": str(d), "source": source, "exists": d.is_dir()})
         elif args.cmd == "import":
             tags = [t.strip() for t in args.tags.split(",") if t.strip()] if args.tags else None
             _emit(importer.run(args.source, Path(args.path), _records_dir(args), tags=tags,
