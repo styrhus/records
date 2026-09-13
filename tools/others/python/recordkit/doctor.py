@@ -20,7 +20,7 @@ from datetime import datetime
 from pathlib import Path
 
 from .config import discover_records_dir, find_hugo_configs, read_content_dir, read_theme
-from .publish import _TARGETS, _checkout_root, _param
+from .publish import _TARGETS, _checkout_root, _param, publish_dest_problem
 
 _HUGO_MIN = (0, 158)  # the theme's site.Language.Locale needs it
 _SKIP_RECORDS = {"_index.md", "LICENSE.md", "404.md"}
@@ -216,13 +216,15 @@ def _publish_checks(text: str, root: Path) -> list[dict]:
                           "known targets: " + " | ".join(_TARGETS)))
     elif target == "rsync":
         dest = _param(text, "publishDest")
-        path = dest.split(":", 1)[1] if ":" in dest else dest
+        # One judgement for both commands: publish raises on exactly what doctor reports.
+        problem = publish_dest_problem(dest) if dest else None
         if not dest:
             out.append(_check("publish", "error", "publishTarget: rsync without publishDest",
                               "set params.publishDest to the webroot to sync into"))
-        elif path.strip().rstrip("/") in ("", "~"):
-            out.append(_check("publish", "error", f"publishDest {dest!r} is a root/home dir",
-                              "records publish refuses it — rsync --delete would wipe the host"))
+        elif problem:
+            out.append(_check("publish", "error", f"publishDest {dest!r} {problem}",
+                              "records publish refuses it — rsync --delete would erase "
+                              "everything there that is not in the built site"))
         else:
             out.append(_check("publish", "ok", f"rsync → {dest}"))
         out.append(_check("rsync", "ok", "rsync found") if _which("rsync") else

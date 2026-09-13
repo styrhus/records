@@ -292,3 +292,113 @@ def test_cli_publish_error_json(tmp_path, capsys):
     rc = cli.main(["publish", "--repo", str(tmp_path)])
     out = json.loads(capsys.readouterr().out)
     assert rc == 1 and "error" in out
+
+
+# --- gap 6: the `rsync --delete` destination guard -----------------------------
+#
+# The guard used to be one string comparison (`""`, `"/"`, `"~"` and trailing
+# slashes). Everything in REFUSED below walked straight through it. Each form is
+# asserted on its own so a regression names which one came back.
+
+REFUSED = [
+    ("/", "the filesystem root"),
+    ("//", "the root, written twice"),
+    (".", "the directory publish runs in"),
+    ("~", "the home directory, bare"),
+    ("~/", "the home directory with a trailing slash"),
+    ("~/.", "the home directory, spelled the long way"),
+    ("~/Documents/../..", "a climb back out of home"),
+    ("..", "the parent of the working directory"),
+    ("../..", "two levels up"),
+    ("/home/tb4", "a Linux home directory written out"),
+    ("/home/tb4/", "the same with a trailing slash"),
+    ("/Users/tb4", "a macOS home directory"),
+    ("/var/home/tb4", "an ostree home directory"),
+    ("/usr/home/tb4", "a BSD home directory"),
+    ("/var/home", "the parent of every ostree home"),
+    ("/home", "the parent of every home"),
+    ("/root", "root's home, and a top-level directory"),
+    ("/srv", "a top-level directory, one above a webroot"),
+    ("/srv/www/../..", "a webroot that normalises back to the root"),
+    ("$HOME/www", "an unexpanded variable"),
+    ("${HOME}/www", "the braced form"),
+    ("user@host:", "a remote login directory"),
+    ("user@host:/", "the remote root"),
+    ("user@host:~", "the remote home"),
+    ("user@host:/home/tb4", "a remote home written out"),
+    ("user@host:~/../other", "a climb out of the remote home"),
+    ("user@host:$HOME/www", "an unexpanded variable on a remote"),
+    ("user@host:/srv", "a remote top-level directory"),
+]
+
+ACCEPTED = [
+    "user@host:/var/www/site/",
+    "user@host:/srv/www/records",
+    "user@host:~/public_html",
+    "user@host:~tb4/public_html",
+    "/srv/www/x",
+    "/var/www/localhost/htdocs",
+    "/home/tb4/www",
+]
+
+
+@pytest.mark.parametrize("dest,why", REFUSED, ids=[d for d, _ in REFUSED])
+def test_publish_dest_refused(dest, why):
+    assert publish.publish_dest_problem(dest) is not None, why
+
+
+@pytest.mark.parametrize("dest", ACCEPTED)
+def test_publish_dest_accepted(dest):
+    assert publish.publish_dest_problem(dest) is None
+
+
+def test_publish_dest_refuses_empty_and_blank():
+    assert publish.publish_dest_problem("") is not None
+    assert publish.publish_dest_problem("   ") is not None
+
+
+def test_publish_dest_accepts_a_real_local_directory(tmp_path):
+    """A legitimate local webroot must still pass, symlinks resolved and all."""
+    webroot = tmp_path / "srv" / "www"
+    webroot.mkdir(parents=True)
+    assert publish.publish_dest_problem(str(webroot)) is None
+
+
+def test_publish_dest_refuses_a_symlink_into_a_home(tmp_path, monkeypatch):
+    """The string says /srv/www; the filesystem says $HOME. Only a local check sees it."""
+    home = tmp_path / "home" / "tb4"
+    home.mkdir(parents=True)
+    monkeypatch.setenv("HOME", str(home))
+    link = tmp_path / "webroot"
+    link.symlink_to(home, target_is_directory=True)
+    assert publish.publish_dest_problem(str(link)) is not None
+
+
+def test_publish_dest_judges_a_remote_path_as_a_string_only(tmp_path, monkeypatch):
+    """A remote path that happens to exist locally is not resolved against this machine."""
+    home = tmp_path / "home" / "tb4"
+    home.mkdir(parents=True)
+    monkeypatch.setenv("HOME", str(home))
+    link = tmp_path / "webroot"
+    link.symlink_to(home, target_is_directory=True)
+    assert publish.publish_dest_problem(f"user@host:{link}") is None
+
+
+@pytest.mark.parametrize("dest", ["/home/tb4", "~", "/srv", "user@host:$HOME/www"])
+def test_rsync_refuses_through_publish(tmp_path, monkeypatch, dest):
+    repo = _repo(tmp_path, f"  publishTarget: rsync\n  publishDest: {dest}\n")
+    rec = _Recorder()
+    monkeypatch.setattr(publish, "_run", rec)
+    with pytest.raises(RuntimeError, match="refusing publishDest"):
+        publish.publish(repo)
+    assert not any(c[0] == "rsync" for c in rec.calls)
+
+
+@pytest.mark.parametrize("dest", ["/home/tb4", "~", "/srv", "user@host:$HOME/www"])
+def test_rsync_dry_run_refuses_exactly_what_a_real_run_refuses(tmp_path, monkeypatch, dest):
+    repo = _repo(tmp_path, f"  publishTarget: rsync\n  publishDest: {dest}\n")
+    rec = _Recorder()
+    monkeypatch.setattr(publish, "_run", rec)
+    with pytest.raises(RuntimeError, match="refusing publishDest"):
+        publish.publish(repo, dry_run=True)
+    assert not any(c[0] == "rsync" for c in rec.calls)

@@ -1,6 +1,8 @@
 import subprocess
 
-from recordkit import doctor
+import pytest
+
+from recordkit import doctor, publish
 
 
 def _repo(tmp_path, config="", records=("2026-07-06_23-22.md",), layout="tools"):
@@ -417,3 +419,23 @@ def test_no_theme_key_means_no_theme_check(tmp_path, monkeypatch):
     _healthy(monkeypatch)
     result = doctor.diagnose(_repo(tmp_path), env={"BASE_URL": "https://x/"})
     assert not [c for c in result["checks"] if c["name"] == "theme"]
+
+
+# gap 6: doctor and publish must agree — one judgement, two commands.
+@pytest.mark.parametrize("dest", ["/home/tb4", "/srv", "~", "$HOME/www", "user@host:/home/tb4"])
+def test_doctor_reports_every_dest_publish_refuses(tmp_path, monkeypatch, dest):
+    _healthy(monkeypatch)
+    repo = _repo(tmp_path, config="contentDir: ../../records\nparams:\n"
+                                  f"  publishTarget: rsync\n  publishDest: {dest}\n")
+    c = _check(doctor.diagnose(repo, env={"BASE_URL": "https://x/"}), "publish")
+    assert c["level"] == "error" and dest in c["message"]
+    with pytest.raises(RuntimeError):
+        publish.check_publish_dest(dest)
+
+
+def test_doctor_still_passes_a_legitimate_dest(tmp_path, monkeypatch):
+    _healthy(monkeypatch)
+    repo = _repo(tmp_path, config="contentDir: ../../records\nparams:\n"
+                                  "  publishTarget: rsync\n  publishDest: user@host:/var/www/site\n")
+    c = _check(doctor.diagnose(repo, env={"BASE_URL": "https://x/"}), "publish")
+    assert c["level"] == "ok" and "rsync →" in c["message"]

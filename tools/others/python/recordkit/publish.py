@@ -13,6 +13,7 @@ publish itself never commits or pushes source.
 from __future__ import annotations
 
 import os
+import posixpath
 import re
 import shutil
 import subprocess
@@ -24,6 +25,15 @@ from .config import checkout_root as _checkout_root
 from .config import find_hugo_configs
 
 _TARGETS = ("pages-branch", "rsync")
+
+# `rsync --delete` erases everything at the destination that is not in the built
+# site, so publishDest is judged before rsync is ever run. Two things shape the
+# rules: a remote `user@host:/path` cannot be resolved here at all — the remote
+# home, its symlinks and its environment are unknown — so it is judged as a
+# string and nothing pretends otherwise; and the judgement happens before the
+# --dry-run branch, so a dry run refuses exactly what a real run refuses.
+_HOME_PARENTS = ("/home", "/Users", "/var/home", "/usr/home")  # Linux, macOS, ostree, BSD
+_MIN_PARTS = 2  # /srv/www publishes, /srv does not: one level above a webroot is too much
 
 
 def _run(argv: list[str], cwd: Path | None = None) -> subprocess.CompletedProcess:
@@ -40,6 +50,114 @@ def _param(text: str, name: str, default: str = "") -> str:
         if m and m.group(1):
             return m.group(1).strip().strip('"').strip("'")
     return default
+
+
+def _split_dest(dest: str) -> tuple[str, bool]:
+    """(path part, remote?) — `user@host:/path` and `host:path` are remote, a bare path is not."""
+    head, sep, tail = dest.partition(":")
+    return (tail, True) if sep else (head, False)
+
+
+def _split_home(path: str) -> tuple[str, str]:
+    """('~' or '~user', the rest) for a home-anchored path, ('', path) otherwise."""
+    if not path.startswith("~"):
+        return "", path
+    head, sep, tail = path.partition("/")
+    return head, (sep + tail) if sep else ""
+
+
+def _home_verdict(path: str) -> str | None:
+    """Why `path` is a home directory or the parent of all of them, or None.
+
+    `_HOME_PARENTS` entries are not all one component deep (`/var/home`), so this
+    compares whole prefixes rather than the first component.
+    """
+    for parent in _HOME_PARENTS:
+        if path == parent:
+            return f"{path} holds every user's home directory"
+        if path.startswith(parent + "/") and "/" not in path[len(parent) + 1:]:
+            return f"{path} is a user's home directory"
+    return None
+
+
+def _local_dest_problem(path: str) -> str | None:
+    """The same judgement again with the filesystem consulted — symlinks and the real home.
+
+    `~` is read as the home directory it names, which is the stricter reading: rsync
+    runs no shell, so a literal `~/www` would only make a directory called `~` here.
+    """
+    try:
+        expanded = Path(path).expanduser()
+    except RuntimeError:
+        return "names a home directory that does not exist on this machine"
+    try:
+        resolved = expanded.resolve()
+    except OSError as e:
+        return f"cannot be resolved ({e})"
+    shown = str(resolved) + (f" (where {path} leads)" if resolved != expanded else "")
+    parts = [p for p in resolved.parts if p != resolved.anchor]
+    if len(parts) < _MIN_PARTS:
+        return f"{shown} is the filesystem root or a top-level directory"
+    try:
+        home = Path.home().resolve()
+    except (OSError, RuntimeError):
+        home = None
+    if home is not None and (resolved == home or resolved in home.parents):
+        return f"{shown} is your home directory, or an ancestor of it"
+    verdict = _home_verdict(str(resolved))
+    return verdict.replace(str(resolved), shown, 1) if verdict else None
+
+
+def publish_dest_problem(dest: str) -> str | None:
+    """Why `dest` is unsafe for `rsync --delete`, or None when it is an acceptable webroot.
+
+    Refused: an empty destination, a remote host with no path, the filesystem root, a
+    top-level directory, a home directory or any ancestor of one, a path that climbs
+    above its own anchor, an unexpanded `$VAR`, and — locally, where the filesystem can
+    be read — anything that resolves through a symlink onto one of those.
+    """
+    raw = (dest or "").strip()
+    if not raw:
+        return "empty — --delete needs the webroot written out"
+    path, remote = _split_dest(raw)
+    path = path.strip()
+    if not path:
+        return "no path after the host — --delete would run in the remote login directory"
+    if "$" in path:
+        # rsync is handed argv, not a shell line, so the variable is never expanded:
+        # what gets deleted is a directory literally named `$HOME`.
+        return "carries an unexpanded variable — rsync runs no shell; write the directory out"
+
+    home_prefix, rest = _split_home(path)
+    if home_prefix:
+        inside = posixpath.normpath(rest.lstrip("/")) if rest.strip("/") else "."
+        if inside in (".", "..") or inside.startswith("../"):
+            return f"{home_prefix} is a home directory — --delete would erase it"
+        checked = f"{home_prefix}/{inside}"
+    else:
+        checked = posixpath.normpath(path)
+        if checked in ("", ".", "/", "//"):
+            return "is the filesystem root, or the directory publish is run from"
+        if checked == ".." or checked.startswith("../"):
+            return "climbs above the directory it starts in"
+        if checked.startswith("/"):
+            parts = [p for p in checked.split("/") if p]
+            if len(parts) < _MIN_PARTS:
+                return (f"/{parts[0]} is a top-level directory — "
+                        "publish into a subdirectory of it, not into it")
+            home = _home_verdict(checked)
+            if home:
+                return home
+    if remote:
+        return None  # the remote filesystem is out of reach; the string is all there is
+    return _local_dest_problem(checked)
+
+
+def check_publish_dest(dest: str) -> None:
+    """Raise RuntimeError unless `dest` is safe to `rsync --delete` into."""
+    why = publish_dest_problem(dest)
+    if why:
+        raise RuntimeError(f"refusing publishDest {dest!r} — {why}")
 
 
 def _build(root: Path, outdir: Path) -> None:
@@ -107,9 +225,7 @@ def _rsync(outdir: Path, text: str, dry_run: bool) -> dict:
     dest = _param(text, "publishDest")
     if not dest:
         raise RuntimeError("publishTarget: rsync needs params.publishDest in hugo.yaml")
-    path = dest.split(":", 1)[1] if ":" in dest else dest
-    if path.strip().rstrip("/") in ("", "~"):
-        raise RuntimeError(f"refusing publishDest {dest!r} — --delete against a root/home dir")
+    check_publish_dest(dest)  # before the dry-run branch: -n refuses what a real run refuses
     argv = ["rsync", "-az", "--delete"]
     if dry_run:
         argv += ["-n", "--itemize-changes"]
