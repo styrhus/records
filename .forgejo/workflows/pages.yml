@@ -9,7 +9,9 @@
 # action) — owner, repo and repo URL are derived from the push by
 # bin/build.sh, so forks publish their own site with zero edits.
 # hugo-runner (node + git + Hugo + pandoc/WeasyPrint) is maintained in its
-# own repo; :latest so deploys pick up runner updates without edits here.
+# own repo and pinned to a released tag, so a runner rebuild cannot change
+# what this workflow builds with. Raising the pin is a deliberate step —
+# docs/toolchain.md. RUNNER_IMAGE still overrides it for local caches.
 name: Deploy to Pages
 
 on:
@@ -34,7 +36,7 @@ jobs:
     if: github.server_url == 'https://codeberg.org' || github.server_url == 'https://codeberg.org/' || vars.PAGES_HOST != ''
     runs-on: ${{ vars.PAGES_RUNNER || 'codeberg-tiny-lazy' }}
     container:
-      image: ${{ vars.RUNNER_IMAGE || 'codeberg.org/tb4/hugo-runner:latest' }}
+      image: ${{ vars.RUNNER_IMAGE || 'codeberg.org/tb4/hugo-runner:0.165.0' }}
     steps:
       - uses: actions/checkout@v4
 

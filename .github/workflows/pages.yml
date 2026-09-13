@@ -47,9 +47,12 @@ jobs:
             echo "doctor: python3 or recordkit not found — skipping pre-flight (recordkit is optional)" >&2
           fi
 
+      # Pinned, like the Forgejo path's runner image — 'latest' meant the two
+      # deploy paths could build with different Hugos on the same commit.
+      # Raising it: docs/toolchain.md.
       - uses: peaceiris/actions-hugo@v3
         with:
-          hugo-version: 'latest'
+          hugo-version: '0.165.0'
           extended: true
       - id: pages
         uses: actions/configure-pages@v5
