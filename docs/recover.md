@@ -128,7 +128,7 @@ it:
 
 ```bash
 records publish --dry-run   # builds, delivers nothing, reports the file count
-records publish
+records publish             # asks before the force-push; --yes skips the question
 ```
 
 Do this before hunting for the old commit. Most of the time it is the whole

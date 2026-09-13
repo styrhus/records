@@ -57,6 +57,12 @@ records publish --dry-run   # build + show what would be delivered
 records publish             # build + deliver
 ```
 
+With `publishTarget: pages-branch` the delivery is a force-push, so the second
+command names the remote, the branch and the file count and asks before it
+pushes. `--yes` skips the question. There is no silent yes: run it where stdin
+is not a terminal — a script, a CI step, `/cpd` — and without `--yes` it
+refuses and says so instead of guessing.
+
 ### Targets
 
 - **`pages-branch`** — force-pushes the built site to `publishBranch`
@@ -162,11 +168,16 @@ records](other-people.md) is the page for that one.
 
 ```yaml
 params:
-  deployCommand: records publish
+  deployCommand: records publish --yes
 ```
 
 The no-CI flow is then: write → `/cpd` → commit, push, publish. `/cpd` runs
 `deployCommand` first, so this wins over the shipped workflow files.
+
+`--yes` is required here, not optional. `/cpd` runs the deploy command as a
+subprocess with its output captured, so without the flag the force-push
+question is asked where you cannot see it and the command waits for an answer
+that never comes. You already confirmed the diff to `/cpd`; the flag says so.
 
 ## Homelab: self-hosted Forgejo
 

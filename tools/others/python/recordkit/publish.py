@@ -2,9 +2,12 @@
 
 Delivery is picked by params in the discovered hugo.yaml: publishTarget
 pages-branch (force-push the built site to publishBranch on publishRemote)
-or rsync (rsync -az --delete to publishDest). commit._deploy checks
-deployCommand first, so `deployCommand: records publish` makes /cpd the
-no-CI publish path; publish itself never commits or pushes source.
+or rsync (rsync -az --delete to publishDest). pages-branch asks before the
+force-push unless --yes, and refuses rather than assuming yes when stdin is
+not a terminal. commit._deploy checks deployCommand first, so
+`deployCommand: records publish --yes` makes /cpd the no-CI publish path —
+without the flag it captures the question's output and waits forever;
+publish itself never commits or pushes source.
 """
 
 from __future__ import annotations
@@ -13,6 +16,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -47,7 +51,22 @@ def _build(root: Path, outdir: Path) -> None:
         raise RuntimeError((p.stderr or p.stdout).strip() or "build failed")
 
 
-def _pages_branch(root: Path, outdir: Path, text: str, dry_run: bool) -> dict:
+def ask(url: str, branch: str, files: int) -> bool:
+    """Show what the force-push overwrites and ask. Non-interactive stdin is a no —
+    never a silent yes, the same rule as redact.ask."""
+    sys.stderr.write(
+        f"about to force-push {files} file(s) to {branch!r} on {url}\n"
+        f"  this replaces whatever that branch holds now — the old commit is not kept\n")
+    if not sys.stdin.isatty():
+        sys.stderr.write("stdin is not a terminal — pass --yes to publish without asking\n")
+        return False
+    sys.stderr.write(f"force-push to {branch}? [y/N] ")
+    sys.stderr.flush()
+    return sys.stdin.readline().strip().lower() in ("y", "yes")
+
+
+def _pages_branch(root: Path, outdir: Path, text: str, dry_run: bool,
+                  yes: bool = False, confirm=None) -> dict:
     branch = _param(text, "publishBranch", "pages")
     remote = _param(text, "publishRemote", "origin")
     p = _run(["git", "-C", str(root), "remote", "get-url", remote])
@@ -55,9 +74,12 @@ def _pages_branch(root: Path, outdir: Path, text: str, dry_run: bool) -> dict:
         raise RuntimeError(f"git remote {remote!r} not found in {root}")
     url = p.stdout.strip()
     result = {"remote": remote, "remote_url": url, "branch": branch, "dry_run": dry_run}
+    files = sum(1 for f in outdir.rglob("*") if f.is_file())
     if dry_run:
-        result.update({"pushed": False,
-                       "files": sum(1 for f in outdir.rglob("*") if f.is_file())})
+        result.update({"pushed": False, "files": files})
+        return result
+    if not (yes or (confirm(url, branch, files) if confirm else ask(url, branch, files))):
+        result.update({"pushed": False, "files": files, "cancelled": True})
         return result
     gitdir = outdir / ".git"
     shutil.rmtree(gitdir, ignore_errors=True)  # stateless across runs
@@ -101,8 +123,12 @@ def _rsync(outdir: Path, text: str, dry_run: bool) -> dict:
     return result
 
 
-def publish(repo: Path, dry_run: bool = False, outdir: Path | None = None) -> dict:
-    """Build via bin/build.sh, then deliver per publishTarget. Dry-run still builds."""
+def publish(repo: Path, dry_run: bool = False, outdir: Path | None = None,
+            yes: bool = False, confirm=None) -> dict:
+    """Build via bin/build.sh, then deliver per publishTarget. Dry-run still builds.
+
+    pages-branch force-pushes, so it asks first unless --yes; rsync is unchanged.
+    """
     configs = find_hugo_configs(Path(repo))
     if not configs:
         raise RuntimeError(f"no */hugo/hugo.yaml under {repo} — nothing to publish")
@@ -120,7 +146,7 @@ def publish(repo: Path, dry_run: bool = False, outdir: Path | None = None) -> di
     _build(root, out)
     result = {"repo": str(root), "target": target, "outdir": str(out), "built": True}
     if target == "pages-branch":
-        result.update(_pages_branch(root, out, text, dry_run))
+        result.update(_pages_branch(root, out, text, dry_run, yes=yes, confirm=confirm))
     else:
         result.update(_rsync(out, text, dry_run))
     return result

@@ -147,7 +147,16 @@ def test_publish(capsys, monkeypatch):
     code, out = run(capsys, ["publish", "--repo", "/r", "--dry-run"])
     assert (code, out) == (0, {"target": "pages-branch"})
     assert spy.args == (Path("/r"),)
-    assert spy.kwargs == {"dry_run": True}
+    assert spy.kwargs == {"dry_run": True, "yes": False}
+
+
+def test_publish_yes(capsys, monkeypatch):
+    """--yes has to reach publish(), not just parse — it is the only way past the prompt."""
+    spy = Spy({"pushed": True})
+    monkeypatch.setattr(cli.publish, "publish", spy)
+    code, out = run(capsys, ["publish", "--repo", "/r", "--yes"])
+    assert (code, out) == (0, {"pushed": True})
+    assert spy.kwargs == {"dry_run": False, "yes": True}
 
 
 def test_myname(capsys, monkeypatch):
