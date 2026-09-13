@@ -135,8 +135,12 @@ def publish_dest_problem(dest: str) -> str | None:
             return f"{home_prefix} is a home directory — --delete would erase it"
         checked = f"{home_prefix}/{inside}"
     else:
-        checked = posixpath.normpath(path)
-        if checked in ("", ".", "/", "//"):
+        # posixpath.normpath keeps *exactly* two leading slashes — POSIX leaves `//`
+        # implementation-defined, three or more collapse — and every check below reads
+        # the string literally, so `//home/tb4` would slip past the home-directory rule
+        # that refuses `/home/tb4`. Nothing here means anything different by `//`.
+        checked = re.sub(r"^//+", "/", posixpath.normpath(path))
+        if checked in ("", ".", "/"):
             return "is the filesystem root, or the directory publish is run from"
         if checked == ".." or checked.startswith("../"):
             return "climbs above the directory it starts in"

@@ -329,6 +329,15 @@ REFUSED = [
     ("user@host:~/../other", "a climb out of the remote home"),
     ("user@host:$HOME/www", "an unexpanded variable on a remote"),
     ("user@host:/srv", "a remote top-level directory"),
+    # Wave 5 (brief #132). `posixpath.normpath` keeps *exactly* two leading slashes,
+    # so on the remote branch — string-only by design, no second filesystem check —
+    # these walked past the home rule that refuses their single-slash twins. The
+    # three-slash form always normalised on its own; it is here so it stays that way.
+    ("user@host://home/tb4", "a remote Linux home behind a doubled slash"),
+    ("user@host://Users/tb4", "a doubled-slash macOS home"),
+    ("user@host://var/home/tb4", "a doubled-slash ostree home"),
+    ("user@host:///home/tb4", "three slashes, which normpath collapses by itself"),
+    ("//home/tb4", "the doubled-slash home locally, where resolve() also catches it"),
 ]
 
 ACCEPTED = [
@@ -339,6 +348,10 @@ ACCEPTED = [
     "/srv/www/x",
     "/var/www/localhost/htdocs",
     "/home/tb4/www",
+    # The other direction of the same fix: collapsing `//` must not start refusing a
+    # legitimate webroot that merely happens to be written with a doubled slash.
+    "user@host://srv/www/records",
+    "user@host://var/www/site/",
 ]
 
 
