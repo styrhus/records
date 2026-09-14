@@ -19,4 +19,9 @@
 {{ if .voice }}{{ $mic = `<span class="voice-icon" role="img" aria-label="voice recorded" title="voice recorded"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg></span>` }}{{ end }}
 {{ $c = replaceRE `<h2 id="((?:human|user)(?:-[^"]+)?)">([^<]*)</h2>` (printf `</section><section class="user"><h2 id="%s$1">$2%s<a class="anchor" href="#%s$1" aria-label="Link to this turn">#</a></h2>` $p $mic $p) $c }}
 {{ $c = replaceRE `<h2 id="assistant(?:-\d+)?">` `</section><section class="assistant"><h2>` $c }}
-{{ printf "<section>%s</section>" $c | safeHTML }}
+{{/* The two rewrites above open every turn with a closing </section>, so the
+     wrapper's own opening tag closes immediately and an empty <section></section>
+     precedes the first turn. Drop that pair. Content with no turn heading has no
+     leading </section> and keeps the plain wrapper. */}}
+{{ $c = printf "<section>%s</section>" $c }}
+{{ strings.TrimPrefix "<section></section>" $c | safeHTML }}
