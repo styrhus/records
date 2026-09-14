@@ -63,7 +63,7 @@ records commit -m "docs: add linux hardware notes" --push
 
 # Build and deliver the site without CI (params.publishTarget in hugo.yaml)
 records publish --dry-run
-records publish
+records publish            # pages-branch asks before the force-push (--yes skips it)
 
 # Advance the werden cycle (or --stamp to re-stamp without advancing)
 records werden

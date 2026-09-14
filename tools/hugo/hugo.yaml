@@ -152,6 +152,9 @@ params:
   #                  → Pages → Deploy from a branch)
   #   rsync        — rsync -az --delete to publishDest (any static webroot)
   # Unset = CI publishes on push; nothing to run locally.
+  # pages-branch force-pushes, so `records publish` asks first; pass --yes to
+  # skip the question (required when nothing is on the other end of stdin,
+  # e.g. deployCommand: records publish --yes).
   # publishTarget: pages-branch
   # publishBranch: pages
   # publishRemote: origin

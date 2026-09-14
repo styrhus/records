@@ -40,6 +40,6 @@ The repository to commit, `<repo>`, is the one holding the `hugo/hugo.yaml` abov
 2. **Deploy.** Determine the method, in this order:
    - a `deployCommand` line is shown under Records checkout above → run that command from `<repo>`
    - otherwise, if `ls` finds a workflow file in `<repo>/.forgejo/workflows/` or `<repo>/.github/workflows/`, or `<repo>/.gitlab-ci.yml` exists → nothing to run — the push in step 1 already triggered the deploy; report that the workflow is publishing the site.
-   - neither → report that no deploy method was found and stop; do not invent a deploy command. (`deployCommand` under `params:` in `tools/hugo/hugo.yaml` sets one — `deployCommand: records publish` with a configured `publishTarget` is the no-CI path.)
+   - neither → report that no deploy method was found and stop; do not invent a deploy command. (`deployCommand` under `params:` in `tools/hugo/hugo.yaml` sets one — `deployCommand: records publish` with a configured `publishTarget` is the no-CI path. Write it as `records publish --yes`: cpd runs the deploy command with its output captured, so `publish`'s force-push confirmation has no terminal to ask on and refuses, and the deploy reports success while publishing nothing.)
 
    Run the deploy **after** commit + push succeeds. Report the deploy output.

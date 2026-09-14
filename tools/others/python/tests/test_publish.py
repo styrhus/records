@@ -35,7 +35,7 @@ def test_pages_branch_push_sequence(tmp_path, monkeypatch):
     repo = _repo(tmp_path, "  publishTarget: pages-branch\n")
     rec = _Recorder()
     monkeypatch.setattr(publish, "_run", rec)
-    out = publish.publish(repo)
+    out = publish.publish(repo, yes=True)
     assert rec.calls[0][0] == "bash" and rec.calls[0][1].endswith("bin/build.sh")
     assert rec.calls[1] == ["git", "-C", str(repo), "remote", "get-url", "origin"]
     assert "init" in rec.calls[2] and "add" in rec.calls[3] and "commit" in rec.calls[4]
@@ -52,7 +52,7 @@ def test_pages_branch_custom_branch_and_remote(tmp_path, monkeypatch):
                            "  publishBranch: www\n  publishRemote: smoke\n")
     rec = _Recorder()
     monkeypatch.setattr(publish, "_run", rec)
-    out = publish.publish(repo)
+    out = publish.publish(repo, yes=True)
     assert rec.calls[1][-1] == "smoke"
     assert rec.calls[5][-1] == "HEAD:refs/heads/www"
     assert out["branch"] == "www" and out["remote"] == "smoke"
@@ -100,6 +100,116 @@ def test_rsync_refuses_root_dest(tmp_path, monkeypatch):
     monkeypatch.setattr(publish, "_run", _Recorder())
     with pytest.raises(RuntimeError, match="refusing"):
         publish.publish(repo)
+
+
+# ------------------------------------------------------------------ asking first
+
+def _no(*a):
+    return False
+
+
+def _yes(*a):
+    return True
+
+
+class _Stdin:
+    """A stdin that is or is not a terminal, and answers when asked."""
+
+    def __init__(self, tty: bool, answer: str = ""):
+        self._tty, self._answer = tty, answer
+
+    def isatty(self):
+        return self._tty
+
+    def readline(self):
+        return self._answer
+
+
+def test_the_force_push_asks_first(tmp_path, monkeypatch):
+    """The default is a question, not a push — this is the whole of gap 5."""
+    repo = _repo(tmp_path, "  publishTarget: pages-branch\n")
+    rec = _Recorder()
+    monkeypatch.setattr(publish, "_run", rec)
+    seen = []
+    out = publish.publish(repo, confirm=lambda *a: seen.append(a) or True)
+    assert seen == [("ssh://example/records.git", "pages", 1)]
+    assert out["pushed"] is True
+
+
+def test_a_declined_confirmation_pushes_nothing(tmp_path, monkeypatch):
+    repo = _repo(tmp_path, "  publishTarget: pages-branch\n")
+    rec = _Recorder()
+    monkeypatch.setattr(publish, "_run", rec)
+    out = publish.publish(repo, confirm=_no)
+    assert len(rec.calls) == 2  # build + get-url, and then it stopped
+    assert out["pushed"] is False and out["cancelled"] is True
+    assert out["files"] == 1  # it still says what it would have pushed
+    assert not (repo / "public" / ".nojekyll").exists()
+
+
+def test_yes_skips_the_question(tmp_path, monkeypatch):
+    repo = _repo(tmp_path, "  publishTarget: pages-branch\n")
+    rec = _Recorder()
+    monkeypatch.setattr(publish, "_run", rec)
+    asked = []
+    out = publish.publish(repo, yes=True, confirm=lambda *a: asked.append(a) or False)
+    assert asked == [] and out["pushed"] is True
+
+
+def test_dry_run_never_asks(tmp_path, monkeypatch):
+    """Nothing is delivered, so there is nothing to confirm."""
+    repo = _repo(tmp_path, "  publishTarget: pages-branch\n")
+    monkeypatch.setattr(publish, "_run", _Recorder())
+    out = publish.publish(repo, dry_run=True, confirm=_no)
+    assert out["pushed"] is False and "cancelled" not in out
+
+
+def test_rsync_is_unchanged(tmp_path, monkeypatch):
+    """gap 5 is about the force-push; the rsync target keeps its publishDest guard."""
+    repo = _repo(tmp_path, "  publishTarget: rsync\n  publishDest: u@h:/var/www/s/\n")
+    rec = _Recorder()
+    monkeypatch.setattr(publish, "_run", rec)
+    out = publish.publish(repo, confirm=_no)
+    assert out["synced"] is True
+
+
+# ------------------------------------------------------------------ ask(), the real prompt
+
+def test_a_non_interactive_stdin_refuses(monkeypatch, capsys):
+    """Never a silent yes — the rule redact.ask set, applied to the force-push."""
+    monkeypatch.setattr(publish.sys, "stdin", _Stdin(tty=False))
+    assert publish.ask("ssh://example/records.git", "pages", 42) is False
+    err = capsys.readouterr().err
+    assert "stdin is not a terminal" in err and "--yes" in err
+
+
+def test_the_question_names_what_it_overwrites(monkeypatch, capsys):
+    monkeypatch.setattr(publish.sys, "stdin", _Stdin(tty=True, answer="y\n"))
+    assert publish.ask("ssh://example/records.git", "pages", 42) is True
+    err = capsys.readouterr().err
+    assert "ssh://example/records.git" in err and "pages" in err and "42" in err
+    assert "replaces" in err
+
+
+@pytest.mark.parametrize("answer, expected", [
+    ("y\n", True), ("Y\n", True), ("yes\n", True), ("YES\n", True),
+    ("n\n", False), ("\n", False), ("", False), ("maybe\n", False),
+])
+def test_only_yes_means_yes(monkeypatch, answer, expected):
+    monkeypatch.setattr(publish.sys, "stdin", _Stdin(tty=True, answer=answer))
+    assert publish.ask("ssh://e/r.git", "pages", 1) is expected
+
+
+def test_a_non_interactive_publish_refuses_end_to_end(tmp_path, monkeypatch, capsys):
+    """The path CI and /cpd take: no --yes, no terminal — it must refuse, not push."""
+    repo = _repo(tmp_path, "  publishTarget: pages-branch\n")
+    rec = _Recorder()
+    monkeypatch.setattr(publish, "_run", rec)
+    monkeypatch.setattr(publish.sys, "stdin", _Stdin(tty=False))
+    out = publish.publish(repo)
+    assert out["pushed"] is False and out["cancelled"] is True
+    assert not any("--force" in c for c in rec.calls)
+    assert "--yes" in capsys.readouterr().err
 
 
 def test_unset_target_errors(tmp_path, monkeypatch):
@@ -159,6 +269,23 @@ def test_cli_publish_json(tmp_path, monkeypatch, capsys):
     rc = cli.main(["publish", "--repo", str(repo), "--dry-run"])
     out = json.loads(capsys.readouterr().out)
     assert rc == 0 and out["dry_run"] is True and out["built"] is True
+
+
+def test_cli_publish_yes(tmp_path, monkeypatch, capsys):
+    repo = _repo(tmp_path, "  publishTarget: pages-branch\n")
+    monkeypatch.setattr(publish, "_run", _Recorder())
+    rc = cli.main(["publish", "--repo", str(repo), "--yes"])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 0 and out["pushed"] is True
+
+
+def test_cli_publish_without_yes_refuses_off_a_terminal(tmp_path, monkeypatch, capsys):
+    repo = _repo(tmp_path, "  publishTarget: pages-branch\n")
+    monkeypatch.setattr(publish, "_run", _Recorder())
+    monkeypatch.setattr(publish.sys, "stdin", _Stdin(tty=False))
+    rc = cli.main(["publish", "--repo", str(repo)])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 0 and out["pushed"] is False and out["cancelled"] is True
 
 
 def test_cli_publish_error_json(tmp_path, capsys):

@@ -49,7 +49,15 @@ def commit(repo: Path, message: str | None, push: bool = False, deploy: bool = F
 
 def _deploy(repo: Path) -> dict:
     """deployCommand first — so `deployCommand: records publish` beats the shipped
-    workflow dirs and is the no-CI publish hook — then workflow presence, then none."""
+    workflow dirs and is the no-CI publish hook — then workflow presence, then none.
+
+    The deployCommand runs with `capture_output=True`, which captures stdout and
+    stderr but inherits stdin. `records publish` asks before force-pushing the
+    pages branch, and that confirmation is invisible here: from a terminal the
+    prompt never appears and the read blocks; from a non-TTY caller `ask` refuses,
+    and the deploy returns `ran: True`, `returncode: 0` with `cancelled: true` in
+    the captured stdout — success-shaped, having published nothing. Configure the
+    command as `records publish --yes` for any unattended path."""
     configs = find_hugo_configs(repo)
     if configs:
         for line in configs[0].read_text(encoding="utf-8").splitlines():
