@@ -32,9 +32,9 @@ params. No Windows — the build path is bash.
 
 With CI publishing, the push is the deploy — nothing to run locally.
 
-All three paths build with a pinned Hugo, so the same commit keeps
-building the same site; raising a pin is a deliberate step, written down
-in [raising the build toolchain](toolchain.md).
+All three paths use a pinned Hugo. The pins are listed — and equal only
+by intention — in [raising the build toolchain](toolchain.md), where
+raising one is a deliberate step.
 
 ## Anywhere else: `records publish`
 
