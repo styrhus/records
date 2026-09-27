@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Layer B of the theme tests: what the themes actually render.
 
 Needs a real Hugo (``requires_hugo``); skips without one, and fails instead

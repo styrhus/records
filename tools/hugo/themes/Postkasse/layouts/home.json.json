@@ -1,3 +1,6 @@
+{{- /* SPDX-FileCopyrightText: 2026 tb4 */ -}}
+{{- /* SPDX-License-Identifier: AGPL-3.0-or-later */ -}}
+
 {{- /* The search index (kiste 2): every record as one JSON object, written once
        at build time and queried in the browser. No service, no library — the
        whole engine is a fetch and a loop in assets/js/postkasse.js.

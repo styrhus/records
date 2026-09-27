@@ -31,4 +31,4 @@ in the editors.
 **Full install guide, for the CLI and every editor:**
 <https://codeberg.org/blyant/records/src/branch/main/docs/install.md>
 
-MIT licensed. Requires Python 3.9+.
+AGPL-3.0-or-later licensed. Requires Python 3.9+.

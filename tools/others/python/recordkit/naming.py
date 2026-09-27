@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Tag/title parsing, slugs, unique paths, timestamps — ported from the record/all/me setup."""
 
 from __future__ import annotations

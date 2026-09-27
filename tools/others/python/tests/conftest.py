@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Shared fixtures.
 
 Everything in tests/ runs without Hugo except the theme *render* tests, which

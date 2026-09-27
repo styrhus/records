@@ -1,5 +1,5 @@
 name = "Fuglekasse"
-license = "MIT"
+license = "AGPL-3.0-or-later"
 licenselink = "https://codeberg.org/blyant/records/src/branch/main/LICENSE.md"
 description = "The default theme for blyant records — a minimal, config-driven Hugo theme for publishing conversation transcripts."
 homepage = "https://codeberg.org/blyant/records"

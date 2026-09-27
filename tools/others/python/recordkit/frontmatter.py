@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Build the record frontmatter block byte-for-byte as record/all/me write it; minimal edits for /stick."""
 
 from __future__ import annotations

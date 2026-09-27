@@ -1,3 +1,6 @@
+{{- /* SPDX-FileCopyrightText: 2026 tb4 */ -}}
+{{- /* SPDX-License-Identifier: AGPL-3.0-or-later */ -}}
+
 {{- /* The honest feed. RSS is disabled site-wide because Hugo's embedded
        template leaks the assistant signature lines through page summaries —
        a template problem, so this is the template that fixes it. It runs the

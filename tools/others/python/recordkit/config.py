@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Resolve the records directory the way the record/all/me/cpd skills do."""
 
 from __future__ import annotations

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Entry point baked into records.pyz — reports the stamped version, else runs the CLI.
 
 build-pyz.sh stages this as the archive's root __main__.py; it is not part of the

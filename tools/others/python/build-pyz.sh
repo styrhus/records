@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Build records.pyz: the whole engine as one file that runs on any Python 3.9+.
 # Zero dependencies is what makes this a stdlib zipapp and nothing more.
 # Usage: tools/others/python/build-pyz.sh [outfile]   (default: dist/records.pyz)

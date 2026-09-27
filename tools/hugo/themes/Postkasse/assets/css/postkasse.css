@@ -1,3 +1,6 @@
+{{- /* SPDX-FileCopyrightText: 2026 tb4 */ -}}
+{{- /* SPDX-License-Identifier: AGPL-3.0-or-later */ -}}
+
 {{- /* Executed as a template by baseof.html so params.style lands in the palette. */ -}}
 {{- $s := site.Params.style -}}
 /* Palette + display font come from hugo.yaml params.style (see the theme README). */

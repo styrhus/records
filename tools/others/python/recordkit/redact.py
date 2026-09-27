@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Rewrite one turn of a record in place, leaving a visible seam instead of a lie.
 
 The seam is the point. A turn that has been redacted keeps its heading, its place in the

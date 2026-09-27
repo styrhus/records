@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: 2026 tb4
+-- SPDX-License-Identifier: AGPL-3.0-or-later
+
 -- EPUB chapters are XHTML: re-read raw HTML (unsafe: true record content) as
 -- native pandoc elements so void tags like <br>/<img> stay well-formed.
 local function readHtml(txt)

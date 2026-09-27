@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Read an archive back, or a live checkout, and report rot.
 
 An archive nobody has ever opened is a hope, not a backup. `verify_archive` recomputes every

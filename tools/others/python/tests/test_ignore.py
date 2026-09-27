@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """`.recordsignore` → the site config's ignoreFiles block.
 
 The book side cannot be executed here (no pandoc, no lua interpreter), so `_book_lua_ignored`

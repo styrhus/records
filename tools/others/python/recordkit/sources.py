@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Source parsers for `records import` — every one yields importer.Conversation and writes nothing.
 
 Kept strictly apart from the emitting in importer.py: a parser reads the user's file (read-only,

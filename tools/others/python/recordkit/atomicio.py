@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Write a whole file's replacement text without a truncate-then-write window.
 
 `Path.write_text` opens the target in truncating mode first and writes the new content after —

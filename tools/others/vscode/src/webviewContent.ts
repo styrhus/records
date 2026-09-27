@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 tb4
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // Inline webview page: HTML + CSS + JS in one template literal (CSP: inline only, no external resources).
 export function getWebviewContent(commandsJson: string): string {
   return `<!DOCTYPE html>

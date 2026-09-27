@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """One self-contained bundle holding everything needed to rebuild — or simply to read — a records site.
 
 The manifest is the point: written first, listing every entry with its size and SHA-256, so an

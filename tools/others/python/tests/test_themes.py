@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Layer A of the theme tests: the contract between the two themes, as files.
 
 No Hugo, no build, no skip — ``pathlib`` and ``hashlib``. AGENTS.md states

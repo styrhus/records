@@ -1,3 +1,6 @@
+{{- /* SPDX-FileCopyrightText: 2026 tb4 */ -}}
+{{- /* SPDX-License-Identifier: AGPL-3.0-or-later */ -}}
+
 {{- /* URL prefix for repo links. Takes {kind: "raw"|"tree", branch?}; style from params.repoLinkStyle (auto = by repoURL host), branch defaults to params.repoBranch. */ -}}
 {{- $style := site.Params.repoLinkStyle | default "auto" -}}
 {{- $shapes := dict "forgejo" (dict "raw" "raw/branch" "tree" "src/branch") "github" (dict "raw" "raw" "tree" "tree") "gitlab" (dict "raw" "-/raw" "tree" "-/tree") -}}

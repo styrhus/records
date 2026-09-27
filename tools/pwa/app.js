@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 tb4
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // UI wiring. All the byte-level decisions live in record.js and all the network
 // in forge.js; this file only moves text between them and the screen.
 

@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # The one build path: site + books into a single output dir, used identically
 # by CI, `records publish` and manual runs.
 # Usage: bin/build.sh [outdir]   (default: <repo-root>/public, gitignored)

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """`.recordsignore` — a friendlier front end to Hugo's `ignoreFiles`, not a second mechanism.
 
 The build already has exactly one exclusion path: `ignoreFiles` in the site config. Hugo matches

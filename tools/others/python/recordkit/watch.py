@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Watch the records dir, rebuild through the one build path, and bark.
 
 The dog: it notices and it reports. It never commits, never pushes, never

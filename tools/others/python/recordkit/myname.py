@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Persist the user's name (/myname). Memory defaults to a gitignored .mem/ beside the records content."""
 
 from __future__ import annotations

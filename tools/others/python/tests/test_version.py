@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """The one version number: recordkit.__version__ must equal the werden cycle in CURRENT."""
 
 from pathlib import Path

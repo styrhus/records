@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 tb4
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // Shell cache, so composing works with no connection. Bump SHELL when any
 // cached file changes, or phones will keep serving the old one.
 const SHELL = "records-shell-v1";

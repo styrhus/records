@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: 2026 tb4
+-- SPDX-License-Identifier: AGPL-3.0-or-later
+
 -- records.nvim — Neovim chat panel for the mechanical records skills.
 -- Mechanical only: every command shells out to the `records` CLI, no model involved. The one
 -- exception is Ollama (ollama_endpoint + ollama_model): still just the CLI, over a background job.

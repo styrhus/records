@@ -602,5 +602,5 @@ stale that way.
 
 ## License
 
-MIT for the theme code. The bundled *Architects Daughter* font is SIL OFL 1.1 — see
+AGPL-3.0-or-later for the theme code. The bundled *Architects Daughter* font is SIL OFL 1.1 — see
 [`static/fonts/OFL.txt`](static/fonts/OFL.txt).

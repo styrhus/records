@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 from datetime import datetime
 from pathlib import Path
 from xml.etree import ElementTree

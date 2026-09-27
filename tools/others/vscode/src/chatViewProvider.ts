@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 tb4
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import * as vscode from "vscode";
 import * as child_process from "child_process";
 import { getWebviewContent } from "./webviewContent";

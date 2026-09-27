@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Find and resolve the local files a record points at — the one scanner archive/verify/export share.
 
 Only asset references count: Markdown images and raw `src=` attributes (records are

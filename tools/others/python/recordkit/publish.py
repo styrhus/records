@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Build the site and deliver it — the mechanical core of `records publish`.
 
 Delivery is picked by params in the discovered hugo.yaml: publishTarget

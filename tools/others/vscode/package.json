@@ -4,7 +4,7 @@
   "description": "Chat-style editor for the blyant records site — mechanical skills without AI (or with Ollama).",
   "version": "0.6.0",
   "publisher": "tb4",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "icon": "media/icon.png",
   "galleryBanner": {
     "color": "#1a1b26",

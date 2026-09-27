@@ -1,3 +1,6 @@
+/* SPDX-FileCopyrightText: 2026 tb4 */
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
 /* Print mirror of the site CSS (themes/Fuglekasse/layouts/baseof.html), light
    palette. book.lua injects the site's params.style.light after this file, so
    these :root values are the theme defaults, overridden per site config. */

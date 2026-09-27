@@ -1,3 +1,6 @@
+/* SPDX-FileCopyrightText: 2026 tb4 */
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
 /* Structural EPUB stylesheet: e-readers override fonts and render grayscale,
    so nothing here relies on colour — borders, indentation and case only. */
 

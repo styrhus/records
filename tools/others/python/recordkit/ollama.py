@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Two-sided /record via a local Ollama model (stdlib urllib, /api/chat)."""
 
 from __future__ import annotations

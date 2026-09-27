@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Stamp the MPRIS now-playing track into a file (/mucke)."""
 
 from __future__ import annotations

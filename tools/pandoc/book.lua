@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: 2026 tb4
+-- SPDX-License-Identifier: AGPL-3.0-or-later
+
 -- Assemble every record into one Pandoc document (JSON on stdout), mirroring the
 -- site: intro (_index.md), loose records, then chapters ascending (arabic before
 -- roman), records ordered by date per params.singleOrder. Run via `pandoc lua`.

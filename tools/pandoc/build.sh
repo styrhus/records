@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Build the site's records into one PDF, EPUB and/or print booklet: book.lua
 # assembles, pandoc renders — HTML printed by WeasyPrint for the PDF and the
 # booklet (A5 pages imposed 2-up on A4 landscape), straight to EPUB otherwise.

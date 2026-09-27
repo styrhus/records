@@ -1,3 +1,6 @@
+/* SPDX-FileCopyrightText: 2026 tb4 */
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
 /* Booklet override, loaded after pdf.css: the book is rendered at A5 so
    impose.py can place two pages per A4 landscape sheet. Page background is
    white for paper printing; other colours stay pdf.css / site-palette values. */

@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: 2026 tb4
+-- SPDX-License-Identifier: AGPL-3.0-or-later
+
 -- Registers :Records without requiring setup() — the plugin works unconfigured.
 if vim.g.loaded_records then
   return

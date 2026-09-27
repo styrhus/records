@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Turn exported conversations into records (`records import`).
 
 One internal shape — a Conversation of Turns — is all any source parser produces; the emitting

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Grep the records tree for things that look like credentials — heuristic, and it says so.
 
 The doctor's sibling: findings with remedies, reporting only, never fixing. What it finds is a

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """The last resort: the whole corpus as plain text that needs no tooling at all.
 
 Markdown is already readable, but not *only* readable — it has syntax that means something else

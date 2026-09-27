@@ -4,7 +4,8 @@
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://codeberg.org/blyant/records
-;; SPDX-License-Identifier: MIT
+;; SPDX-FileCopyrightText: 2026 tb4
+;; SPDX-License-Identifier: AGPL-3.0-or-later
 
 ;;; Commentary:
 

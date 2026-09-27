@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """git commit/push and Hugo deploy — the mechanical core of /gc, /gcp, /cpd."""
 
 from __future__ import annotations

@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # werden.sh — advance or set the records werden-cycle name and stamp it into docs.
 #
 # Usage: werden.sh [new-structure-name | --stamp]

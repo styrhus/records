@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Booklet imposition: place the pages of a PDF two-up on A4 landscape sheets
 in folding order, so the duplex-printed stack (flip on short edge) folds in
 half into a booklet. Page count is padded to a multiple of 4 with the filler

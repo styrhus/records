@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 tb4
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // Single source of truth for slash commands: dispatch in chatViewProvider, autocomplete in the webview.
 export interface CommandSpec {
   name: string;

@@ -1,5 +1,5 @@
 name = "Postkasse"
-license = "MIT"
+license = "AGPL-3.0-or-later"
 licenselink = "https://codeberg.org/blyant/records/src/branch/main/LICENSE.md"
 description = "The growth theme for blyant records — Fuglekasse's shape with an assets pipeline, room for search, backlinks and feeds."
 homepage = "https://codeberg.org/blyant/records"

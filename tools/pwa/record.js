@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 tb4
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // The byte-exact mirror of recordkit's record writer. Every function here has a
 // named counterpart in tools/others/python/recordkit/ and must agree with it
 // byte for byte — tools/pwa/fixtures.json is the shared contract, checked by

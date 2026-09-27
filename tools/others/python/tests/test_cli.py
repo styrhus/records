@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Smoke tests for the argparse wiring in `recordkit.cli` — one per subcommand.
 
 `cli.py` is the one module every plugin goes through and the only one with no tests: the

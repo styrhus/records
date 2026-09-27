@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """records booth — a room with a door: open, type, submit a turn, keep typing, close.
 
 stdlib curses only. Buffer and Session hold the logic, so everything but the drawing

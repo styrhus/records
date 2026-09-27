@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Pull a record out of the published world without pretending it never existed.
 
 One mechanism, not two: `draft: true` in the record's own frontmatter. Hugo skips drafts by

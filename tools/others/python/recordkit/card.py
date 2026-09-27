@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """One turn of a record as a shareable SVG quote card, drawn in the site's own palette.
 
 Stdlib only: the SVG is a template string, text metrics are a monospace assumption.

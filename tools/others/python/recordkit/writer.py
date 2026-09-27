@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Append helpers matching the record/all/me heredoc pattern (leading blank line, then content)."""
 
 from __future__ import annotations

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 tb4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Put a file into a record — the ergonomics of the leaf-bundle convention.
 
 Converting a flat `<slug>.md` into `<slug>/index.md` and copying a file beside it is a four-step

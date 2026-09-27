@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 tb4
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // Forgejo/Gitea contents API. One adapter, one forge — Codeberg is the canonical
 // host and the only one this has been tested against.
 //

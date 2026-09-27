@@ -3,7 +3,7 @@ name = "recordkit"
 dynamic = ["version"]
 description = "Run the mechanical records skills without AI: create Hugo-frontmatter records, feature, commit/push/deploy, publish, stamp now-playing."
 readme = "README.md"
-license = "MIT"
+license = "AGPL-3.0-or-later"
 requires-python = ">=3.9"
 dependencies = []
 keywords = ["hugo", "markdown", "records", "publishing", "static-site", "ollama"]
