@@ -1,5 +1,5 @@
 # naming
-<!-- werden: 0.12.3 badstu-cricket -->
+<!-- werden: 0.12.4 badstu-moth -->
 
 How werden-cycle names are formed, and the name pools they draw from.
 
@@ -31,7 +31,7 @@ and `pyproject.toml` reads it from there. There is one version number in this pr
 cycle.
 
 That has one consequence worth stating plainly. **Structures are not walked in pool order** — the
-roads on the [roadmap](../../../docs/records/developers/ROADMAP.md) are open, not queued — so a step
+roads are open, not queued (the roads ledger lives in `styrhus/management`) — so a step
 from `badstu` (12) back to `bikube` (3) derives `0.3.1`, which is *lower* than `0.12.1`. Package
 indexes order releases numerically, so the older release would stay "latest" forever.
 

@@ -79,8 +79,9 @@ voiceRecorded: true
 That puts a microphone beside every Human heading, on the site and in the PDF
 and EPUB alike. It means *this was spoken*; it does not mean a machine wrote it
 down, and this project ships no transcriber — your phone did the listening, at
-your asking, before any of our code saw the text. The reasoning is in
-[the argument against building it](records/developers/roadmap/akvarium/voice.md).
+your asking, before any of our code saw the text. If you want the audio itself
+kept beside the words, that is `records attach` applied to an `.m4a` — see
+[attachments](attachments.md).
 
 ## A git client
 

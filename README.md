@@ -63,6 +63,6 @@ record — [install it](docs/install.md).
 
 ---
 
-> Fase — 0.12.3 badstu-cricket
+> Fase — 0.12.4 badstu-moth
 
 [blyant](https://snl.no/blyant)

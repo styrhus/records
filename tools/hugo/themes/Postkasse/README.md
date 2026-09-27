@@ -1,6 +1,6 @@
 # Postkasse
 
-<!-- werden: 0.12.3 badstu-cricket -->
+<!-- werden: 0.12.4 badstu-moth -->
 
 The growth theme for [blyant records](https://codeberg.org/blyant/records) — Norwegian for
 *mailbox*, wearing the name of the werden cycle that dreamed it.
@@ -15,8 +15,7 @@ script are built, minified and fingerprinted out of `assets/` instead of sitting
 `baseof.html`, and on that foundation live the features the fence keeps out of Fuglekasse:
 site-wide [search](#search), build-time [backlinks](#backlinks), an honest [RSS feed](#rss),
 [reading chrome](#reading-chrome), [attachment rendering](#attachments) and per-record
-[Open Graph cards](#meta-description-and-link-previews) — see the
-[kiste roadmap](../../../../docs/records/developers/roadmap/kiste/ROADMAP.md).
+[Open Graph cards](#meta-description-and-link-previews) — each documented below.
 
 ## Switching themes
 

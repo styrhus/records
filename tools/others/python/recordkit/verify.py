@@ -5,7 +5,7 @@ checksum against the manifest; `verify_repo` asks the everyday question instead 
 relative image reference in every record still resolve to a file that exists? A moved image is a
 broken image on the site and a missing figure in the PDF, silently, today.
 
-The roadmap asked for a --json flag. There is none: the CLI emits JSON on stdout for every command
+An early plan asked for a --json flag. There is none: the CLI emits JSON on stdout for every command
 by design (cli._emit), so `records verify` is already machine-readable.
 
 """
