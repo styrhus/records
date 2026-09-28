@@ -118,8 +118,9 @@ global setting with `chapterOpen: true` or `chapterOpen: false` in its
 `_index.md` front matter (unset inherits `chapterState`).
 
 Hovering a chapter title reveals a `#` link (as on record titles) that anchors
-to `#chapter-<folder-name>`; clicking it links to the chapter without toggling
-the fold.
+to `#chapter-<folder-name>`; clicking it (or Enter on it) links to the chapter
+without toggling the fold. On touch screens, which have no hover, the `#` links
+stay visible.
 
 Records outside numbered folders render first, exactly as without chapters;
 the chapters follow in ascending order, arabic before roman (`-1, 0, 2, i, iv`),
@@ -173,8 +174,8 @@ regular expression (`foo|bar`, `\bword\b`); invalid regex syntax falls back to
 a plain case-insensitive text search, so `c++(` and friends still find their
 literal selves. Whitespace is collapsed before matching, so a phrase matches
 across line breaks. In browsers with the CSS Custom Highlight API the matched
-words are tinted in the visible cards; elsewhere the filtering works the same
-without the tint.
+words are tinted and underlined in the visible cards; elsewhere the filtering
+works the same without the marking.
 
 The filter state lives in the URL query string —
 `?tags=a,b&language=nb,none&from=2026-01-01&to=2026-12-31&word=foo%7Cbar` —
@@ -185,6 +186,10 @@ anywhere until the filter clears. Tags containing a comma cannot be filtered
 closes as a plain `<details>`, but the controls do nothing.
 
 ## Get PDF
+
+Printing a page straight from the browser always uses the light palette, even for a
+reader in dark mode, and leaves out the floating buttons and the logo; the PDF below is
+the proper book.
 
 Set `params.pdf` to a filename — `pdf: records.pdf` — and the footer shows a
 **Get PDF** link to that file at the site root. It is **unset by default**: the

@@ -5,10 +5,12 @@
   <article>
     {{ partial "lang-badge.html" . }}
     {{ $fmt := site.Params.dateTitleFormat }}
-    {{- if and $fmt (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` .Title) }}
+    {{- /* No title: fall back to the file name, as baseof.html's <title> does. */}}
+    {{- $t := .Title }}{{ if not $t }}{{ with .File }}{{ $t = .ContentBaseName }}{{ end }}{{ end }}
+    {{- if and $fmt (findRE `^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$` $t) }}
     <h1><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format $fmt .Date }}</time></h1>
     {{- else }}
-    {{- with .Title }}
+    {{- with $t }}
     <h1>{{ . }}</h1>
     {{- end }}
     {{- end }}

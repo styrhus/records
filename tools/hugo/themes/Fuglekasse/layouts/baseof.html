@@ -29,7 +29,7 @@
       --surface: {{ $s.light.surface | safeCSS }};
       --card: {{ $s.light.card | safeCSS }};
     }
-    @media (prefers-color-scheme: dark) {
+    @media screen and (prefers-color-scheme: dark) {
       :root {
         --bg: {{ $s.dark.bg | safeCSS }};
         --fg: {{ $s.dark.fg | safeCSS }};
@@ -88,7 +88,7 @@
     }
     .assistant-block > :last-child { margin-bottom: 0; }
     .assistant-label { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 0.5rem; color: var(--ab-fg); }
-    @media (prefers-color-scheme: dark) {
+    @media screen and (prefers-color-scheme: dark) {
       /* The dark half's bg would blend into this fill — nested code drops to the dark surface. */
       .assistant-block { --ab-bg: #2a2b38; --ab-code: {{ $s.dark.surface | safeCSS }}; }
       .assistant-label { color: color-mix(in srgb, var(--ab-fg) 62%, var(--ab-bg)); }
@@ -112,7 +112,7 @@
       --hl-comment: #5f6370; --hl-keyword: #6c17b2; --hl-string: #085726;
       --hl-number: #8b2800; --hl-func: #0c3bbf; --hl-builtin: #004f7b; --hl-var: #980d0d;
     }
-    @media (prefers-color-scheme: dark) {
+    @media screen and (prefers-color-scheme: dark) {
       :root {
         --hl-comment: #9aabde; --hl-keyword: #ff79c6; --hl-string: #f1fa8c;
         --hl-number: #bd93f9; --hl-func: #50fa7b; --hl-builtin: #8be9fd; --hl-var: #ffb86c;
@@ -162,6 +162,8 @@
     .anchor { margin-left: 0.4em; color: var(--dim); text-decoration: none; opacity: 0; transition: opacity 0.15s; }
     .record-head:hover .anchor, section.user h2:hover .anchor, details.chapter > summary:hover .anchor, .anchor:focus { opacity: 1; }
     .anchor:hover { text-decoration: none; }
+    /* Touch screens have no hover to reveal the "#" anchors, so they stay shown. */
+    @media screen and (hover: none) { .anchor { opacity: 1; } }
     /* Mic icon on Human headings of voiceRecorded records. */
     .voice-icon svg { height: 0.7em; width: auto; margin-left: 0.4em; color: var(--accent); vertical-align: baseline; }
     /* Language badge (frontmatter "language"), top right of records. */
@@ -230,7 +232,17 @@
     .filter-clear { font: inherit; color: var(--fg); background: var(--card); border: none; border-radius: 6px; padding: 0.15rem 0.6rem; cursor: pointer; }
     .filter-clear:hover { color: var(--accent); }
     .filter-hidden { display: none; }
-    ::highlight(word-match) { background-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+    ::highlight(word-match) { background-color: color-mix(in srgb, var(--accent) 30%, transparent); text-decoration: underline 2px var(--accent); }
+    /* Paper gets the light palette (the dark queries above are screen-only) and none of the fixed widgets. */
+    @media print {
+      :root { color-scheme: light; }
+      .toc, .filter, .spotify, .site-logo, .scroll-to-top { display: none; }
+      .assistant-block { --ab-bg: transparent; --ab-fg: var(--fg); --ab-code: var(--surface); border: 1px solid var(--dim); }
+      .assistant-block { --hl-comment: inherit; --hl-keyword: inherit; --hl-string: inherit; --hl-number: inherit; --hl-func: inherit; --hl-builtin: inherit; --hl-var: inherit; }
+      .assistant-block a { color: var(--accent); }
+      .assistant-block blockquote { border-left-color: var(--accent); }
+      .assistant-block th, .assistant-block td { border-color: var(--dim); }
+    }
     /* Architects Daughter by Kimberly Geswein — SIL OFL 1.1, see fonts/OFL.txt. */
     @font-face {
       font-family: "{{ $s.font | safeCSS }}";
@@ -320,6 +332,8 @@
       var chapterAnchors = document.querySelectorAll('details.chapter > summary .anchor');
       for (var j = 0; j < chapterAnchors.length; j++) {
         chapterAnchors[j].addEventListener('click', function (e) { e.stopPropagation(); });
+        // Space on a link nested in <summary> would toggle the fold too.
+        chapterAnchors[j].addEventListener('keydown', function (e) { if (e.key === ' ') e.preventDefault(); });
       }
 
       // Open any collapsed <details> that holds the hash target so TOC/anchor links reveal it.

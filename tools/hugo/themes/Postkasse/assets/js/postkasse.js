@@ -49,6 +49,8 @@
   var chapterAnchors = document.querySelectorAll('details.chapter > summary .anchor');
   for (var j = 0; j < chapterAnchors.length; j++) {
     chapterAnchors[j].addEventListener('click', function (e) { e.stopPropagation(); });
+    // Space on a link nested in <summary> would toggle the fold too.
+    chapterAnchors[j].addEventListener('keydown', function (e) { if (e.key === ' ') e.preventDefault(); });
   }
 
   // Open any collapsed <details> that holds the hash target so TOC/anchor links reveal it.

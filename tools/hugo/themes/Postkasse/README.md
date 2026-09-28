@@ -199,7 +199,7 @@ Records outside numbered folders render first; chapters follow in ascending orde
 roman (`-1, 0, 2, i, iv`), regardless of `singleOrder` — that only orders records *inside* a
 chapter. Give a chapter a title with an `_index.md` carrying a `title:` (`1 — This is Chapter 1`);
 the `_index.md` never becomes a record. Hovering a chapter title reveals a `#` anchor that links to
-it without toggling the fold. Note that a folder whose name is a valid roman numeral (`cd`, `mix`,
+it without toggling the fold; on touch screens, which have no hover, the `#` anchors stay visible. Note that a folder whose name is a valid roman numeral (`cd`, `mix`,
 `ml`) becomes a chapter too — pick a different tag name if that is not what you mean.
 
 ## Table of contents
@@ -227,7 +227,7 @@ all filtered away hide; chapters holding matches open automatically and return t
 The Word field searches everything visible on a card as you type, tried as a case-insensitive
 regular expression (`foo|bar`, `\bword\b`) and falling back to a literal search on invalid syntax.
 Whitespace is collapsed first, so a phrase matches across line breaks. Browsers with the CSS Custom
-Highlight API tint the matches.
+Highlight API tint and underline the matches.
 
 Filter state lives in the URL query string —
 `?tags=a,b&language=nb,none&from=2026-01-01&to=2026-12-31&word=foo%7Cbar` — so a filtered view is a
@@ -372,6 +372,10 @@ the hooks — `book.lua` already resolves images its own way, and a video link s
 there.
 
 ## Get PDF
+
+Printing a page straight from the browser always uses the light palette, even for a
+reader in dark mode, and leaves out the floating buttons and the logo; the PDF below is
+the proper book.
 
 Set `params.pdf` to a filename — `pdf: records.pdf` — and the footer shows a **Get PDF** link to
 that file at the site root. **Unset by default**: the theme only renders the link; the file is built

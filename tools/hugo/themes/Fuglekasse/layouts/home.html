@@ -192,7 +192,7 @@
       {{ else if and $i (not $isSpecial) }}<div class="record-sep" aria-hidden="true">· · ·</div>{{ end }}
       {{ $book := "" }}
       {{ if $isSpecial }}{{ $book = printf " book-%s" $r.File.ContentBaseName }}{{ end }}
-      <article class="record-flow{{ $book }}{{ if $r.Params.featured }} featured{{ end }}" id="{{ path.Base $r.RelPermalink }}"{{ with $r.Params.language }} lang="{{ . }}"{{ end }}>
+      <article class="record-flow{{ $book }}{{ if $r.Params.featured }} featured{{ end }}" id="{{ path.Base $r.RelPermalink }}" aria-label="{{ partial "inline/record-title.html" $r | plainify }}"{{ with $r.Params.language }} lang="{{ . }}"{{ end }}>
         {{ partial "record.html" (dict "content" $r.Content "prefix" (path.Base $r.RelPermalink) "voice" $r.Params.voiceRecorded) }}
       </article>
     {{ end }}
@@ -202,7 +202,7 @@
     {{ range $paginator.Pages }}
       <article class="post">
         <h2><a href="{{ .RelPermalink }}">{{ partial "inline/record-title.html" . }}</a></h2>
-        {{ partial "record.html" (dict "content" .Summary "prefix" (path.Base .RelPermalink) "voice" .Params.voiceRecorded) }}
+        {{ partial "record.html" (dict "content" .Summary "level" 3 "prefix" (path.Base .RelPermalink) "voice" .Params.voiceRecorded) }}
         {{ if .Truncated }}<p class="more"><a href="{{ .RelPermalink }}">Read more →</a></p>{{ end }}
         {{ if and $showTags (ne .Params.showTags false) .Params.tags }}<p class="post-tags">{{ range .Params.tags }}<span>#{{ . }}</span> {{ end }}</p>{{ end }}
         {{ if and $dfmt (ne .Params.showDate false) }}<p class="post-date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format $dfmt .Date }}</time></p>{{ end }}
@@ -234,7 +234,7 @@
   <article class="record-page{{ if .Params.featured }} featured{{ end }}"{{ with .Params.language }} lang="{{ . }}"{{ end }}{{ with .Params.tags }} data-tags="{{ delimit . "," }}"{{ end }} data-date="{{ .Date.Format "2006-01-02" }}">
     {{ partial "lang-badge.html" . }}
     <h2 class="record-head" id="{{ $id }}">{{ partial "inline/record-title.html" . }}<a class="anchor" href="#{{ $id }}" aria-label="Link to this record">#</a></h2>
-    {{ partial "record.html" (dict "content" .Content "prefix" $id "voice" .Params.voiceRecorded) }}
+    {{ partial "record.html" (dict "content" .Content "level" 3 "prefix" $id "voice" .Params.voiceRecorded) }}
     {{ if and site.Params.showTags (ne .Params.showTags false) .Params.tags }}<p class="post-tags">{{ range .Params.tags }}<span>#{{ . }}</span> {{ end }}</p>{{ end }}
     {{ if and site.Params.datePostFormat (ne .Params.showDate false) }}<p class="post-date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format site.Params.datePostFormat .Date }}</time></p>{{ end }}
     {{ partial "comment-link.html" . }}
