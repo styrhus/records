@@ -25,8 +25,8 @@ Sure! Adam and Eve are the first humans in Genesis.
 — claude-opus-4-8
 """
 
-SITE_CONFIG = """baseURL: https://blyant.codeberg.page/records/
-title: blyant records
+SITE_CONFIG = """baseURL: https://styrhus.codeberg.page/records/
+title: Styrhus Records
 params:
   dateTitleFormat: "02. January 2006"
   datePostFormat: "02. January 2006 15:04"
@@ -182,7 +182,7 @@ def test_build_uses_the_site_palette_title_and_url(tmp_path):
     svg = out.read_text(encoding="utf-8")
     assert "#444444" in svg and "#666666" in svg          # accent + card from the site config
     assert "06. July 2026" in svg                          # dateTitleFormat
-    assert "https://blyant.codeberg.page/records/2026-07-06_23-22/" in svg
+    assert "https://styrhus.codeberg.page/records/2026-07-06_23-22/" in svg
 
 
 def test_build_omits_the_url_when_baseurl_is_commented_out(tmp_path):

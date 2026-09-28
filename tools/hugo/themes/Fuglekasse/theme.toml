@@ -1,8 +1,8 @@
 name = "Fuglekasse"
 license = "AGPL-3.0-or-later"
-licenselink = "https://codeberg.org/blyant/records/src/branch/main/LICENSE.md"
-description = "The default theme for blyant records — a minimal, config-driven Hugo theme for publishing conversation transcripts."
-homepage = "https://codeberg.org/blyant/records"
+licenselink = "https://codeberg.org/styrhus/records/src/branch/main/LICENSE.md"
+description = "The default theme for Styrhus Records — a minimal, config-driven Hugo theme for publishing conversation transcripts."
+homepage = "https://codeberg.org/styrhus/records"
 min_version = "0.158.0"
 tags = ["minimal", "blog", "transcripts"]
 

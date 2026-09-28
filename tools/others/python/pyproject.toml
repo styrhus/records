@@ -17,9 +17,9 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://codeberg.org/blyant/records"
-Source = "https://codeberg.org/blyant/records"
-Issues = "https://codeberg.org/blyant/records/issues"
+Homepage = "https://codeberg.org/styrhus/records"
+Source = "https://codeberg.org/styrhus/records"
+Issues = "https://codeberg.org/styrhus/records/issues"
 
 [project.scripts]
 records = "recordkit.cli:main"

@@ -2,7 +2,7 @@
 
 <!-- werden: 0.12.4 badstu-moth -->
 
-The growth theme for [blyant records](https://codeberg.org/blyant/records) — Norwegian for
+The growth theme for [Styrhus Records](https://codeberg.org/styrhus/records) — Norwegian for
 *mailbox*, wearing the name of the werden cycle that dreamed it.
 
 [Fuglekasse](../Fuglekasse/README.md) is the default theme and stays deliberately small: flat
@@ -375,7 +375,7 @@ there.
 
 Set `params.pdf` to a filename — `pdf: records.pdf` — and the footer shows a **Get PDF** link to
 that file at the site root. **Unset by default**: the theme only renders the link; the file is built
-by the [blyant records](https://codeberg.org/blyant/records) repo's Pages workflow with the tooling
+by the [Styrhus Records](https://codeberg.org/styrhus/records) repo's Pages workflow with the tooling
 in `tools/pandoc/`, which turns the whole site into one PDF book — cover, table of contents with
 page numbers, loose records then chapters ascending, in the site's light palette and typography.
 Drafts, `LICENSE.md`, `404.md` and `ignoreFiles` matches stay out, signature lines are stripped, and

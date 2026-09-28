@@ -20,7 +20,7 @@ from recordkit import ignore
 
 CONFIG = """\
 locale: en-no
-title: blyant records
+title: Styrhus Records
 
 theme: Fuglekasse
 

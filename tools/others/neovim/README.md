@@ -1,7 +1,7 @@
 # records.nvim
 
 A chat panel in Neovim for writing records — the Markdown files that become a
-[blyant records](https://codeberg.org/blyant/records) site.
+[Styrhus Records](https://codeberg.org/styrhus/records) site.
 
 `:Records` opens a split at the bottom. Type `/all #linux How To` to start a recording, then plain
 lines to append to it, `/esc` to stop. `/stick`, `/gc`, `/gcp`, `/cpd`, `/myname`, `/mucke`, `/airtime`

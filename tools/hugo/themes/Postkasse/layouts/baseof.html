@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  {{ with resources.Get "CURRENT" }}<meta name="generator" content="blyant records {{ index (split (trim .Content "\n ") " ") 0 }}">{{ end }}
+  {{ with resources.Get "CURRENT" }}<meta name="generator" content="Styrhus Records {{ index (split (trim .Content "\n ") " ") 0 }}">{{ end }}
   <link rel="icon" href="{{ partial "static-url.html" (or site.Params.favicon "fuglekasse.svg") }}">
   {{- /* Display title, resolved once: head-meta.html reuses it for og:title. */ -}}
   {{- $pageTitle := site.Title -}}

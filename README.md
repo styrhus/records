@@ -1,14 +1,14 @@
-# blyant records
+# Styrhus Records
 
 Your records, published. Drop Markdown into `records/`, get a website —
-**blyant records** is your own publishing _datamaskineri_.
+**Styrhus Records** is your own publishing _datamaskineri_.
 
 Fork, enable Actions, push — your words appear at
 `https://<you>.codeberg.page/records/` (or your own domain name). A fresh
 fork starts as a working demo site; your first record replaces the demo
 automatically.
 
-The front page explains the basic functions: <https://blyant.codeberg.page/records/>.
+The front page explains the basic functions: <https://styrhus.codeberg.page/records/>.
 
 ## Make it yours
 
@@ -37,7 +37,7 @@ land in the clone, and `/cpd` pushes it home. Nothing to configure —
 
 ## Record together
 
-Teams, friends and lovers can share one **blyant records** instance. Add them as
+Teams, friends and lovers can share one **Styrhus Records** instance. Add them as
 collaborators on your fork, and they clone, they write, they commit — commit
 to it. Every push publishes to the same site.
 
@@ -65,4 +65,4 @@ record — [install it](docs/install.md).
 
 > Fase — 0.12.4 badstu-moth
 
-[blyant](https://snl.no/blyant)
+Code: AGPL-3.0-or-later · prose: CC BY-SA 4.0 — see [LICENSE.md](LICENSE.md).

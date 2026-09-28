@@ -1,4 +1,4 @@
-# Ollama Integration for blyant records
+# Ollama Integration for Styrhus Records
 
 The Records engine (`../python/`) and plugins (VSCode, Neovim) are fully usable with **no AI** — they support all mechanical skills (create, feature, commit/deploy, now-playing) plus user-only recording (`/all`, `/me`).
 
@@ -116,7 +116,7 @@ If Ollama is not configured or the endpoint is unreachable:
 - Voice skills are unavailable (the UI will warn).
 - All mechanical skills continue to work.
 
-This keeps the blyant records site usable offline or on minimal hardware.
+This keeps the Styrhus Records site usable offline or on minimal hardware.
 
 ## Status
 

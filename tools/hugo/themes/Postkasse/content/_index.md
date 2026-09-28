@@ -3,13 +3,13 @@ title: Velkommen
 date: 2026-07-05T01:30:00+02:00
 ---
 
-This is your **blyant records** site. Every Markdown file in `records/` becomes a page;
+This is your **Styrhus Records** site. Every Markdown file in `records/` becomes a page;
 this repository carries the machinery to write and publish them.
 
-**blyant records** publishes straight from your editor, with helpers along the
+**Styrhus Records** publishes straight from your editor, with helpers along the
 way. They run in well-known AI agents — or with no model at all, and even
 with your own local one; the
-[README](https://codeberg.org/blyant/records) covers both.
+[README](https://codeberg.org/styrhus/records) covers both.
 
 No helpers required, though: write or drop `.md` files into `records/` by
 hand and they publish just the same.
@@ -27,12 +27,12 @@ The essentials:
 - `/cpd` — stage everything, commit, push — and the push publishes the site
 - `/esc` — stop active modes; name one to stop only it
 
-The full set lives in [`.ai/skills/`](https://codeberg.org/blyant/records/src/branch/main/.ai/skills) —
+The full set lives in [`.ai/skills/`](https://codeberg.org/styrhus/records/src/branch/main/.ai/skills) —
 drafts-only recording, commit variants, diff summaries, spelling corrections, and a few voices.
 
 ## Publishing
 
-[Fork this repository](https://codeberg.org/blyant/records), enable Actions in your fork's settings, then push to
+[Fork this repository](https://codeberg.org/styrhus/records), enable Actions in your fork's settings, then push to
 `main`. Your site appears at `https://<your-user>.codeberg.page/<your-repo>/` — nothing to configure; the
 owner and repository name are derived from the push itself.
 

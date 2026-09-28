@@ -15,7 +15,7 @@ CONTENTS                                                     *records-contents*
 ==============================================================================
 1. INTRODUCTION                                          *records-introduction*
 
-records.nvim is the Neovim front end for blyant records — a publish-your-
+records.nvim is the Neovim front end for Styrhus Records — a publish-your-
 conversations site where every record is a Markdown file in your own repo.
 
 The plugin holds no logic of its own. Every action shells out to the `records`

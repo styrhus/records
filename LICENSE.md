@@ -1,4 +1,4 @@
-# blyant records — License
+# Styrhus Records — License
 
 This project contains two kinds of things. They have two licenses.
 

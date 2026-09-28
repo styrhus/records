@@ -2,7 +2,7 @@
 
 ## Human
 
-I forked `ssh://git@codeberg.org/blyant/records.git` into my own repo `ssh://git@codeberg.org/tb4/pages.git`. Now the original repo has new commits. How do I get them into my fork?
+I forked `ssh://git@codeberg.org/styrhus/records.git` into my own repo `ssh://git@codeberg.org/tb4/pages.git`. Now the original repo has new commits. How do I get them into my fork?
 
 ## Assistant
 
@@ -23,7 +23,7 @@ Okay, step 1?
 Run this once, inside your fork's clone:
 
 ```bash
-git remote add upstream ssh://git@codeberg.org/blyant/records.git
+git remote add upstream ssh://git@codeberg.org/styrhus/records.git
 ```
 
 A *remote* is just a saved address — like a contact in your phone. You already have one contact called `origin` (your fork, `ssh://git@codeberg.org/tb4/pages.git`). Now you added a second one called `upstream` (the original).

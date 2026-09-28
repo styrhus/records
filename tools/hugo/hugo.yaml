@@ -2,9 +2,9 @@
 # stops deriving and uses it as-is; needed for custom domains and rsync/VPS).
 # Commented out: CI derives the URL per fork (zero-edit forks); manual
 # bin/build.sh runs then need BASE_URL set or fail with a pointer here.
-# baseURL: https://blyant.codeberg.page/records/
+# baseURL: https://styrhus.codeberg.page/records/
 locale: en-no
-title: blyant records
+title: Styrhus Records
 
 # The default branding theme; all design lives in tools/hugo/themes/Fuglekasse/.
 theme: Fuglekasse
@@ -60,7 +60,7 @@ staticDir: [static, ../../static]
 dataDir: ../../data
 
 # The generator meta tag names the software, not Hugo: the themes emit
-# "blyant records <version>" from the repo-root CURRENT file (werden cycle),
+# "Styrhus Records <version>" from the repo-root CURRENT file (werden cycle),
 # mounted into assets because readFile cannot leave the project dir.
 disableHugoGeneratorInject: true
 module:
@@ -135,7 +135,7 @@ cascade:
 # Repo URL for the footer link and raw-link rewrites. Commented out = CI
 # derives it per fork (like baseURL); uncommented = authoritative everywhere.
 params:
-  # repoURL: https://codeberg.org/blyant/records
+  # repoURL: https://codeberg.org/styrhus/records
   # Set to false to hide the footer repo link; repoURL keeps rewriting
   # relative records/ links either way. Fuglekasse defaults to true.
   # showRepoURL: false
@@ -310,12 +310,12 @@ params:
   # The whole site as one PDF, built by the Pages workflow with the tooling in
   # pandoc/ and served from the site root; the footer shows a "Get PDF" link.
   # The value is the filename. Uncomment to enable both build and link.
-  # pdf: blyant.pdf
+  # pdf: styrhus-records.pdf
 
   # The whole site as one EPUB, built by the same workflow step and served from
   # the site root; the footer shows a "Get EPUB" link. The value is the
   # filename. Uncommend to enable both build and link.
-  # epub: blyant.epub
+  # epub: styrhus-records.epub
 
   # The book as a paper-saving print booklet: A5 pages on a white (ink-saving)
   # background, two-up on A4 landscape sheets in folding order — print
@@ -326,7 +326,7 @@ params:
   # outer sheet with forside as the folded book's back cover.
   # Built by the same workflow step (needs pypdf next to WeasyPrint); the
   # footer shows a "Get booklet" link. The value is the filename.
-  # booklet: blyant-booklet.pdf
+  # booklet: styrhus-records-booklet.pdf
 
   # Brand mark pinned to the bottom-right corner of every page. Point it at a
   # file in the repo-root static/ (or the theme's); remove to show none.

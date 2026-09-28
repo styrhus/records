@@ -1,7 +1,7 @@
 # records.el
 
 A chat panel in Emacs for writing records — the Markdown files that become a
-[blyant records](https://codeberg.org/blyant/records) site.
+[Styrhus Records](https://codeberg.org/styrhus/records) site.
 
 `M-x records` opens a window at the bottom. `RET` prompts for a line: `/all #linux How To` starts a
 recording, plain text appends to it, `/esc` stops. `/stick`, `/gc`, `/gcp`, `/cpd`, `/myname`,

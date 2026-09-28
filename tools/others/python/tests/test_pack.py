@@ -168,9 +168,9 @@ def test_external_script_is_removed(tmp_path):
 
 def test_outbound_anchors_are_left_alone(tmp_path):
     """A link a human clicks is not a fetch."""
-    repo = _site(tmp_path, '<a href="https://codeberg.org/blyant/records">repo</a>')
+    repo = _site(tmp_path, '<a href="https://codeberg.org/styrhus/records">repo</a>')
     _, html = _packed(repo)
-    assert 'href="https://codeberg.org/blyant/records"' in html
+    assert 'href="https://codeberg.org/styrhus/records"' in html
 
 
 # -- links -------------------------------------------------------------------

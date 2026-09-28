@@ -2,7 +2,7 @@
 
 <!-- werden: 0.12.4 badstu-moth -->
 
-The default theme for [blyant records](https://codeberg.org/blyant/records) — Norwegian for
+The default theme for [Styrhus Records](https://codeberg.org/styrhus/records) — Norwegian for
 *nesting box*. A deliberately small, config-driven Hugo theme for publishing
 conversation transcripts: four templates, one web font, no build step.
 
@@ -189,7 +189,7 @@ closes as a plain `<details>`, but the controls do nothing.
 Set `params.pdf` to a filename — `pdf: records.pdf` — and the footer shows a
 **Get PDF** link to that file at the site root. It is **unset by default**: the
 theme only renders the link; the file itself is built by the
-[blyant records](https://codeberg.org/blyant/records) repo's Pages workflow with the
+[Styrhus Records](https://codeberg.org/styrhus/records) repo's Pages workflow with the
 tooling in `tools/pandoc/`, which turns the whole site into one PDF book — cover
 (greeting and title), table of contents with page numbers, loose records first,
 then chapters ascending, each record under its display title, in the site's
@@ -239,7 +239,7 @@ Dates without a UTC offset — front matter `date:` values and filename
 timestamps — are interpreted in the site's `timeZone`, so CI builds on UTC
 machines keep your wall-clock times. It's a root `hugo.yaml` key, not a param:
 Hugo ignores root keys in theme configs, so Fuglekasse can't ship a default —
-the blyant records repo's `hugo.yaml` sets `timeZone: Europe/Oslo`; point it at your
+the Styrhus Records repo's `hugo.yaml` sets `timeZone: Europe/Oslo`; point it at your
 own zone.
 
 ## Tags
@@ -367,7 +367,7 @@ PDF/EPUB books never include them.
 content files carrying `demo: true` in their front matter (the theme ships one,
 `content/example/example-recording.md`) — but only while the site has no real
 records: the first record of your own hides them automatically, nothing to
-edit. `false` never shows them. The blyant records site ships `demoMode: true`
+edit. `false` never shows them. The Styrhus Records site ships `demoMode: true`
 so a fresh fork is a working site out of the box.
 
 The theme also ships the default front page (`content/_index.md`, the welcome

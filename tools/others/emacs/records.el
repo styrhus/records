@@ -1,15 +1,15 @@
-;;; records.el --- Chat panel for the blyant records site  -*- lexical-binding: t; -*-
+;;; records.el --- Chat panel for the Styrhus Records site  -*- lexical-binding: t; -*-
 
 ;; Author: tb4
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "27.1"))
-;; Homepage: https://codeberg.org/blyant/records
+;; Homepage: https://codeberg.org/styrhus/records
 ;; SPDX-FileCopyrightText: 2026 tb4
 ;; SPDX-License-Identifier: AGPL-3.0-or-later
 
 ;;; Commentary:
 
-;; The Emacs front end for blyant records — a publish-your-conversations site
+;; The Emacs front end for Styrhus Records — a publish-your-conversations site
 ;; where every record is a Markdown file in your own repo.
 ;;
 ;; The package holds no logic of its own.  Every action runs the `records' CLI
@@ -30,7 +30,7 @@
 (require 'subr-x)
 
 (defgroup records nil
-  "Write records for a blyant records site."
+  "Write records for a Styrhus Records site."
   :group 'external
   :prefix "records-")
 

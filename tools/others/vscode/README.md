@@ -2,7 +2,7 @@
 
 Write your conversations down, and publish them as your own static site.
 
-[blyant records](https://codeberg.org/blyant/records) turns Markdown transcripts into a published
+[Styrhus Records](https://codeberg.org/styrhus/records) turns Markdown transcripts into a published
 site. This extension is the editor side of it: a sidebar chat where you record a conversation — with
 yourself, or with a local model — and it lands as a Markdown file in your own repo, with correct
 frontmatter, ready to build and publish. No account, no service, no data leaving your machine.
@@ -22,7 +22,7 @@ If `records` isn't on your PATH afterwards, set `records.binaryPath` to its full
 
 A local [Ollama](https://ollama.com) model is **optional**. Without one, every command still works;
 recordings are simply one-sided. Full setup for the CLI and every editor:
-[docs/install.md](https://codeberg.org/blyant/records/src/branch/main/docs/install.md).
+[docs/install.md](https://codeberg.org/styrhus/records/src/branch/main/docs/install.md).
 
 ## Features
 
@@ -70,7 +70,7 @@ Open `tools/others/vscode/` in the editor, `npm install`, then press F5 to launc
 Extension Development Host (`npm run watch` for incremental compiles). `npm run package` builds the
 `.vsix`; built `.vsix` files are throwaway build artefacts — never committed, never packaged.
 Release steps live in
-[tools/others/README.md](https://codeberg.org/blyant/records/src/branch/main/tools/others/README.md).
+[tools/others/README.md](https://codeberg.org/styrhus/records/src/branch/main/tools/others/README.md).
 
 ## Settings
 
@@ -107,4 +107,4 @@ missing files degrade to a marker instead of failing the turn. The `@` picker li
 2000 workspace files (common build/VCS dirs excluded). Without a configured model,
 attachments are ignored and the message is recorded user-only with a notice.
 
-See [tools/others/ollama/README.md](https://codeberg.org/blyant/records/src/branch/main/tools/others/ollama/README.md).
+See [tools/others/ollama/README.md](https://codeberg.org/styrhus/records/src/branch/main/tools/others/ollama/README.md).

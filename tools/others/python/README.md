@@ -1,6 +1,6 @@
 # recordkit
 
-The AI-free engine behind [blyant records](https://codeberg.org/blyant/records) — a
+The AI-free engine behind [Styrhus Records](https://codeberg.org/styrhus/records) — a
 publish-your-conversations site where every record is a Markdown file in your own repo.
 
 `recordkit` is a stateless CLI that emits JSON. It creates records with correct Hugo frontmatter,
@@ -29,6 +29,6 @@ Editor plugins for VS Code / VSCodium, Neovim and Emacs drive this same CLI — 
 in the editors.
 
 **Full install guide, for the CLI and every editor:**
-<https://codeberg.org/blyant/records/src/branch/main/docs/install.md>
+<https://codeberg.org/styrhus/records/src/branch/main/docs/install.md>
 
 AGPL-3.0-or-later licensed. Requires Python 3.9+.

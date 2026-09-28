@@ -1,8 +1,8 @@
-# blyant records Without AI (`tools/others/`)
+# Styrhus Records Without AI (`tools/others/`)
 
 <!-- werden: 0.12.4 badstu-moth -->
 
-This directory contains the **no-AI engine and plugins** for the blyant records site — letting you run the mechanical slash-commands without a model. Optionally add Ollama for the AI-driven skills.
+This directory contains the **no-AI engine and plugins** for the Styrhus Records site — letting you run the mechanical slash-commands without a model. Optionally add Ollama for the AI-driven skills.
 
 ## Architecture
 
@@ -40,7 +40,7 @@ The `records` command is now available system-wide. From a clone: `pipx install 
 
 Installing the editor plugins is one page: [docs/install.md](../../docs/install.md).
 
-### 2. Try it (from the blyant records repo)
+### 2. Try it (from the Styrhus Records repo)
 
 ```bash
 # Create a record

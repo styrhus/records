@@ -79,8 +79,8 @@ def test_base_url_env_is_second_rung():
 
 
 def test_pages_host_derivation():
-    env = {"PAGES_HOST": "p.xil.no", "GITHUB_REPOSITORY": "blyant/records"}
-    assert doctor.resolve_url("", env) == ("PAGES_HOST", "https://blyant.p.xil.no/records/")
+    env = {"PAGES_HOST": "p.xil.no", "GITHUB_REPOSITORY": "styrhus/records"}
+    assert doctor.resolve_url("", env) == ("PAGES_HOST", "https://styrhus.p.xil.no/records/")
 
 
 def test_pages_host_repo_named_pages_serves_domain_root():
@@ -89,8 +89,8 @@ def test_pages_host_repo_named_pages_serves_domain_root():
 
 
 def test_codeberg_derivation():
-    env = {"GITHUB_REPOSITORY": "blyant/records", "GITHUB_SERVER_URL": "https://codeberg.org"}
-    assert doctor.resolve_url("", env) == ("codeberg", "https://blyant.codeberg.page/records/")
+    env = {"GITHUB_REPOSITORY": "styrhus/records", "GITHUB_SERVER_URL": "https://codeberg.org"}
+    assert doctor.resolve_url("", env) == ("codeberg", "https://styrhus.codeberg.page/records/")
 
 
 def test_ci_pages_url_is_last_rung():
