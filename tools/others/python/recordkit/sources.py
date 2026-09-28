@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -267,7 +268,94 @@ def markdown(path: Path):
         )
 
 
+# --- claude.ai data export (conversations.json, zipped in batches) -----------------------------
+
+def _export_documents(path: Path, name: str) -> list:
+    """Every `name` JSON document under `path`: the file itself, a zip holding it, or a directory
+    of either — exports now arrive as several `<category>-NNN.zip` batches."""
+    path = Path(path)
+    if path.is_dir():
+        found = [f for f in sorted(path.rglob("*")) if f.name == name or f.suffix == ".zip"]
+    elif path.is_file():
+        found = [path]
+    else:
+        raise ValueError(f"no export at {path}")
+    docs = []
+    for file in found:
+        if file.suffix == ".zip":
+            with zipfile.ZipFile(file) as archive:
+                members = [m for m in archive.namelist() if Path(m).name == name]
+                docs += [(f"{file.name}:{m}", archive.read(m)) for m in members]
+        else:
+            docs.append((file.name, file.read_bytes()))
+    if not docs:
+        raise ValueError(f"{path.name}: no {name} in it")
+    parsed = []
+    for label, raw in docs:
+        try:
+            parsed.append(json.loads(raw))
+        except json.JSONDecodeError as e:
+            raise ValueError(f"{label} is not JSON ({e.msg})") from e
+    return parsed
+
+
+def _cai_branch(messages: list) -> list:
+    """The branch the export last showed: walk parents back from the newest message. An edited
+    or regenerated turn leaves its siblings in the list; they are not part of this conversation."""
+    by_id = {m.get("uuid"): m for m in messages}
+    if not messages or not all(m.get("parent_message_uuid") for m in messages):
+        return messages
+    leaf = max(messages, key=lambda m: m.get("created_at") or "")
+    chain: list = []
+    seen: set = set()
+    while leaf is not None and leaf.get("uuid") not in seen:
+        seen.add(leaf.get("uuid"))
+        chain.append(leaf)
+        leaf = by_id.get(leaf.get("parent_message_uuid"))
+    return chain[::-1]
+
+
+def _cai_text(message: dict) -> str:
+    """Text blocks only — the flat `text` field carries stub lines where tool cards sat."""
+    blocks = message.get("content")
+    if isinstance(blocks, list) and blocks:
+        text = "\n\n".join(b.get("text", "") for b in blocks
+                           if isinstance(b, dict) and b.get("type") == "text")
+    else:
+        text = message.get("text") or ""
+    names = [a.get("file_name") for a in (message.get("attachments") or []) + (message.get("files") or [])
+             if isinstance(a, dict) and a.get("file_name")]
+    notes = "\n".join(f"*[attachment: {n}]*" for n in names)
+    return "\n\n".join(part for part in (text.strip(), notes) if part)
+
+
+def claude_ai(path: Path):
+    """claude.ai data export — a conversations.json, a zip holding one, or the unzipped export
+    directory. The export names no model, so assistant turns go unsigned."""
+    for doc in _export_documents(Path(path), "conversations.json"):
+        if not isinstance(doc, list):
+            raise ValueError("not a claude.ai export: conversations.json is not a list")
+        for conv in doc:
+            turns = []
+            for message in _cai_branch(conv.get("chat_messages") or []):
+                text = _cai_text(message)
+                if text:
+                    turns.append(Turn(HUMAN if message.get("sender") == "human" else ASSISTANT, text))
+            turns = _coalesce(turns)
+            if not turns:
+                continue
+            first_human = next((t.text for t in turns if t.role == HUMAN), "")
+            yield Conversation(
+                turns=turns,
+                title=_clean_title(conv.get("name") or first_human),
+                date=_when(conv.get("created_at")),
+                source_id=conv.get("uuid"),
+                kind="claude.ai conversation",
+            )
+
+
 PARSERS: dict = {
+    "claude-ai": claude_ai,
     "claude-code": claude_code,
     "llm": llm,
     "markdown": markdown,

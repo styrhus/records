@@ -1,0 +1,257 @@
+[
+ {
+  "uuid": "conv-tools",
+  "name": "Frames without a cloud",
+  "summary": "",
+  "created_at": "2026-08-13T09:58:18.306505Z",
+  "updated_at": "2026-08-13T10:00:00Z",
+  "account": {
+   "uuid": "acct"
+  },
+  "chat_messages": [
+   {
+    "uuid": "m1",
+    "text": "which photo frames work offline?",
+    "content": [
+     {
+      "type": "text",
+      "text": "which photo frames work offline?",
+      "citations": []
+     }
+    ],
+    "sender": "human",
+    "created_at": "2026-08-13T09:58:19Z",
+    "updated_at": "2026-08-13T09:58:19Z",
+    "attachments": [],
+    "files": [],
+    "parent_message_uuid": "00000000-0000-4000-8000-000000000000"
+   },
+   {
+    "uuid": "m2",
+    "text": "Three kinds work offline.\n```\nThis block is not supported on your current device yet.\n```\n\nThe simplest is a USB-stick frame.",
+    "content": [
+     {
+      "type": "thinking",
+      "thinking": "private reasoning"
+     },
+     {
+      "type": "tool_use",
+      "id": "toolu_1",
+      "name": "web_search",
+      "input": {
+       "query": "offline photo frame"
+      }
+     },
+     {
+      "type": "tool_result",
+      "tool_use_id": "toolu_1",
+      "name": "web_search",
+      "content": [
+       {
+        "type": "text",
+        "text": "search result body"
+       }
+      ]
+     },
+     {
+      "type": "text",
+      "text": "Three kinds work offline.",
+      "citations": []
+     },
+     {
+      "type": "text",
+      "text": "The simplest is a USB-stick frame.",
+      "citations": []
+     }
+    ],
+    "sender": "assistant",
+    "created_at": "2026-08-13T09:58:40Z",
+    "updated_at": "2026-08-13T09:58:40Z",
+    "attachments": [],
+    "files": [],
+    "parent_message_uuid": "m1"
+   }
+  ]
+ },
+ {
+  "uuid": "conv-branch",
+  "name": "",
+  "summary": "",
+  "created_at": "2026-08-18T11:10:53Z",
+  "updated_at": "2026-08-18T11:20:00Z",
+  "account": {
+   "uuid": "acct"
+  },
+  "chat_messages": [
+   {
+    "uuid": "b1",
+    "text": "what is gitops?",
+    "content": [
+     {
+      "type": "text",
+      "text": "what is gitops?",
+      "citations": []
+     }
+    ],
+    "sender": "human",
+    "created_at": "2026-08-18T11:10:54Z",
+    "updated_at": "2026-08-18T11:10:54Z",
+    "attachments": [],
+    "files": [],
+    "parent_message_uuid": "00000000-0000-4000-8000-000000000000"
+   },
+   {
+    "uuid": "b2",
+    "text": "Git as the source of truth.",
+    "content": [
+     {
+      "type": "text",
+      "text": "Git as the source of truth.",
+      "citations": []
+     }
+    ],
+    "sender": "assistant",
+    "created_at": "2026-08-18T11:11:00Z",
+    "updated_at": "2026-08-18T11:11:00Z",
+    "attachments": [],
+    "files": [],
+    "parent_message_uuid": "b1"
+   },
+   {
+    "uuid": "b3",
+    "text": "and argo?",
+    "content": [
+     {
+      "type": "text",
+      "text": "and argo?",
+      "citations": []
+     }
+    ],
+    "sender": "human",
+    "created_at": "2026-08-18T11:12:00Z",
+    "updated_at": "2026-08-18T11:12:00Z",
+    "attachments": [],
+    "files": [],
+    "parent_message_uuid": "b2"
+   },
+   {
+    "uuid": "b4",
+    "text": "the abandoned answer",
+    "content": [
+     {
+      "type": "text",
+      "text": "the abandoned answer",
+      "citations": []
+     }
+    ],
+    "sender": "assistant",
+    "created_at": "2026-08-18T11:12:10Z",
+    "updated_at": "2026-08-18T11:12:10Z",
+    "attachments": [],
+    "files": [],
+    "parent_message_uuid": "b3"
+   },
+   {
+    "uuid": "b5",
+    "text": "argo or flux?",
+    "content": [
+     {
+      "type": "text",
+      "text": "argo or flux?",
+      "citations": []
+     }
+    ],
+    "sender": "human",
+    "created_at": "2026-08-18T11:13:00Z",
+    "updated_at": "2026-08-18T11:13:00Z",
+    "attachments": [],
+    "files": [],
+    "parent_message_uuid": "b2"
+   },
+   {
+    "uuid": "b6",
+    "text": "Either; Flux is lighter.",
+    "content": [
+     {
+      "type": "text",
+      "text": "Either; Flux is lighter.",
+      "citations": []
+     }
+    ],
+    "sender": "assistant",
+    "created_at": "2026-08-18T11:13:10Z",
+    "updated_at": "2026-08-18T11:13:10Z",
+    "attachments": [],
+    "files": [],
+    "parent_message_uuid": "b5"
+   }
+  ]
+ },
+ {
+  "uuid": "conv-empty",
+  "name": "Nothing said",
+  "summary": "",
+  "created_at": "2026-08-19T00:00:00Z",
+  "updated_at": "2026-08-19T00:00:00Z",
+  "account": {
+   "uuid": "acct"
+  },
+  "chat_messages": []
+ },
+ {
+  "uuid": "conv-attach",
+  "name": "Read this",
+  "summary": "",
+  "created_at": "2026-08-20T02:14:20Z",
+  "updated_at": "2026-08-20T02:15:00Z",
+  "account": {
+   "uuid": "acct"
+  },
+  "chat_messages": [
+   {
+    "uuid": "a1",
+    "text": "summarise it",
+    "content": [
+     {
+      "type": "text",
+      "text": "summarise it",
+      "citations": []
+     }
+    ],
+    "sender": "human",
+    "created_at": "2026-08-20T02:14:21Z",
+    "updated_at": "2026-08-20T02:14:21Z",
+    "attachments": [
+     {
+      "file_name": "notes.txt",
+      "file_type": "txt",
+      "extracted_content": "secret body"
+     }
+    ],
+    "files": [
+     {
+      "file_name": "photo.png"
+     }
+    ],
+    "parent_message_uuid": "00000000-0000-4000-8000-000000000000"
+   },
+   {
+    "uuid": "a2",
+    "text": "It is a shopping list.",
+    "content": [
+     {
+      "type": "text",
+      "text": "It is a shopping list.",
+      "citations": []
+     }
+    ],
+    "sender": "assistant",
+    "created_at": "2026-08-20T02:14:30Z",
+    "updated_at": "2026-08-20T02:14:30Z",
+    "attachments": [],
+    "files": [],
+    "parent_message_uuid": "a1"
+   }
+  ]
+ }
+]

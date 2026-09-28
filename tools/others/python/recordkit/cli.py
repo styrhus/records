@@ -146,12 +146,14 @@ def _build_parser() -> argparse.ArgumentParser:
     cf.add_argument("--dir")
 
     im = sub.add_parser("import", help="import conversations from an export into records")
-    im.add_argument("--source", required=True, help="claude-code | llm | markdown")
+    im.add_argument("--source", required=True, help="claude-ai | claude-code | llm | markdown")
     im.add_argument("--path", required=True, help="the export file or directory")
     im.add_argument("--dir")
     im.add_argument("--tags", help="comma-separated; routes every record into the first tag")
     im.add_argument("--dry-run", action="store_true", help="report what would land, write nothing")
     im.add_argument("--name", help="human name for the headings; default: the saved /myname name")
+    im.add_argument("--draft", action=argparse.BooleanOptionalAction, default=None,
+                    help="write records as drafts; default: on for claude-ai, off otherwise")
 
     ar = sub.add_parser("archive", help="bundle records, assets, config and a checksum manifest")
     ar.add_argument("--repo", default=".")
@@ -325,7 +327,8 @@ def main(argv: list[str] | None = None) -> int:
         elif args.cmd == "import":
             tags = [t.strip() for t in args.tags.split(",") if t.strip()] if args.tags else None
             _emit(importer.run(args.source, Path(args.path), _records_dir(args), tags=tags,
-                               name=args.name or myname.load(), dry_run=args.dry_run))
+                               name=args.name or myname.load(), dry_run=args.dry_run,
+                               draft=args.draft))
         elif args.cmd == "archive":
             if args.check:
                 report = archive_mod.check(Path(args.repo), Path(args.out) if args.out else None)

@@ -4,6 +4,7 @@
 import json
 import os
 import sqlite3
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -314,3 +315,94 @@ def test_markdown_skips_an_empty_file(tmp_path):
 
 def test_markdown_is_registered():
     assert sources.PARSERS["markdown"] is sources.markdown
+
+
+# --- claude.ai export --------------------------------------------------------------------------
+
+CLAUDE_AI = FIXTURES / "claude-ai-conversations.json"
+
+
+def cai(path=CLAUDE_AI):
+    return {c.source_id: c for c in sources.claude_ai(Path(path))}
+
+
+def zipped(tmp_path, name="conversations-000.zip", member="conversations.json"):
+    target = tmp_path / name
+    with zipfile.ZipFile(target, "w") as archive:
+        archive.write(CLAUDE_AI, member)
+    return target
+
+
+def test_claude_ai_keeps_text_blocks_and_drops_the_tool_trace():
+    turns = cai()["conv-tools"].turns
+    assert [(t.role, t.text) for t in turns] == [
+        ("human", "which photo frames work offline?"),
+        ("assistant", "Three kinds work offline.\n\nThe simplest is a USB-stick frame."),
+    ]
+    body = "\n".join(t.text for t in turns)
+    assert "private reasoning" not in body and "search result body" not in body
+    assert "not supported on your current device" not in body
+
+
+def test_claude_ai_follows_the_newest_branch():
+    turns = cai()["conv-branch"].turns
+    assert [t.text for t in turns] == ["what is gitops?", "Git as the source of truth.",
+                                       "argo or flux?", "Either; Flux is lighter."]
+
+
+def test_claude_ai_title_date_and_id():
+    conv = cai()["conv-tools"]
+    assert conv.title == "Frames without a cloud"
+    assert conv.date == datetime(2026, 8, 13, 9, 58, 18, 306505, tzinfo=timezone.utc)
+    assert conv.kind == "claude.ai conversation"
+
+
+def test_claude_ai_untitled_takes_the_first_human_line():
+    assert cai()["conv-branch"].title == "what is gitops?"
+
+
+def test_claude_ai_assistant_turns_go_unsigned():
+    assert all(t.model is None for c in cai().values() for t in c.turns)
+
+
+def test_claude_ai_skips_an_empty_conversation():
+    assert "conv-empty" not in cai()
+
+
+def test_claude_ai_names_attachments_without_their_content():
+    text = cai()["conv-attach"].turns[0].text
+    assert text == "summarise it\n\n*[attachment: notes.txt]*\n*[attachment: photo.png]*"
+
+
+def test_claude_ai_reads_the_zip(tmp_path):
+    assert set(cai(zipped(tmp_path))) == {"conv-tools", "conv-branch", "conv-attach"}
+
+
+def test_claude_ai_reads_every_batch_in_a_directory(tmp_path):
+    zipped(tmp_path, "conversations-000.zip")
+    with zipfile.ZipFile(tmp_path / "light_metadata-000.zip", "w") as archive:
+        archive.writestr("users.json", "[]")
+    convs = list(sources.claude_ai(tmp_path))
+    assert len(convs) == 3
+
+
+def test_claude_ai_zip_without_conversations_is_an_error(tmp_path):
+    zipped(tmp_path, "light.zip", member="users.json")
+    with pytest.raises(ValueError, match="no conversations.json"):
+        list(sources.claude_ai(tmp_path / "light.zip"))
+
+
+def test_claude_ai_rejects_a_non_list_document(tmp_path):
+    (tmp_path / "conversations.json").write_text("{}")
+    with pytest.raises(ValueError, match="not a claude.ai export"):
+        list(sources.claude_ai(tmp_path / "conversations.json"))
+
+
+def test_claude_ai_is_registered():
+    assert sources.PARSERS["claude-ai"] is sources.claude_ai
+
+
+def test_claude_ai_directory_without_conversations_is_an_error(tmp_path):
+    zipped(tmp_path, "light_metadata-000.zip", member="users.json")
+    with pytest.raises(ValueError, match="no conversations.json"):
+        list(sources.claude_ai(tmp_path))

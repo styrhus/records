@@ -109,3 +109,22 @@ def test_unknown_source_error_names_the_known_ones(tmp_path):
     with pytest.raises(ValueError) as e:
         importer.run("nope", tmp_path, tmp_path)
     assert "nope" in str(e.value) and "claude-code" in str(e.value)
+
+
+def test_run_drafts_by_default_for_whole_account_exports(tmp_path, monkeypatch):
+    monkeypatch.setitem(importer.parsers(), "claude-ai", lambda p: iter([conv(title="A", source_id="1")]))
+    out = importer.run("claude-ai", tmp_path / "src", tmp_path / "rec")
+    assert out["written"][0]["draft"] is True
+    assert "\ndraft: true\n" in Path(out["written"][0]["path"]).read_text()
+
+
+def test_run_draft_false_overrides_the_source_default(tmp_path, monkeypatch):
+    monkeypatch.setitem(importer.parsers(), "claude-ai", lambda p: iter([conv(title="A", source_id="1")]))
+    out = importer.run("claude-ai", tmp_path / "src", tmp_path / "rec", draft=False)
+    assert "draft:" not in Path(out["written"][0]["path"]).read_text()
+
+
+def test_run_other_sources_publish_by_default(tmp_path, monkeypatch):
+    monkeypatch.setitem(importer.parsers(), "fake", lambda p: iter([conv(title="A", source_id="1")]))
+    out = importer.run("fake", tmp_path / "src", tmp_path / "rec")
+    assert "draft:" not in Path(out["written"][0]["path"]).read_text()

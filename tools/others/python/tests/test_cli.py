@@ -215,7 +215,15 @@ def test_import(capsys, monkeypatch):
                              "--tags", "a,b", "--dry-run", "--name", "tb4"])
     assert (code, out) == (0, {"imported": 3})
     assert spy.args == ("llm", Path("/e.json"), Path("/rec"))
-    assert spy.kwargs == {"tags": ["a", "b"], "name": "tb4", "dry_run": True}
+    assert spy.kwargs == {"tags": ["a", "b"], "name": "tb4", "dry_run": True, "draft": None}
+
+
+def test_import_draft_flags(capsys, monkeypatch):
+    spy = Spy({})
+    monkeypatch.setattr(cli.importer, "run", spy)
+    run(capsys, ["import", "--source", "claude-ai", "--path", "/e", "--dir", "/r", "--no-draft"])
+    run(capsys, ["import", "--source", "llm", "--path", "/e", "--dir", "/r", "--draft"])
+    assert [kw["draft"] for _, kw in spy.calls] == [False, True]
 
 
 def test_archive(capsys, monkeypatch):

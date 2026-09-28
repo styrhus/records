@@ -112,7 +112,7 @@ These have no slash-command counterpart — they are the CLI's, and they need no
 
 | Command | What it does |
 |---------|-------------|
-| `records import --source <s> --path <p>` | Import conversations from an export: `claude-code`, `llm`, `markdown`. Idempotent — a second run writes nothing. |
+| `records import --source <s> --path <p>` | Import conversations from an export: `claude-ai` (the account export — `conversations.json`, its zip, or the folder of batch zips), `claude-code`, `llm`, `markdown`. Idempotent — a second run writes nothing. `claude-ai` writes drafts unless `--no-draft`; `--draft` works for any source. |
 | `records archive [--check]` | One zip holding records, referenced assets, the site config and a SHA-256 manifest. Deterministic. `--check` is cron mode: silent when healthy. |
 | `records verify [<archive>]` | Recompute an archive's checksums, or — with no argument — check that every reference in every record still resolves. |
 | `records export --out <path> [--single]` | The whole corpus as plain text that needs no tooling at all. |

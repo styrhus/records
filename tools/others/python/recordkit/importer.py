@@ -21,6 +21,8 @@ from . import create, frontmatter, writer
 
 HUMAN = "human"
 ASSISTANT = "assistant"
+# Whole-account exports: every conversation you ever had, so nothing publishes unasked.
+DRAFT_SOURCES = frozenset({"claude-ai"})
 
 
 @dataclass
@@ -63,7 +65,7 @@ def imported_ids(records_dir: Path, source: str) -> dict:
 
 
 def emit(records_dir: Path, conv: Conversation, source: str = "", tags: list | None = None,
-         name: str | None = None, dry_run: bool = False) -> dict:
+         name: str | None = None, dry_run: bool = False, draft: bool = False) -> dict:
     """Write one conversation as a record. Explicit `tags` override the parser's."""
     tags = tags if tags else list(conv.tags)
     when = conv.date or datetime.now()
@@ -73,7 +75,7 @@ def emit(records_dir: Path, conv: Conversation, source: str = "", tags: list | N
     if dry_run:
         path = create.target_path(records_dir, title, when, tags)
     else:
-        path = Path(create.new_record(records_dir, tags=tags, title=title,
+        path = Path(create.new_record(records_dir, tags=tags, title=title, draft=draft,
                                       when=when, extra=identity)["path"])
         for turn in conv.turns:
             if turn.role == ASSISTANT:
@@ -82,17 +84,20 @@ def emit(records_dir: Path, conv: Conversation, source: str = "", tags: list | N
                 writer.append_human(path, turn.text, name=name)
 
     return {"path": str(path), "title": title or path.stem, "source_id": conv.source_id,
-            "turns": len(conv.turns), "kind": conv.kind}
+            "turns": len(conv.turns), "kind": conv.kind, "draft": draft}
 
 
 def run(source: str, path: Path, records_dir: Path, tags: list | None = None,
-        name: str | None = None, dry_run: bool = False) -> dict:
-    """Parse `path` with the named source and emit every conversation it yields."""
+        name: str | None = None, dry_run: bool = False, draft: bool | None = None) -> dict:
+    """Parse `path` with the named source and emit every conversation it yields.
+    `draft` None means the source's default: drafts for DRAFT_SOURCES, published otherwise."""
     registry = parsers()
     parser = registry.get(source)
     if parser is None:
         raise ValueError(f"unknown source: {source} (known: {', '.join(sorted(registry))})")
 
+    if draft is None:
+        draft = source in DRAFT_SOURCES
     seen = imported_ids(records_dir, source)
     written: list = []
     skipped: list = []
@@ -100,7 +105,8 @@ def run(source: str, path: Path, records_dir: Path, tags: list | None = None,
         if conv.source_id and conv.source_id in seen:
             skipped.append({"source_id": conv.source_id, "record": str(seen[conv.source_id])})
             continue
-        result = emit(records_dir, conv, source=source, tags=tags, name=name, dry_run=dry_run)
+        result = emit(records_dir, conv, source=source, tags=tags, name=name, dry_run=dry_run,
+                      draft=draft)
         if conv.source_id:
             seen[conv.source_id] = Path(result["path"])
         written.append(result)
