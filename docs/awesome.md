@@ -26,7 +26,7 @@ any key under `params.style`:
 params:
   style:
     light: { bg: "#d5d6db", fg: "#343b58", dim: "#5a5d67", accent: "#34548a", surface: "#e5e6ea", card: "#f5f5f7" }
-    dark:  { bg: "#282a36", fg: "#f8f8f2", dim: "#8b96c9", accent: "#bd93f9", surface: "#21222c", card: "#323445" }
+    dark:  { bg: "#282a36", fg: "#f8f8f2", dim: "#a0aad8", accent: "#bd93f9", surface: "#21222c", card: "#323445" }
 ```
 
 `bg` background · `fg` text · `dim` quiet text (footer, labels) · `accent`

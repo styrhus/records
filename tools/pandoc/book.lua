@@ -98,11 +98,13 @@ end
 -- Assistant-panel text, accents and code fills come from the palette's dark half (as on the site).
 local darkParams = styleParams.dark or {}
 local dark = {}
-for k, dflt in pairs({ bg = "#282a36", fg = "#f8f8f2", dim = "#8b96c9", accent = "#bd93f9", surface = "#21222c" }) do
+for k, dflt in pairs({ bg = "#282a36", fg = "#f8f8f2", dim = "#a0aad8", accent = "#bd93f9", surface = "#21222c" }) do
   dark[k] = str(darkParams[k]) or dflt
 end
 -- The panel fill itself is fixed per scheme; the book prints the light one.
-local abBg = "#717484"
+local abBg = "#555867"
+-- Link colour on that fill: the dark accent is 2.5:1 on it.
+local abLink = "#e2cffc"
 local fontName = str(styleParams.font) or "Architects Daughter"
 local fontFile = str(styleParams.fontfile) or "fonts/architects-daughter.woff2"
 
@@ -720,9 +722,9 @@ end
 
 -- Palette + greeting font from site params, injected after pdf.css so they win.
 local css = string.format(":root{--bg:%s;--fg:%s;--dim:%s;--accent:%s;--surface:%s;"
-  .. "--ab-bg:%s;--ab-fg:%s;--ab-code:%s;--ab-accent:%s;--ab-dim:%s}@page{background:%s}",
+  .. "--ab-bg:%s;--ab-fg:%s;--ab-code:%s;--ab-accent:%s;--ab-link:%s;--ab-dim:%s}@page{background:%s}",
   light.bg, light.fg, light.dim, light.accent, light.surface,
-  abBg, dark.fg, dark.bg, dark.accent, dark.dim, light.bg)
+  abBg, dark.fg, dark.bg, dark.accent, abLink, dark.dim, light.bg)
 local fontPath = path.join({ repoRoot, "hugo", "themes", themeName, "static", fontFile })
 if not exists(fontPath) then fontPath = path.join({ repoRoot, "hugo", "static", fontFile }) end
 if exists(fontPath) then

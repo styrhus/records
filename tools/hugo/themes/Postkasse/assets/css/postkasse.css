@@ -45,7 +45,6 @@ section.user { border-left: 3px solid var(--accent); padding-left: 1rem; }
 section.user > h2, section.assistant > h2 { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; margin: 2.5rem 0 0.25rem; }
 section.user > h2 { color: var(--accent); }
 section.assistant > h2 { color: var(--fg); }
-section.assistant { opacity: 0.75; }
 code, pre { font-size: 0.9em; background: var(--surface); }
 code { padding: 0.1em 0.3em; border-radius: 3px; }
 pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 0.75rem; border-radius: 6px; }
@@ -61,7 +60,8 @@ blockquote > :last-child { margin-bottom: 0; }
 blockquote pre, blockquote code { background: var(--bg); } /* --surface on --surface would blend */
 /* ```assistant fences: model output pasted into a record — markdown on a slate panel. */
 .assistant-block {
-  --ab-bg: #717484; /* fixed per scheme; text, accents and code fills still track params.style's dark half */
+  --ab-bg: #555867; /* fixed per scheme; text, accents and code fills still track params.style's dark half */
+  --ab-link: #e2cffc; /* the dark accent is 2.5:1 on this fill; this lavender passes AA */
   --ab-fg: {{ $s.dark.fg | safeCSS }};
   --ab-code: {{ $s.dark.bg | safeCSS }};
   /* Dracula token colours, so a nested fence stays readable on the dark code fill in both schemes. */
@@ -74,7 +74,7 @@ blockquote pre, blockquote code { background: var(--bg); } /* --surface on --sur
 .assistant-label { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 0.5rem; color: var(--ab-fg); }
 @media screen and (prefers-color-scheme: dark) {
   /* The dark half's bg would blend into this fill — nested code drops to the dark surface. */
-  .assistant-block { --ab-bg: #2a2b38; --ab-code: {{ $s.dark.surface | safeCSS }}; }
+  .assistant-block { --ab-bg: #2a2b38; --ab-code: {{ $s.dark.surface | safeCSS }}; --ab-link: {{ $s.dark.accent | safeCSS }}; }
   .assistant-label { color: color-mix(in srgb, var(--ab-fg) 62%, var(--ab-bg)); }
 }
 /* Headings inside the block stay a step below their counterparts outside it. */
@@ -86,7 +86,7 @@ blockquote pre, blockquote code { background: var(--bg); } /* --surface on --sur
 .assistant-block h2 { font-size: 1.1em; }
 .assistant-block h3 { font-size: 1em; }
 .assistant-block h4, .assistant-block h5, .assistant-block h6 { font-size: 0.92em; }
-.assistant-block a { color: {{ $s.dark.accent | safeCSS }}; }
+.assistant-block a { color: var(--ab-link); }
 .assistant-block code, .assistant-block pre { background: var(--ab-code); }
 .assistant-block blockquote { border-left-color: {{ $s.dark.accent | safeCSS }}; background: var(--ab-code); }
 .assistant-block th, .assistant-block td { border-color: {{ $s.dark.dim | safeCSS }}; }

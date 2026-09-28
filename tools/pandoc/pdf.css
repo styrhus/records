@@ -63,7 +63,6 @@ h2.record-head { page-break-before: always; page-break-after: avoid; font-size: 
 /* speaker turns (site: section.user / section.assistant); pandoc may emit
    the wrapping div as <section>, so match by class only */
 .user { border-left: 3px solid var(--accent); padding-left: 1rem; }
-.assistant { opacity: 0.75; }
 h6.speaker { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.08em; margin: 2.5rem 0 0.25rem; page-break-after: avoid; }
 .user h6.speaker { color: var(--accent); }
 .assistant h6.speaker { color: var(--fg); }
@@ -91,7 +90,7 @@ pre code { padding: 0; background: none; }
 /* ```assistant fences (Div.assistant-block from book.lua): the site's slate panel, light-scheme fill.
    --ab-* are injected via header-includes — fill fixed, the rest from the palette's dark half. */
 .assistant-block {
-  background: var(--ab-bg, #717484); color: var(--ab-fg, #f8f8f2);
+  background: var(--ab-bg, #555867); color: var(--ab-fg, #f8f8f2);
   margin: 1rem 0; padding: 0.75rem 1rem; border-radius: 6px;
 }
 .assistant-block > :last-child { margin-bottom: 0; }
@@ -101,10 +100,10 @@ pre code { padding: 0; background: none; }
 .assistant-block h3 { font-size: 1.05em; }
 .assistant-block h4 { font-size: 1em; }
 .assistant-block h5, .assistant-block h6:not(.speaker) { font-size: 0.92em; }
-.assistant-block a { color: var(--ab-accent, #bd93f9); }
+.assistant-block a { color: var(--ab-link, #e2cffc); }
 .assistant-block code, .assistant-block pre { background: var(--ab-code, #282a36); }
 .assistant-block blockquote { border-left-color: var(--ab-accent, #bd93f9); background: var(--ab-code, #282a36); }
-.assistant-block th, .assistant-block td { border-color: var(--ab-dim, #8b96c9); }
+.assistant-block th, .assistant-block td { border-color: var(--ab-dim, #a0aad8); }
 .assistant-block tbody tr:nth-child(even) { background: var(--ab-code, #282a36); }
 /* Skylighting tokens inside the panel: Dracula, so a nested fence stays readable on the dark code fill. */
 .assistant-block code span.co, .assistant-block code span.do { color: #9aabde; }
