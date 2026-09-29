@@ -357,6 +357,13 @@ params:
   # commentURL: https://codeberg.org/you/yourrepo/issues/new
   # commentSite: example.com
 
+  # Turn-heading words shown on the site and in the PDF/EPUB. Display only:
+  # records keep `## Human` / `## Assistant`, and anchors stay #human-N.
+  # Named turns keep their name ("Menneske (Ola)"). Defaults: Human, Assistant.
+  # turnLabels:
+  #   human: Menneske
+  #   assistant: Assistent
+
   # Look & feel — Fuglekasse ships these defaults; uncomment a line to override.
   # style:
   #   font: Architects Daughter

@@ -32,6 +32,11 @@ logoSize = "default"  # logo size: default (48px), bigger-1 (+25%), bigger-2 (+5
 # commentSite = "example.com"  # site label in the prefilled issue title ([site - #slug]); unset uses the baseURL host
 # cdnURL = "https://example.b-cdn.net/"  # CDN prefix for static assets (favicon, font, logo, pdf/epub/booklet) in production builds; unset serves them from the site
 
+# Displayed turn-heading words (site and PDF/EPUB); the record source keeps ## Human / ## Assistant.
+[params.turnLabels]
+human = "Human"
+assistant = "Assistant"
+
 [params.style]
 font = "Architects Daughter"
 fontfile = "fonts/architects-daughter.woff2"

@@ -453,6 +453,24 @@ their ids are dropped, so a `## Assistant` line *inside* the block cannot break 
 Nested fences work if the outer fence uses more backticks than the inner one. Same rendering in the
 PDF and EPUB; the print booklet draws the panel as an outlined white box.
 
+## Turn labels
+
+The turn headings show the words written in the record, **Human** and **Assistant**. To show other
+words, set them in `hugo.yaml`:
+
+```yaml
+params:
+  turnLabels:
+    human: Menneske
+    assistant: Assistent
+```
+
+This changes only what readers see. The records still say `## Human` and `## Assistant`, turn anchors
+stay `#human-N`, and a named turn keeps its name (`Menneske (Ola)`). Legacy `## User` headings take
+the human label too. The assistant label also names the assistant-block panel. The PDF, EPUB and
+booklet use the same words, but they read `hugo.yaml` only, so set the labels there rather than
+through a `HUGO_PARAMS_TURNLABELS_*` variable.
+
 ## Footer repo link
 
 `params.repoURL` puts a small link to your repository in the footer (and, with

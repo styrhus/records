@@ -78,6 +78,10 @@ local bookLook = boolOr(params.bookLook, false)
 -- the gap back to the newest record (mirrors Postkasse's inline/time-earlier.html).
 local showTimeEarlier = boolOr(params.showTimeEarlier, false)
 local showTags = boolOr(params.showTags, true)
+-- turnLabels: displayed speaker words; site config only, so the defaults restate the theme toml.
+local turnLabels = params.turnLabels or {}
+local humanLabel = str(turnLabels.human) or "Human"
+local assistantLabel = str(turnLabels.assistant) or "Assistant"
 local repoURL = os.getenv("HUGO_PARAMS_REPOURL") or str(params.repoURL) or ""
 -- Raw-link URL shape per forge; auto/unknown = detect from the repoURL host (mirrors repo-link.html).
 local repoLinkStyle = str(params.repoLinkStyle) or "auto"
@@ -497,7 +501,7 @@ local function contentFilter(recDir)
       local ok, d = pcall(pandoc.read, text, "gfm+smart")
       if not ok then d = pandoc.read(text, "gfm") end
       local blocks = d.blocks:walk(contentFilter(recDir))
-      blocks:insert(1, pandoc.Header(6, { pandoc.Str("Assistant") }, pandoc.Attr("", { "speaker", "assistant-label" })))
+      blocks:insert(1, pandoc.Header(6, { pandoc.Str(assistantLabel) }, pandoc.Attr("", { "speaker", "assistant-label" })))
       return pandoc.Div(blocks, pandoc.Attr("", { "assistant-block" }))
     end,
     Image = function(img)
@@ -580,6 +584,8 @@ local function turnDivs(blocks, voice)
       flush()
       curClass = who
       local label = pandoc.Inlines(b.content)
+      if who == "user" and humanLabel ~= "Human" then label = pandoc.Inlines({ pandoc.Str(humanLabel) }) end
+      if who == "assistant" and assistantLabel ~= "Assistant" then label = pandoc.Inlines({ pandoc.Str(assistantLabel) }) end
       if voice and who == "user" then label:insert(pandoc.RawInline("html", micSvg)) end
       cur:insert(pandoc.Header(6, label, pandoc.Attr("", { "speaker" })))
     elseif not isSignature(b) then

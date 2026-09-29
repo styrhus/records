@@ -6,6 +6,6 @@
        <h2 id="human|assistant">, which a heading inside the block would fake. */ -}}
 {{- $inner := .Page.RenderString (dict "display" "block") .Inner -}}
 {{- $inner = replaceRE `(<h[1-6])\s+id="[^"]*"` "$1" $inner -}}
-<div class="assistant-block"><p class="assistant-label">Assistant</p>
+<div class="assistant-block"><p class="assistant-label">{{ site.Params.turnLabels.assistant | default "Assistant" }}</p>
 {{ $inner | safeHTML }}
 </div>

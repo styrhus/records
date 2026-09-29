@@ -8,7 +8,8 @@
      mic icon to each Human heading. page (the record) lets raw <img src="shot.png"> in unsafe
      content find the attachment beside it — the markdown render hooks in _markup/ do the same for
      ![](shot.png); omit it and only that raw-HTML case is left unresolved.
-     Named turns (## Human (name), written when /myname is set) render the same, name shown. */}}
+     Named turns (## Human (name), written when /myname is set) render the same, name shown.
+     params.turnLabels swaps the displayed Human/Assistant word. */}}
 {{ $c := partial "strip-signatures.html" .content }}
 {{ $c = partial "resolve-attachments.html" (dict "content" $c "page" .page) }}
 {{ $c = partial "rewrite-record-links.html" $c }}
@@ -16,6 +17,9 @@
 {{ with .prefix }}{{ $p = printf "%s-" . }}{{ end }}
 {{ $mic := "" }}
 {{ if .voice }}{{ $mic = `<span class="voice-icon" role="img" aria-label="voice recorded" title="voice recorded"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg></span>` }}{{ end }}
+{{/* turnLabels: display-only relabel of the heading word; ids and the source stay Human/Assistant. */}}
+{{ with site.Params.turnLabels.human }}{{ if ne . "Human" }}{{ $c = replaceRE `(<h2 id="(?:human|user)(?:-[^"]+)?">)(?i:human|user)` (printf "${1}%s" (replace (htmlEscape .) "$" "$$")) $c }}{{ end }}{{ end }}
+{{ with site.Params.turnLabels.assistant }}{{ if ne . "Assistant" }}{{ $c = replaceRE `(<h2 id="assistant(?:-\d+)?">)(?i:assistant)` (printf "${1}%s" (replace (htmlEscape .) "$" "$$")) $c }}{{ end }}{{ end }}
 {{ $c = replaceRE `<h2 id="((?:human|user)(?:-[^"]+)?)">([^<]*)</h2>` (printf `</section><section class="user"><h2 id="%s$1">$2%s<a class="anchor" href="#%s$1" aria-label="Link to this turn">#</a></h2>` $p $mic $p) $c }}
 {{ $c = replaceRE `<h2 id="assistant(?:-\d+)?">` `</section><section class="assistant"><h2>` $c }}
 {{/* level: the turns' outline level when the record sits under its own h2 heading (cards, posts). */}}
