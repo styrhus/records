@@ -12,10 +12,10 @@ Works in VS Code and VSCodium alike.
 ## Requires the `records` CLI
 
 The extension has no logic of its own — it drives
-[recordkit](https://pypi.org/project/recordkit/), a dependency-free Python CLI:
+[recordkit](https://pypi.org/project/styrhus-records/), a dependency-free Python CLI:
 
 ```bash
-pipx install recordkit
+pipx install styrhus-records
 ```
 
 If `records` isn't on your PATH afterwards, set `records.binaryPath` to its full path.

@@ -28,7 +28,7 @@ this plugin.
 
 The recordkit CLI, installed separately: >
 
-    pipx install recordkit
+    pipx install styrhus-records
 <
 Neovim 0.9 or newer. No Lua dependencies.
 

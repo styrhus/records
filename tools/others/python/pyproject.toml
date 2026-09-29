@@ -1,5 +1,5 @@
 [project]
-name = "recordkit"
+name = "styrhus-records"
 dynamic = ["version"]
 description = "Run the mechanical records skills without AI: create Hugo-frontmatter records, feature, commit/push/deploy, publish, stamp now-playing."
 readme = "README.md"

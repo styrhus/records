@@ -33,7 +33,7 @@ tools/others/
 ### 1. Install the engine
 
 ```bash
-pipx install recordkit
+pipx install styrhus-records
 ```
 
 The `records` command is now available system-wide. From a clone: `pipx install ./python`.
@@ -212,6 +212,9 @@ The version is not chosen here — it is the werden cycle number, stamped into
 derives a lower number; bump the epoch in `CURRENT` by hand first, or the older release stays
 "latest" on PyPI. See [naming/README.md](naming/README.md).
 
+The distribution is `styrhus-records`, not `recordkit`: PyPI refuses `recordkit` as too similar to the
+unrelated `record-kit`. The import package and the `records` command keep their names.
+
 ```bash
 cd python
 python -m pytest -q                       # test_version.py checks CURRENT == __version__
@@ -220,7 +223,7 @@ python -m zipfile -l dist/*.whl           # must contain recordkit/ and nothing 
 pipx run twine check dist/*
 
 pipx run twine upload --repository testpypi dist/*
-pipx install --index-url https://test.pypi.org/simple/ recordkit   # in a clean container
+pipx install --index-url https://test.pypi.org/simple/ styrhus-records   # in a clean container
 records config                            # against a real checkout
 
 pipx run twine upload dist/*              # then PyPI, for real
@@ -235,13 +238,14 @@ cd vscode
 npm install && npm run package            # records-chat-<version>.vsix
 npx vsce ls                               # inspect what is about to ship
 
-npx ovsx create-namespace tb4 -p "$OVSX_TOKEN"     # once, ever
-npx ovsx publish records-chat-<version>.vsix -p "$OVSX_TOKEN"
+export OVSX_PAT="$(cat ~/.config/open-vsx-token)"  # env, not argv
+npx ovsx create-namespace styrhus                 # once, ever (done 2026-09-29)
+npx ovsx publish records-chat-<version>.vsix
 
 npx vsce publish -p "$AZURE_TOKEN"        # then the Marketplace
 ```
 
-The `publisher` field is `tb4` and must match the namespace claimed on each registry. The extension
+The `publisher` field is `styrhus` and must match the namespace claimed on each registry. The extension
 keeps its own npm-semver in `package.json` — it is not the engine, and it is not the werden cycle.
 
 ## Conventions
@@ -264,4 +268,4 @@ keeps its own npm-semver in `package.json` — it is not the engine, and it is n
 
 - **Wire Ollama in Emacs** (the CLI's `ollama-reply` does the HTTP work; VSCode and Neovim are done — `records-ollama-endpoint` is still a reserved defcustom).
 - **Walk both plugins against a real site** — the postkasse 5 walkthrough: every command, VSCode and Neovim, on a scratch clone with a live Ollama.
-- **Upload the releases** — the packaging is done and the runbooks are above; PyPI and Open VSX need credentials.
+- **The Marketplace release** — PyPI (`styrhus-records`) and Open VSX (`styrhus.records-chat`) are live since 2026-09-29; the VS Code Marketplace still needs an Azure DevOps token.

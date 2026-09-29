@@ -13,7 +13,7 @@
 ;; where every record is a Markdown file in your own repo.
 ;;
 ;; The package holds no logic of its own.  Every action runs the `records' CLI
-;; (recordkit, `pipx install recordkit'), which does the frontmatter, the
+;; (recordkit, `pipx install styrhus-records'), which does the frontmatter, the
 ;; naming, the git work and the publishing.  If Emacs needs something the CLI
 ;; cannot do, the CLI grows, not this package.
 ;;
@@ -76,7 +76,7 @@ Signal an error when the CLI is missing, mute, or reports one."
           (with-temp-buffer
             (unless (or (file-name-absolute-p records-bin)
                         (executable-find records-bin))
-              (error "No `%s' on PATH — install it with `pipx install recordkit'"
+              (error "No `%s' on PATH — install it with `pipx install styrhus-records'"
                      records-bin))
             (apply #'call-process records-bin nil t nil argv)
             (let ((out (buffer-string)))

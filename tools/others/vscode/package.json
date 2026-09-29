@@ -3,7 +3,7 @@
   "displayName": "Records Chat",
   "description": "Chat-style editor for the Styrhus Records site — mechanical skills without AI (or with Ollama).",
   "version": "0.6.0",
-  "publisher": "tb4",
+  "publisher": "styrhus",
   "license": "AGPL-3.0-or-later",
   "icon": "media/icon.png",
   "galleryBanner": {

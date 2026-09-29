@@ -584,7 +584,7 @@ export function getWebviewContent(commandsJson: string): string {
       div.appendChild(body);
 
       const pipx = document.createElement("code");
-      pipx.textContent = "pipx install recordkit";
+      pipx.textContent = "pipx install styrhus-records";
       div.appendChild(pipx);
 
       const hint = document.createElement("div");

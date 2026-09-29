@@ -14,7 +14,7 @@ parses its JSON. **Mechanical only** — no model is involved, and none is neede
 
 See the one install page: [docs/install.md](../../../docs/install.md).
 
-Short version, once `pipx install recordkit` has given you the CLI:
+Short version, once `pipx install styrhus-records` has given you the CLI:
 
 ```elisp
 (add-to-list 'load-path "~/path/to/records/tools/others/emacs")

@@ -12,10 +12,10 @@ Markdown file in `records/`, and any text editor writes one.
 publishes, and stamps the now-playing track. Pure Python, **no dependencies**, no model.
 
 ```bash
-pipx install recordkit
+pipx install styrhus-records
 ```
 
-`pip install recordkit` works too; `pipx` just keeps it out of your system Python. From a clone:
+`pip install styrhus-records` works too (the Python package inside is `recordkit`); `pipx` just keeps it out of your system Python. From a clone:
 
 ```bash
 pipx install ./tools/others/python
@@ -49,8 +49,8 @@ above, so anything the CLI can do, they can do, and nothing else.
 
 Install **Records Chat** from the registry:
 
-- VSCodium and other Open VSX clients: search `Records Chat`, publisher `tb4`
-- VS Code: search `Records Chat` in the Marketplace
+- VSCodium and other Open VSX clients: search `Records Chat`, publisher `styrhus`
+- VS Code: not on the Marketplace yet — install the `.vsix` from Open VSX or build one (below)
 
 Or from a built package: `codium --install-extension records-chat-<version>.vsix`.
 

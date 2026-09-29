@@ -9,8 +9,10 @@ deterministically, with **no model involved and no runtime dependencies**. Outpu
 the AI-driven skills produce.
 
 ```bash
-pipx install recordkit
+pipx install styrhus-records
 ```
+
+The PyPI name is `styrhus-records`; the package it installs is `recordkit`, the command `records`.
 
 ```bash
 records config                        # the resolved records directory

@@ -2,8 +2,8 @@
 
 ## 0.6.0
 
-- First registry release: the extension is published to Open VSX and the VS Code Marketplace instead of sideloaded as a `.vsix`.
-- README rewritten to stand on its own as a registry page — what the extension is, that it drives the `records` CLI (`pipx install recordkit`), and that Ollama is optional.
+- First registry release: the extension is published to Open VSX instead of sideloaded as a `.vsix`; the VS Code Marketplace follows.
+- README rewritten to stand on its own as a registry page — what the extension is, that it drives the `records` CLI (`pipx install styrhus-records`), and that Ollama is optional.
 - Registry metadata: keywords, homepage, issue tracker, gallery banner.
 - `.vscodeignore` excludes `*.vsix`, so built packages can no longer end up inside a built package.
 
