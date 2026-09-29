@@ -42,7 +42,9 @@ line near the bottom (the script renames it):
 The engine's package version is the same number: the script stamps `__version__` in
 `tools/others/python/recordkit/__init__.py`, so PyPI speaks werden and there is no second version to
 maintain. A structure step *down* the pool derives a lower number — bump the epoch by hand in
-`CURRENT` before releasing, or the older release stays "latest" on PyPI.
+`CURRENT` before releasing, or the older release stays "latest" on PyPI. Releasing a number means
+pushing it as a tag (`git tag -a <number>`), and CI publishes it (see `tools/others/README.md` →
+**Releasing**). This skill never tags.
 
 ## Steps
 

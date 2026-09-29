@@ -203,7 +203,10 @@ Emacs: one file, `records.el`.
 
 ## Releasing
 
-Both releases are manual and both need credentials, so they are the human's to run.
+Both releases run in Forgejo Actions on g.xil.no when a tag is pushed; the manual commands below are
+the fallback. The workflows need two repo secrets, set by a repo admin: `PYPI_TOKEN` (a PyPI token,
+ideally scoped to `styrhus-records`) and `OVSX_PAT` (an Open VSX access token). Both workflows run only
+in `styrhus/records`, so a fork's tags publish nothing.
 
 ### The engine → PyPI
 
@@ -214,6 +217,19 @@ derives a lower number; bump the epoch in `CURRENT` by hand first, or the older 
 
 The distribution is `styrhus-records`, not `recordkit`: PyPI refuses `recordkit` as too similar to the
 unrelated `record-kit`. The import package and the `records` command keep their names.
+
+To release, tag the werden number and push the tag:
+
+```bash
+git tag -a 0.12.4 -m "badstu-moth — <what this release brings>"
+git push origin 0.12.4
+```
+
+`.forgejo/workflows/release-pypi.yml` refuses a tag that differs from `recordkit.__version__`, runs
+the tests with `RECORDS_REQUIRE_HUGO=1` (the runner image has Hugo), builds, checks that the wheel
+holds only `recordkit/`, runs `twine check --strict` and uploads. PyPI refuses a version it already has.
+
+Manual fallback, with an optional TestPyPI dry run:
 
 ```bash
 cd python
@@ -232,6 +248,18 @@ pipx run twine upload dist/*              # then PyPI, for real
 ### The extension → Open VSX, then the Marketplace
 
 Open VSX first: it is what VSCodium users actually query, and Codeberg-first is deliberate here.
+
+To release, bump `version` in `package.json`, commit, then tag `vscode-v<version>` and push the tag:
+
+```bash
+git tag -a vscode-v0.7.0 -m "records-chat 0.7.0"
+git push origin vscode-v0.7.0
+```
+
+`.forgejo/workflows/release-openvsx.yml` refuses a tag that differs from `package.json`, packages the
+`.vsix` and runs `ovsx publish`. The Marketplace is not in CI yet: it needs an Azure DevOps token.
+
+Manual fallback:
 
 ```bash
 cd vscode

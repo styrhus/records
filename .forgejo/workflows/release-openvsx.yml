@@ -1,0 +1,44 @@
+# Publish the VS Code extension (tools/others/vscode, styrhus.records-chat) to
+# Open VSX when a `vscode-vX.Y.Z` tag is pushed. The tag must match
+# package.json's version — the extension keeps its own semver, not werden.
+# Needs the repo secret OVSX_PAT. The VS Code Marketplace stays manual until
+# there is an Azure DevOps token. Runner and image follow pages.yml's vars.
+name: Release to Open VSX
+
+on:
+  push:
+    tags: ['vscode-v*']
+
+jobs:
+  openvsx:
+    # Canonical repo only — forks carry the tag names but not the secret.
+    if: github.repository == 'styrhus/records'
+    runs-on: ${{ vars.PAGES_RUNNER || 'codeberg-tiny-lazy' }}
+    container:
+      image: ${{ vars.RUNNER_IMAGE || 'codeberg.org/tb4/hugo-runner:0.165.0' }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: tools/others/vscode
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tag matches version
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          if [ "$GITHUB_REF_NAME" != "vscode-v$version" ]; then
+            echo "tag $GITHUB_REF_NAME != vscode-v$version (package.json)" >&2
+            exit 1
+          fi
+          echo "VERSION=$version" >>"$GITHUB_ENV"
+
+      # package-lock.json is gitignored, so install rather than ci.
+      - name: Package
+        run: |
+          npm install --no-audit --no-fund
+          npm run package
+
+      - name: Publish
+        run: npx --yes ovsx@1 publish "records-chat-$VERSION.vsix"
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}

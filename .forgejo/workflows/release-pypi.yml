@@ -1,0 +1,68 @@
+# Publish the engine (tools/others/python, dist name styrhus-records) to PyPI
+# when a werden-number tag is pushed: `git tag -a 0.12.4 -m "badstu-moth — …"`.
+# The tag must equal recordkit.__version__ (tests/test_version.py ties that to
+# CURRENT). Tests run first, with RECORDS_REQUIRE_HUGO=1 since the runner image
+# carries Hugo. Needs the repo secret PYPI_TOKEN. Runner and image follow
+# pages.yml's vars; the image's node serves checkout, its python3 the build.
+name: Release to PyPI
+
+on:
+  push:
+    tags: ['[0-9]*.[0-9]*.[0-9]*']
+
+jobs:
+  pypi:
+    # Canonical repo only — forks carry the tag names but not the secret.
+    if: github.repository == 'styrhus/records'
+    runs-on: ${{ vars.PAGES_RUNNER || 'codeberg-tiny-lazy' }}
+    container:
+      image: ${{ vars.RUNNER_IMAGE || 'codeberg.org/tb4/hugo-runner:0.165.0' }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: tools/others/python
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tools
+        run: |
+          python3 -m venv /tmp/venv
+          /tmp/venv/bin/pip install --quiet build twine pytest
+          echo /tmp/venv/bin >>"$GITHUB_PATH"
+
+      - name: Tag matches version
+        run: |
+          version="$(python -c 'import recordkit; print(recordkit.__version__)')"
+          if [ "$GITHUB_REF_NAME" != "$version" ]; then
+            echo "tag $GITHUB_REF_NAME != recordkit.__version__ $version" >&2
+            exit 1
+          fi
+
+      - name: Test
+        run: python -m pytest -q
+        env:
+          RECORDS_REQUIRE_HUGO: '1'
+
+      - name: Build
+        run: |
+          rm -rf dist
+          python -m build
+
+      # The wheel ships recordkit/ and its metadata, nothing else from tools/.
+      - name: Check
+        run: |
+          python - <<'PY'
+          import glob, sys, zipfile
+          (whl,) = glob.glob("dist/*.whl")
+          stray = [n for n in zipfile.ZipFile(whl).namelist()
+                   if not n.startswith(("recordkit/", "styrhus_records-"))]
+          if stray:
+              sys.exit(f"{whl} carries unexpected files: {stray}")
+          PY
+          twine check --strict dist/*
+
+      - name: Upload
+        run: twine upload --non-interactive dist/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
