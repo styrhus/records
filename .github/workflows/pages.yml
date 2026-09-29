@@ -36,17 +36,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Optional pre-flight: records doctor. recordkit ships in-repo, needs
-      # only python3; skip cleanly, like bin/build.sh's pandoc check, when
-      # it's missing.
-      - name: Doctor (optional pre-flight)
-        run: |
-          if command -v python3 >/dev/null 2>&1 && [ -d tools/others/python/recordkit ]; then
-            PYTHONPATH="$(pwd)/tools/others/python" python3 -m recordkit doctor --repo "$(pwd)"
-          else
-            echo "doctor: python3 or recordkit not found — skipping pre-flight (recordkit is optional)" >&2
-          fi
-
       # Pinned, like the Forgejo path's runner image — 'latest' meant the two
       # deploy paths could build with different Hugos on the same commit.
       # Raising it: docs/toolchain.md.
@@ -56,6 +45,16 @@ jobs:
           extended: true
       - id: pages
         uses: actions/configure-pages@v5
+      # Optional pre-flight: records doctor. recordkit ships in-repo, needs
+      # only python3; skip cleanly, like bin/build.sh's pandoc check, when
+      # it's missing. Runs after Hugo and configure-pages: doctor checks both.
+      - name: Doctor (optional pre-flight)
+        run: |
+          if command -v python3 >/dev/null 2>&1 && [ -d tools/others/python/recordkit ]; then
+            BASE_URL="${{ steps.pages.outputs.base_url }}" PYTHONPATH="$(pwd)/tools/others/python" python3 -m recordkit doctor --repo "$(pwd)"
+          else
+            echo "doctor: python3 or recordkit not found — skipping pre-flight (recordkit is optional)" >&2
+          fi
       # configure-pages hands us the exact site URL (project page, user
       # site or custom domain); bin/build.sh normalizes and builds.
       - name: Build
