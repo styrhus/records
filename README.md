@@ -64,5 +64,5 @@ record — [install it](docs/install.md).
 ---
 
 > Fase — 0.12.4 badstu-moth
-
-Code: AGPL-3.0-or-later · prose: CC BY-SA 4.0 — see [LICENSE.md](LICENSE.md).
+>
+> Code: AGPL-3.0-or-later · prose: CC BY-SA 4.0 — see [LICENSE.md](LICENSE.md).
