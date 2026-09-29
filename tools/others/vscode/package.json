@@ -2,7 +2,7 @@
   "name": "records-chat",
   "displayName": "Records Chat",
   "description": "Chat-style editor for the Styrhus Records site — mechanical skills without AI (or with Ollama).",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "publisher": "styrhus",
   "license": "AGPL-3.0-or-later",
   "icon": "media/icon.png",
@@ -32,6 +32,9 @@
   "categories": [
     "Chat"
   ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "viewsContainers": {
@@ -41,6 +44,14 @@
           "title": "Records",
           "icon": "media/activity-icon.svg"
         }
+      ],
+      "secondarySidebar": [
+        {
+          "id": "records-secondary",
+          "title": "Records Chat",
+          "icon": "media/activity-icon.svg",
+          "when": "!records.doesNotSupportSecondarySidebar"
+        }
       ]
     },
     "views": {
@@ -49,14 +60,37 @@
           "type": "webview",
           "id": "recordsChat",
           "name": "Chat",
-          "contextualTitle": "Records Chat"
+          "contextualTitle": "Records Chat",
+          "when": "records.doesNotSupportSecondarySidebar"
+        },
+        {
+          "id": "recordsList",
+          "name": "Records",
+          "contextualTitle": "Records",
+          "icon": "media/activity-icon.svg"
+        }
+      ],
+      "records-secondary": [
+        {
+          "type": "webview",
+          "id": "recordsChatSecondary",
+          "name": "Records Chat",
+          "contextualTitle": "Records Chat",
+          "icon": "media/activity-icon.svg",
+          "when": "!records.doesNotSupportSecondarySidebar"
         }
       ]
     },
     "commands": [
       {
         "command": "records.openChat",
-        "title": "Records: Open Chat"
+        "title": "Records: Open Chat",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "records.refreshList",
+        "title": "Records: Refresh List",
+        "icon": "$(refresh)"
       }
     ],
     "keybindings": [
@@ -96,6 +130,26 @@
           "description": "Token-by-token Ollama replies via `records ollama-reply/-chat --stream`. Off by default — that flag is not wired into the shared recordkit CLI yet; enabling this ahead of that lands makes every Ollama turn fail the same way an unreachable endpoint does (gracefully, recording the message user-only)."
         }
       }
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "records.openChat",
+          "when": "view == recordsList",
+          "group": "navigation"
+        },
+        {
+          "command": "records.refreshList",
+          "when": "view == recordsList",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "records.refreshList",
+          "when": "false"
+        }
+      ]
     }
   },
   "scripts": {

@@ -26,13 +26,18 @@ recordings are simply one-sided. Full setup for the CLI and every editor:
 
 ## Features
 
-- Persistent chat in the activity bar (birdhouse icon) — open it once, it stays put
+- Persistent chat in the secondary side bar (birdhouse tab, next to other chat extensions) —
+  in the activity bar on editors older than VS Code 1.106
+- Records list in the activity bar: your records newest first, click to open
+- Markdown-rendered replies (code blocks with Copy, tables, lists, links)
+- Multi-line composer: Enter sends, Shift+Enter adds a line; toolbar for attachments,
+  commands, the model and send; header shows whether you are recording
 - Ephemeral chat: with an Ollama model configured, chatting works without an active
   recording — history lives in memory only, nothing is written to disk
 - Slash-command autocomplete: type `/` for a filtered command popup with argument hints
 - `@` file attachments: type `@` to pick workspace files/folders as model-only context
 - Active-editor context chip: the open file is sent as context (click the chip to disable)
-- Settings gear (⚙) to set the Ollama endpoint/model; active model shown under the input
+- Model pill in the composer toolbar shows the active model and opens the Ollama settings
 - `/record`, `/all`, `/me` — create and transcribe records with Hugo frontmatter
 - `/stick [slug]` — feature a record (adds `featured: true`, clears `draft:`)
 - `/gc`, `/gcp`, `/cpd` — commit / push / deploy
@@ -46,7 +51,7 @@ recordings are simply one-sided. Full setup for the CLI and every editor:
 
 ## Opening it
 
-The birdhouse icon in the activity bar. Or `Ctrl+Shift+R` / `Cmd+Shift+R`, or `Ctrl+Shift+\` /
+The birdhouse tab in the secondary side bar (the activity bar holds the Records list). Or `Ctrl+Shift+R` / `Cmd+Shift+R`, or `Ctrl+Shift+\` /
 `Cmd+Shift+\` (that's `Ctrl+|` on a US layout), or "Records: Open Chat" from the command palette —
 all of them focus the chat's text input directly.
 
@@ -84,7 +89,7 @@ With `records.ollamaEndpoint` and `records.ollamaModel` set, `/record` becomes t
 each chat message goes through `records ollama-reply`, which sends the record's turns so far
 to the model (`/api/chat`) and appends the reply as a signed `## Human`/`## Assistant` turn
 (the model tag is stripped by the site during rendering). While the model generates, the
-input is locked and a busy line shows; there is no streaming. If Ollama is unreachable or
+input is locked and a busy line shows (token streaming follows `records.stream`). If Ollama is unreachable or
 errors, the message is recorded user-only and a warning appears. `/all` and `/me` always
 record user-only. Voice skills as system-prompt presets are still future.
 

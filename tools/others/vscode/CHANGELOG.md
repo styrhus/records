@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.0
+
+- The chat moves to the secondary side bar (VS Code 1.106+), as a tab next to other chat extensions such as Claude Code and Mistral Vibe; older editors keep it in the activity bar.
+- New **Records** list in the activity bar: every record in the resolved records directory, newest first, with title, age, section and draft/featured state; click to open, live-refreshing as records are written.
+- Assistant replies render as Markdown — headings, lists, emphasis, links, inline and fenced code (with a Copy button), blockquotes, tables — escaped first, only `http(s)`/`mailto` links. Streamed replies render as they arrive.
+- Restyled with the editor's theme: proportional UI font, user messages as bubbles, status lines small and dim, errors and command output as accented blocks, animated busy indicator, welcome screen on an empty chat.
+- New composer: a multi-line box (Enter sends, Shift+Enter adds a line, grows with its content) with a toolbar — attach (`@`), commands (`/`), the model pill (opens the Ollama settings, replacing the ⚙ button and the model line) and a send button. Context chips sit inside the box.
+- Header shows the recording state — recording (with file and model), draft, ephemeral chat or idle — and a stop button for `/esc`.
+- Fix: context files in multi-root workspaces. `@` picks and the editor chip now reach the CLI as absolute paths, so a file from any folder other than the first is no longer reported missing to the model; the `@` picker labels entries with their folder name when several are open.
+
 ## 0.6.0
 
 - First registry release: the extension is published to Open VSX instead of sideloaded as a `.vsix`; the VS Code Marketplace follows.

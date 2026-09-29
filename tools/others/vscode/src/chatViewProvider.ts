@@ -3,6 +3,7 @@
 
 import * as vscode from "vscode";
 import * as child_process from "child_process";
+import * as path from "path";
 import { getWebviewContent } from "./webviewContent";
 import { COMMANDS } from "./commands";
 
@@ -19,7 +20,14 @@ interface RecordingSession {
 
 interface Attachment {
   path: string;
+  abs?: string;
   kind: "file" | "dir";
+}
+
+interface FileEntry {
+  path: string;
+  abs: string;
+  type: "file" | "dir";
 }
 
 type MessageToView = {
@@ -36,13 +44,16 @@ type MessageToView = {
     | "settings-values"
     | "focus-input"
     | "stream-token"
-    | "watch-status";
+    | "watch-status"
+    | "recording-state";
   content?: string;
   error?: string;
   model?: string;
   endpoint?: string;
-  files?: { path: string; type: "file" | "dir" }[];
+  files?: FileEntry[];
   path?: string;
+  abs?: string;
+  mode?: string;
 };
 
 type MessageFromView = {
@@ -68,9 +79,10 @@ const FIND_EXCLUDES =
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
   static readonly viewType = "recordsChat";
+  static readonly secondaryViewType = "recordsChatSecondary";
 
   private view?: vscode.WebviewView;
-  private recording: RecordingSession | undefined;
+  private recording: (RecordingSession & { mode: string }) | undefined;
   private chatHistory: { role: "user" | "assistant"; content: string }[] = [];
   private pendingFocus = false;
   // hundehus 3: the dog's editor half. `records watch` writes no state file, so status comes from
@@ -138,6 +150,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     try {
       if (message.type === "ready") {
         this.postModelInfo();
+        this.postRecordingState();
         this.postActiveEditor(vscode.window.activeTextEditor);
         if (this.pendingFocus) {
           this.pendingFocus = false;
@@ -167,8 +180,9 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
   private async handleChatMessage(message: MessageFromView) {
     const text = message.text || "";
     const attachments = message.attachments || [];
-    const files = attachments.filter((a) => a.kind === "file").map((a) => a.path);
-    const dirs = attachments.filter((a) => a.kind === "dir").map((a) => a.path);
+    // absolute paths: the CLI runs from the first workspace folder, attachments may live in any
+    const files = attachments.filter((a) => a.kind === "file").map((a) => a.abs || a.path);
+    const dirs = attachments.filter((a) => a.kind === "dir").map((a) => a.abs || a.path);
     if (message.activeEditor && !files.includes(message.activeEditor)) {
       files.push(message.activeEditor);
     }
@@ -244,6 +258,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       case "esc":
         this.recording = undefined;
         this.chatHistory = [];
+        this.postRecordingState();
         this.postMessage({ type: "update-status", content: "Recording stopped." });
         break;
       case "stick":
@@ -293,33 +308,54 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     });
   }
 
+  private postRecordingState() {
+    this.postMessage({
+      type: "recording-state",
+      path: this.recording?.file,
+      mode: this.recording?.mode,
+      model: this.recording?.ollama?.model,
+    });
+  }
+
   private postActiveEditor(editor: vscode.TextEditor | undefined) {
     // undefined fires when the webview itself takes focus — keep the last real editor
     if (!editor) return;
     const uri = editor.document.uri;
     if (uri.scheme !== "file") return;
-    const rel = vscode.workspace.asRelativePath(uri, false);
-    if (rel === uri.fsPath) return; // outside the workspace
-    this.postMessage({ type: "active-editor", path: rel });
+    if (!vscode.workspace.getWorkspaceFolder(uri)) return;
+    const rel = vscode.workspace.asRelativePath(uri, this.multiRoot());
+    this.postMessage({ type: "active-editor", path: rel, abs: uri.fsPath });
+  }
+
+  private multiRoot(): boolean {
+    return (vscode.workspace.workspaceFolders?.length || 0) > 1;
   }
 
   private async listFiles() {
-    const ws = vscode.workspace.workspaceFolders?.[0];
-    if (!ws) {
+    if (!vscode.workspace.workspaceFolders?.length) {
       this.postMessage({ type: "file-list", files: [] });
       this.postMessage({ type: "error", error: "No workspace folder open." });
       return;
     }
+    // multi-root: labels carry the folder name, and each entry keeps its absolute path for the CLI
+    const multi = this.multiRoot();
     const uris = await vscode.workspace.findFiles("**/*", FIND_EXCLUDES, 2000);
-    const files = uris.map((u) => vscode.workspace.asRelativePath(u, false));
-    const dirs = new Set<string>();
-    for (const f of files) {
-      const parts = f.split("/");
-      for (let i = 1; i < parts.length; i++) dirs.add(parts.slice(0, i).join("/"));
+    const files: FileEntry[] = [];
+    const dirs = new Map<string, string>();
+    for (const u of uris) {
+      const folder = vscode.workspace.getWorkspaceFolder(u);
+      if (!folder) continue;
+      const parts = path.relative(folder.uri.fsPath, u.fsPath).split(path.sep);
+      const prefix = multi ? folder.name + "/" : "";
+      files.push({ path: prefix + parts.join("/"), abs: u.fsPath, type: "file" });
+      for (let i = 1; i < parts.length; i++) {
+        dirs.set(prefix + parts.slice(0, i).join("/"), path.join(folder.uri.fsPath, ...parts.slice(0, i)));
+      }
     }
-    const list: { path: string; type: "file" | "dir" }[] = [
-      ...[...dirs].sort().map((d) => ({ path: d, type: "dir" as const })),
-      ...files.sort().map((f) => ({ path: f, type: "file" as const })),
+    const byPath = (a: FileEntry, b: FileEntry) => a.path.localeCompare(b.path);
+    const list: FileEntry[] = [
+      ...[...dirs].map(([p, abs]) => ({ path: p, abs, type: "dir" as const })).sort(byPath),
+      ...files.sort(byPath),
     ];
     this.postMessage({ type: "file-list", files: list });
   }
@@ -359,8 +395,9 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         arguments: args,
         ...(draft && { draft: true }),
       });
-      this.recording = { file: result.path as string, draft, ollama };
+      this.recording = { file: result.path as string, draft, ollama, mode };
       this.chatHistory = [];
+      this.postRecordingState();
       this.postMessage({
         type: "update-status",
         content: `Recording (${mode}${ollama ? ` · ollama ${ollama.model}` : ""}): ${result.path}`,
@@ -509,6 +546,16 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       });
     } catch (e) {
       this.postMessage({ type: "error", error: `Config failed: ${e}` });
+    }
+  }
+
+  // absolute records dir for the Records list view; undefined when the CLI is missing
+  async recordsDir(): Promise<string | undefined> {
+    try {
+      const dir = String((await this.runCLI("config", {})).records_dir || "");
+      return dir ? path.resolve(this.cliCwd() || "", dir) : undefined;
+    } catch {
+      return undefined;
     }
   }
 
