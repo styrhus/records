@@ -11,7 +11,7 @@ licensed under:
 
 **GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later)**
 
-Copyright (c) 2026 tb4
+Copyright (c) 2026 Toralv Berge
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU
 Affero General Public License as published by the Free Software Foundation, either version 3 of the
@@ -37,6 +37,6 @@ under:
 **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**
 
 You are free to share and adapt the material for any purpose, even commercially, as long as you give
-appropriate credit to `me`, `tb4` or another `member of the menneske family` and distribute your contributions under the same license.
+appropriate credit to `Toralv Berge` and distribute your contributions under the same license.
 
 Full license text: https://creativecommons.org/licenses/by-sa/4.0/legalcode
