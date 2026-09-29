@@ -275,6 +275,11 @@ params:
   # or `chapterOpen: false`.
   # chapterState: latest
 
+  # Chapter toggle (theme: Postkasse only; basic/single modes): show only the
+  # chapter holding the newest record, untitled, behind a right-aligned
+  # chapters icon that reveals them all (remembered per browser).
+  # chapterToggle: true
+
   # Floating table of contents: a collapsed button pinned top-right on the home
   # page (all modes but posts) that opens to the chapters and their records.
   # Off by default; uncomment to enable.

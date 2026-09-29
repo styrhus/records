@@ -195,6 +195,15 @@ stays flat and `single-flowing` flattens them into its stream.
 newest record, `"expanded"` opens every chapter, `"collapsed"` closes every one. A single chapter
 overrides it with `chapterOpen: true` or `chapterOpen: false` in its `_index.md` front matter.
 
+Set `params.chapterToggle: true` when most chapters are rarely written to. The home page then shows
+only the chapter holding the newest record — open, with its title hidden, so its records read like
+loose ones — and a small chapters icon, right-aligned above them, reveals every chapter as usual.
+**Off by default**, honoured in `single` and `basic` (elsewhere it warns and is ignored). The switch
+is a plain checkbox, so it works without JavaScript; with it, the reader's choice is remembered in
+the browser (`localStorage`), a link into a hidden chapter (a TOC entry, a `#` anchor) shows all
+chapters, and an active filter shows matches in every chapter. If the newest record sits outside a
+chapter, the folded view shows no chapters at all.
+
 Records outside numbered folders render first; chapters follow in ascending order, arabic before
 roman (`-1, 0, 2, i, iv`), regardless of `singleOrder` — that only orders records *inside* a
 chapter. Give a chapter a title with an `_index.md` carrying a `title:` (`1 — This is Chapter 1`);

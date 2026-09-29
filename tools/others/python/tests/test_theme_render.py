@@ -110,3 +110,28 @@ def test_single_flowing_publishes_one_page_and_no_record_pages(hugo_site):
     index = main_of(public / "index.html")
     assert "Answered." in index and "Again." in index
     assert "<section></section>" not in index
+
+
+CHAPTER_RECORDS = [
+    dict(name="1/old", title="Old", date="2026-01-01T10:00:00+01:00", body=TURNS),
+    dict(name="2/new", title="New", date="2026-02-01T10:00:00+01:00", body=TURNS),
+]
+
+
+@pytest.mark.parametrize("mode", ["single", "basic"])
+def test_chapter_toggle_marks_the_newest_chapter_and_forces_it_open(hugo_site, mode):
+    """Postkasse ``chapterToggle``: the CSS fold needs the switch plus a
+    ``chapter-latest`` class on the newest record's chapter, which must be
+    open even under ``chapterState: collapsed``."""
+    public = hugo_site(CHAPTER_RECORDS, theme="Postkasse",
+                       params=f"  pageMode: {mode}\n  chapterToggle: true\n  chapterState: collapsed\n")
+    index = main_of(public / "index.html")
+    assert 'id="chapter-toggle"' in index
+    assert '<details class="chapter chapter-latest" open>' in index
+    assert '<details class="chapter">' in index
+
+
+def test_chapter_toggle_is_absent_when_off(hugo_site):
+    public = hugo_site(CHAPTER_RECORDS, theme="Postkasse", params="  pageMode: single\n")
+    index = main_of(public / "index.html")
+    assert "chapter-toggle" not in index and "chapter-latest" not in index

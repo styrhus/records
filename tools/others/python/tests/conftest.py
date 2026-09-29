@@ -95,6 +95,7 @@ date: {date}
 def write_record(records_dir: Path, name, title, date, body, **frontmatter):
     extra = "".join(f"{k}: {v}\n" for k, v in frontmatter.items())
     path = records_dir / f"{name}.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(RECORD.format(title=title, date=date, extra=extra, body=body),
                     encoding="utf-8")
     return path

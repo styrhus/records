@@ -10,6 +10,7 @@ singleOrder = "asc"  # single/single-flowing mode record order: "asc" (oldest→
 bookLook = false     # single-flowing: records/forside.md, side-1.md, bakside.md become front cover, page 1 and back cover
 threeDotAnchor = false  # single-flowing: the · · · separators become copy-linkable anchors (stable 5-char ids), one above every record incl. the first, none above a bookLook cover page
 chapterState = "latest"  # chapter fold state: "latest" (open the chapter with the newest record) | "expanded" | "collapsed"
+chapterToggle = false    # single/basic: show only the newest record's chapter, untitled, behind a right-aligned chapters icon that reveals all chapters (the choice is remembered per browser)
 showToc = false      # floating table-of-contents widget (top-right, home page; all modes but posts)
 showFilter = false   # single mode: floating filter button (bottom-left) — filter record cards by word (text/regex), tags, language and date range
 showSearch = false      # site-wide search: a button beside the site title on every page, querying the build-time /index.json in the browser (no service, no library). Needs the `outputs:` block in the site config too — see the README, "Search"

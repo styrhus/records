@@ -19,6 +19,10 @@
     {{ warnf "Postkasse: unknown chapterState %q, falling back to \"latest\"" $chapterState }}
     {{ $chapterState = "latest" }}
   {{ end }}
+  {{ $chapterToggle := and (site.Params.chapterToggle | default false) (in (slice "single" "basic") $mode) }}
+  {{ if and site.Params.chapterToggle (not (in (slice "single" "basic") $mode)) }}
+    {{ warnf "Postkasse: chapterToggle is only honoured in pageMode \"single\" and \"basic\"" }}
+  {{ end }}
   {{ $showFilter := site.Params.showFilter | default false }}
   {{ if and $showFilter (ne $mode "single") }}
     {{ warnf "Postkasse: showFilter is only honoured in pageMode \"single\"" }}
@@ -89,8 +93,11 @@
       {{ if eq $chapterState "expanded" }}{{ $open = true }}
       {{ else if eq $chapterState "latest" }}{{ $open = eq $name $latestSection }}{{ end }}
       {{ if eq $override "open" }}{{ $open = true }}{{ else if eq $override "closed" }}{{ $open = false }}{{ end }}
+      {{/* chapterToggle: the newest record's chapter is the one shown folded, so it must be open. */}}
+      {{ $latest := and $chapterToggle (eq $name $latestSection) }}
+      {{ if $latest }}{{ $open = true }}{{ end }}
       {{ if findRE `^-?\d+$` $name }}
-        {{ $arabic = $arabic | append (dict "name" $name "num" (int $name) "title" $title "open" $open "pages" .Pages) }}
+        {{ $arabic = $arabic | append (dict "name" $name "num" (int $name) "title" $title "open" $open "latest" $latest "pages" .Pages) }}
         {{ $chapterNames = $chapterNames | append $name }}
       {{ else if and $name (findRE `^m{0,3}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3})$` (lower $name)) }}
         {{/* Roman → int: subtract a numeral standing before a larger one, else add. */}}
@@ -105,7 +112,7 @@
             {{ $num = add $num $v }}
           {{ end }}
         {{ end }}
-        {{ $roman = $roman | append (dict "name" $name "num" $num "title" $title "open" $open "pages" .Pages) }}
+        {{ $roman = $roman | append (dict "name" $name "num" $num "title" $title "open" $open "latest" $latest "pages" .Pages) }}
         {{ $chapterNames = $chapterNames | append $name }}
       {{ end }}
     {{ end }}
@@ -188,8 +195,9 @@
     {{ range partial "inline/featured-first.html" (dict "pages" $loose "order" $order) }}
       {{ partial "inline/record-card.html" . }}
     {{ end }}
+    {{ if and $chapterToggle $chapters }}{{ partial "inline/chapter-toggle.html" . }}{{ end }}
     {{ range $chapters }}
-      <details class="chapter"{{ if .open }} open{{ end }}>
+      <details class="chapter{{ if .latest }} chapter-latest{{ end }}"{{ if .open }} open{{ end }}>
         <summary id="chapter-{{ .name }}">{{ .name }}{{ with .title }} — {{ . }}{{ end }}<a class="anchor" href="#chapter-{{ .name }}" aria-label="Link to this chapter">#</a></summary>
         {{ range partial "inline/featured-first.html" (dict "pages" .pages "order" $order) }}
           {{ partial "inline/record-card.html" . }}
@@ -266,8 +274,9 @@
     {{ .Content }}
     {{/* basic: link index (featured pinned, newest-first); loose records first, then chapters. */}}
     {{ partial "inline/record-list.html" $loose }}
+    {{ if and $chapterToggle $chapters }}{{ partial "inline/chapter-toggle.html" . }}{{ end }}
     {{ range $chapters }}
-      <details class="chapter"{{ if .open }} open{{ end }}>
+      <details class="chapter{{ if .latest }} chapter-latest{{ end }}"{{ if .open }} open{{ end }}>
         <summary id="chapter-{{ .name }}">{{ .name }}{{ with .title }} — {{ . }}{{ end }}<a class="anchor" href="#chapter-{{ .name }}" aria-label="Link to this chapter">#</a></summary>
         {{ partial "inline/record-list.html" .pages }}
       </details>
@@ -289,6 +298,14 @@
     {{ if and site.Params.datePostFormat (ne .Params.showDate false) }}<p class="post-date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ time.Format site.Params.datePostFormat .Date }}</time></p>{{ end }}
     {{ partial "comment-link.html" . }}
   </article>
+{{ end }}
+
+{{/* chapterToggle switch: a CSS-only checkbox; unchecked shows just the newest record's chapter, untitled. */}}
+{{ define "_partials/inline/chapter-toggle.html" }}
+  <div class="chapter-toggle">
+    <input type="checkbox" id="chapter-toggle" class="chapter-toggle-input">
+    <label for="chapter-toggle" title="Show all chapters"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg><span class="visually-hidden">Show all chapters</span></label>
+  </div>
 {{ end }}
 
 {{/* Records with featured: true first, then the rest; both sorted by Date in .order. */}}

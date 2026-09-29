@@ -27,6 +27,8 @@
     var summaries = document.querySelectorAll('details.chapter > summary');
     var found = null;
     for (var i = 0; i < summaries.length; i++) {
+      // Summaries hidden by the chapter toggle have no box to land on.
+      if (!summaries[i].getClientRects().length) continue;
       if (summaries[i].getBoundingClientRect().top < 2) found = summaries[i];
       else break;
     }
@@ -53,12 +55,31 @@
     chapterAnchors[j].addEventListener('keydown', function (e) { if (e.key === ' ') e.preventDefault(); });
   }
 
+  // Chapter toggle (params.chapterToggle): remember "show all" per browser.
+  var chapterToggle = document.getElementById('chapter-toggle');
+  if (chapterToggle) {
+    try { if (localStorage.getItem('postkasse-chapters') === 'all') chapterToggle.checked = true; } catch (e) {}
+    chapterToggle.addEventListener('change', function () {
+      try {
+        if (chapterToggle.checked) localStorage.setItem('postkasse-chapters', 'all');
+        else localStorage.removeItem('postkasse-chapters');
+      } catch (e) {}
+    });
+  }
+
+  // A chapter the toggle keeps out of view has no box; a link into it shows all chapters (unsaved).
+  function unhideChapter(t) {
+    var ch = t.closest('details.chapter');
+    if (chapterToggle && ch && !ch.getClientRects().length) { chapterToggle.checked = true; return true; }
+    return false;
+  }
+
   // Open any collapsed <details> that holds the hash target so TOC/anchor links reveal it.
   function revealHashTarget() {
     if (!location.hash) return;
     var t = document.getElementById(decodeURIComponent(location.hash.slice(1)));
     if (!t) return;
-    var el = t.parentElement, opened = false;
+    var el = t.parentElement, opened = unhideChapter(t);
     while (el) {
       if (el.tagName === 'DETAILS' && !el.open) { el.open = true; opened = true; }
       el = el.parentElement;
@@ -123,15 +144,21 @@
   // Keyboard navigation between records (params.keyNav, single/single-flowing):
   // j or n forward, k or p back. Modifier chords and typing in a field are left alone.
   if (document.querySelector('main[data-keynav]')) {
-    var records = document.querySelectorAll('main article.record-page[id], main article.record-flow[id]');
+    var allRecords = document.querySelectorAll('main article.record-page[id], main article.record-flow[id]');
     document.addEventListener('keydown', function (e) {
-      if (e.metaKey || e.ctrlKey || e.altKey || !records.length) return;
+      if (e.metaKey || e.ctrlKey || e.altKey || !allRecords.length) return;
       var t = e.target;
       if (t && (t.isContentEditable || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) return;
       var step = 0;
       if (e.key === 'j' || e.key === 'n') step = 1;
       else if (e.key === 'k' || e.key === 'p') step = -1;
       else return;
+      // Skip records in chapters the chapter toggle keeps out of view.
+      var records = Array.prototype.filter.call(allRecords, function (r) {
+        var ch = r.closest('details.chapter');
+        return !ch || ch.getClientRects().length;
+      });
+      if (!records.length) return;
       e.preventDefault();
       var cur = 0;
       for (var i = 0; i < records.length; i++) {
@@ -401,6 +428,8 @@
 
     function applyFilter(st) {
       var active = !!(st.tags.length || st.langs.length || st.from || st.to || st.word);
+      // An active filter suspends the chapter toggle's fold, so matches in every chapter show.
+      document.querySelector('main').classList.toggle('filter-active', active);
       // Word input compiles as a case-insensitive regex; invalid syntax falls back to literal text.
       var wordRe = null;
       if (st.word) {
