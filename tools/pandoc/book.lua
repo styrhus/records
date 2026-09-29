@@ -557,10 +557,12 @@ local function isSignature(b)
   return false
 end
 
+-- Named turns (## Human (Ola), written by /myname) are human turns too, as in turns.py.
 local function speakerOf(b)
   if b.t ~= "Header" or b.level ~= 2 then return nil end
   local s = utils.stringify(b.content):lower()
   if s == "human" or s == "user" then return "user" end
+  if s:match("^human %(.+%)$") or s:match("^user %(.+%)$") then return "user" end
   if s == "assistant" then return "assistant" end
   return nil
 end
@@ -584,8 +586,10 @@ local function turnDivs(blocks, voice)
       flush()
       curClass = who
       local label = pandoc.Inlines(b.content)
-      if who == "user" and humanLabel ~= "Human" then label = pandoc.Inlines({ pandoc.Str(humanLabel) }) end
-      if who == "assistant" and assistantLabel ~= "Assistant" then label = pandoc.Inlines({ pandoc.Str(assistantLabel) }) end
+      -- Swap the leading word only, so a named turn keeps its name (as record.html does).
+      local swap = who == "user" and humanLabel ~= "Human" and humanLabel
+        or who == "assistant" and assistantLabel ~= "Assistant" and assistantLabel
+      if swap and label[1] and label[1].t == "Str" then label[1] = pandoc.Str(swap) end
       if voice and who == "user" then label:insert(pandoc.RawInline("html", micSvg)) end
       cur:insert(pandoc.Header(6, label, pandoc.Attr("", { "speaker" })))
     elseif not isSignature(b) then
