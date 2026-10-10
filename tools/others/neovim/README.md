@@ -45,7 +45,7 @@ one source of truth, installed by path. The layout here is already the one a plu
 | `bin` | `"records"` | The recordkit CLI to run; an absolute path if it isn't on Neovim's PATH. |
 | `ollama_endpoint` | `nil` | Ollama base URL, e.g. `"http://localhost:11434"`. Unset (or empty) disables Ollama entirely — every command stays mechanical. |
 | `ollama_model` | `nil` | Model tag for `ollama_endpoint`, e.g. `"qwen2.5-coder:latest"`. Required alongside `ollama_endpoint`; without it `/record` records user-only and says so. |
-| `stream` | `false` | Token-by-token replies via `records ollama-reply/-chat --stream`. **Off by default** — that flag is not wired into the shared `cli.py` yet (see the postkasse road), so turning this on ahead of that lands makes every Ollama turn fail the same way an unreachable endpoint does: gracefully, with the human's words still appended user-only. |
+| `stream` | `false` | Token-by-token replies via `records ollama-reply/-chat --stream`. Off by default. |
 
 With `ollama_endpoint` and `ollama_model` set, `/record` starts a two-sided turn: your line goes to
 `records ollama-reply`, its reply is appended and signed, and the call runs in the background so

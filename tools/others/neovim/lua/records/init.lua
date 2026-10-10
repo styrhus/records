@@ -11,10 +11,7 @@ local config = {
   bin = "records",
   ollama_endpoint = nil, -- set to enable two-sided /record and ephemeral chat
   ollama_model = nil, -- required alongside ollama_endpoint
-  -- Token-by-token rendering via `records ollama-reply/-chat --stream`. Off by default: --stream
-  -- is not wired into cli.py yet (postkasse 2's reported, unapplied diff) — turning this on before
-  -- that lands makes every Ollama turn fail the same way an unreachable endpoint does (gracefully:
-  -- the human's words still get appended user-only, see ollama_turn()'s fallback).
+  -- Token-by-token rendering via `records ollama-reply/-chat --stream`.
   stream = false,
 }
 
@@ -152,7 +149,7 @@ end
 
 -- Streaming twin: `command` is expected to emit NDJSON on stdout (one {"token": "…"} object per
 -- chunk, then one final object shaped like the non-streaming reply — the postkasse 2 cli.py
--- contract, not yet wired). on_token fires per chunk; on_done(ok, result_or_error) fires once, at
+-- contract). on_token fires per chunk; on_done(ok, result_or_error) fires once, at
 -- the end, same signature as run_cli_async's.
 run_cli_async_stream = function(command, opts, on_token, on_done)
   local argv = build_argv(command, opts)

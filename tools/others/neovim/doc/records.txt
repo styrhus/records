@@ -83,11 +83,7 @@ require("records").setup({opts})
 
     stream           boolean  false
                      Token-by-token replies via `records ollama-reply/-chat
-                     --stream`. Off by default: that flag is not wired into
-                     the shared cli.py yet. Turning this on before it lands
-                     makes every Ollama turn fail the same way an
-                     unreachable endpoint does — gracefully, with the
-                     human's words still appended user-only.
+                     --stream`. Off by default.
 
 ==============================================================================
 5. COMMANDS                                                  *records-commands*
