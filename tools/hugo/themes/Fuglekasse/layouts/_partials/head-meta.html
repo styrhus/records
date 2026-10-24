@@ -64,4 +64,5 @@
        pointed at params.logo. */ -}}
 {{- with site.Params.ogImage }}
   <meta property="og:image" content="{{ absURL (partial "static-url.html" .) }}">
-{{- end -}}
+{{- end }}
+  <meta name="twitter:card" content="{{ if site.Params.ogImage }}summary_large_image{{ else }}summary{{ end }}">

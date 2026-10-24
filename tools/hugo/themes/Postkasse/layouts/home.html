@@ -31,6 +31,7 @@
   {{ if and $threeDotAnchor (ne $mode "single-flowing") }}
     {{ warnf "Postkasse: threeDotAnchor is only honoured in pageMode \"single-flowing\"" }}
   {{ end }}
+  {{ $sharePages := and (site.Params.sharePages | default false) (in (slice "single" "single-flowing") $mode) }}
   {{ $showTimeEarlier := and (site.Params.showTimeEarlier | default false) (eq $mode "single-flowing") }}
   {{ if and site.Params.showTimeEarlier (ne $mode "single-flowing") }}
     {{ warnf "Postkasse: showTimeEarlier is only honoured in pageMode \"single-flowing\"" }}
@@ -227,24 +228,24 @@
           {{ $earlier = partial "inline/time-earlier.html" (sub $anchor.Date.Unix $r.Date.Unix) }}
         {{ end }}
       {{ end }}
+      {{ $share := "" }}
+      {{ if $sharePages }}
+        {{ $target := path.Base $r.RelPermalink }}
+        {{ if and $threeDotAnchor (not $isSpecial) }}{{ $target = partial "inline/anchor-code.html" $r }}{{ end }}
+        {{ $share = partial "inline/share-url.html" (dict "page" $r "target" $target) }}
+      {{ end }}
       {{ if $threeDotAnchor }}
         {{/* Anchored dinkus above every record incl. the first; never above a bookLook special.
              id: 5 base-66 chars from an FNV-1a hash of the slug — stable across builds. */}}
         {{ if not $isSpecial }}
-          {{ $abc := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~" }}
-          {{ $seed := hash.FNV32a (path.Base $r.RelPermalink) }}
-          {{ $id := "" }}
-          {{ range seq 5 }}
-            {{ $id = printf "%s%s" $id (substr $abc (mod $seed 66) 1) }}
-            {{ $seed = int (div $seed 66) }}
-          {{ end }}
-          <a class="record-sep" href="#{{ $id }}" id="{{ $id }}" aria-label="Link to this point">· · ·</a>
+          {{ $id := partial "inline/anchor-code.html" $r }}
+          <a class="record-sep" href="#{{ $id }}" id="{{ $id }}" aria-label="Link to this point"{{ with $share }} data-permalink="{{ . }}"{{ end }}>· · ·{{ if $share }}<span class="permalink-note" aria-live="polite"></span>{{ end }}</a>
         {{ end }}
       {{ else if and $i (not $isSpecial) }}<div class="record-sep" aria-hidden="true">· · ·</div>{{ end }}
       {{ $book := "" }}
       {{ if $isSpecial }}{{ $book = printf " book-%s" $r.File.ContentBaseName }}{{ end }}
       <article class="record-flow{{ $book }}{{ if $r.Params.featured }} featured{{ end }}" id="{{ path.Base $r.RelPermalink }}" aria-label="{{ partial "inline/record-title.html" $r | plainify }}"{{ with $r.Params.language }} lang="{{ . }}"{{ end }}{{ if $stickyNav }} data-nav-title="{{ partial "inline/record-title.html" $r | plainify }}"{{ end }}>
-        {{ if site.Params.permalinkButton }}{{ partial "permalink.html" (dict "page" $r "anchor" true) }}{{ end }}
+        {{ if site.Params.permalinkButton }}{{ partial "permalink.html" (dict "page" $r "anchor" true "share" $share) }}{{ end }}
         {{ with $earlier }}<div class="time-earlier{{ if $isNow }} time-now{{ end }}">{{ if $isNow }}<time datetime="{{ $r.Date.Format "2006-01-02" }}">{{ . }}</time>{{ else }}{{ . }}{{ end }}</div>{{ end }}
         {{ partial "record.html" (dict "content" $r.Content "prefix" (path.Base $r.RelPermalink) "voice" $r.Params.voiceRecorded "page" $r) }}
         {{ partial "attachments.html" (dict "page" $r) }}
@@ -287,9 +288,11 @@
 {{/* One record as a single-mode document card. */}}
 {{ define "_partials/inline/record-card.html" }}
   {{ $id := path.Base .RelPermalink }}
+  {{ $share := "" }}
+  {{ if site.Params.sharePages }}{{ $share = partial "inline/share-url.html" (dict "page" . "target" $id) }}{{ end }}
   <article class="record-page{{ if .Params.featured }} featured{{ end }}"{{ with .Params.language }} lang="{{ . }}"{{ end }}{{ with .Params.tags }} data-tags="{{ delimit . "," }}"{{ end }} data-date="{{ .Date.Format "2006-01-02" }}">
     {{ partial "lang-badge.html" . }}
-    <h2 class="record-head" id="{{ $id }}">{{ partial "inline/record-title.html" . }}{{ if site.Params.permalinkButton }}{{ partial "permalink.html" (dict "page" . "anchor" true) }}{{ else }}<a class="anchor" href="#{{ $id }}" aria-label="Link to this record">#</a>{{ end }}</h2>
+    <h2 class="record-head" id="{{ $id }}">{{ partial "inline/record-title.html" . }}{{ if site.Params.permalinkButton }}{{ partial "permalink.html" (dict "page" . "anchor" true "share" $share) }}{{ else }}<a class="anchor" href="#{{ $id }}" aria-label="Link to this record"{{ with $share }} data-permalink="{{ . }}"{{ end }}>#{{ if $share }}<span class="permalink-note" aria-live="polite"></span>{{ end }}</a>{{ end }}</h2>
     {{ partial "record.html" (dict "content" .Content "level" 3 "prefix" $id "voice" .Params.voiceRecorded "page" .) }}
     {{ partial "attachments.html" (dict "page" .) }}
     {{ partial "backlinks.html" (dict "page" . "anchor" true) }}
@@ -404,4 +407,28 @@
     {{ end }}
   {{ end }}
   {{ return $s }}
+{{ end }}
+
+{{/* threeDotAnchor id: 5 base-66 chars from an FNV-1a hash of the slug — stable across builds. */}}
+{{ define "_partials/inline/anchor-code.html" }}
+  {{ $abc := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~" }}
+  {{ $seed := hash.FNV32a (path.Base .RelPermalink) }}
+  {{ $id := "" }}
+  {{ range seq 5 }}
+    {{ $id = printf "%s%s" $id (substr $abc (mod $seed 66) 1) }}
+    {{ $seed = int (div $seed 66) }}
+  {{ end }}
+  {{ return $id }}
+{{ end }}
+
+{{/* sharePages: writes /s/<code>/index.html with the record's link preview, returns its absolute URL. */}}
+{{ define "_partials/inline/share-url.html" }}
+  {{ $code := partial "inline/anchor-code.html" .page }}
+  {{ $url := absURL (printf "s/%s/" $code) }}
+  {{ $ctx := dict "page" .page "url" $url "target" (printf "%s#%s" site.Home.RelPermalink .target)
+       "title" (partial "inline/record-title.html" .page | plainify | htmlUnescape) }}
+  {{ with resources.Get "share/index.html" }}
+    {{ (. | resources.ExecuteAsTemplate (printf "s/%s/index.html" $code) $ctx).Publish }}
+  {{ end }}
+  {{ return $url }}
 {{ end }}

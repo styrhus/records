@@ -198,9 +198,18 @@ params:
   # Per-record link-preview cards (theme: Postkasse only) — bin/build.sh runs
   # `records card` over every record into public/cards/ and each record page's
   # og:image points at its own 1200x630 SVG quote card; the home page keeps
-  # ogImage. Skipped in the one-page modes and when python3/recordkit is
-  # absent. SVG previews render in Slack/Discord but not on many crawlers.
+  # ogImage. In the one-page modes the cards go on the share pages (below),
+  # so they are skipped there only with sharePages off. Skipped when
+  # python3/recordkit is absent. With rsvg-convert on PATH (the hugo-runner
+  # image) each card also ships as PNG and og:image points there.
   # ogCards: true
+
+  # Share pages (theme: Postkasse only; single/single-flowing modes) — link
+  # previews never see a #fragment, so every record also gets /s/<code>/, a
+  # tiny page with that record's own title, excerpt and image that forwards
+  # readers to the record on the front page. The record's copy links (# anchor,
+  # · · · divider, permalink button) copy that address. On by default.
+  # sharePages: false
 
   # Site-wide search (theme: Postkasse only) — a magnifier beside the site
   # title on every page, opening a panel that queries the build-time

@@ -1,0 +1,23 @@
+{{- /* SPDX-FileCopyrightText: 2026 tb4 */ -}}
+{{- /* SPDX-License-Identifier: AGPL-3.0-or-later */ -}}
+{{- /* Share page (params.sharePages): the record's own link preview at /s/<code>/,
+       since crawlers never send the #fragment of a one-page link. Readers are
+       sent on to the record's place on the front page. Takes {page, title, url, target}.
+       Asset templates run as text/template: escape by hand. */ -}}
+{{- $p := .page -}}
+{{- $title := htmlEscape .title -}}
+<!DOCTYPE html>
+<html lang="{{ or $p.Params.language site.Language.Locale }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>{{ $title }} · {{ htmlEscape site.Title }}</title>
+  <link rel="canonical" href="{{ htmlEscape .url }}">
+  {{- partial "head-meta.html" (dict "page" $p "title" .title "url" .url) }}
+  <script>location.replace({{ jsonify .target }});</script>
+</head>
+<body>
+  <p><a href="{{ htmlEscape .target }}">{{ $title }}</a> · {{ htmlEscape site.Title }}</p>
+</body>
+</html>

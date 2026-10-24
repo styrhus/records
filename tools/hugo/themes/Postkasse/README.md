@@ -167,7 +167,23 @@ alphabet `A–Z a–z 0–9 - . _ ~` (66 characters, `66⁵ ≈ 1.25 billion` po
 **stable across builds** — derived by hashing each record's slug (Hugo has no build-time RNG), so a
 copied link survives a rebuild. They collide only on a slug-hash collision, negligible in practice.
 **Off by default**; ignored (with a build warning) in every other page mode, and the PDF/EPUB book
-is unaffected — this is web-only.
+is unaffected — this is web-only. With **Share pages** on (the default), clicking a divider copies
+the record's `/s/<code>/` link — the same five characters — rather than the `#` link.
+
+## Share pages
+
+A link preview (Mastodon, Bluesky, Slack, Discord, Facebook…) is fetched without the part after
+`#`, so on a one-page site every shared `/#XXXXX` link previews as the front page. In `single` and
+`single-flowing` mode `params.sharePages` (**on by default**) therefore writes one extra page per
+record, `/s/<code>/index.html`, where `<code>` is the record's five-character anchor id (see
+**Anchored separators** — computed even when that option is off). The page carries the record's own
+`og:title`, `og:description` (its opening words), `og:image` (its card with `ogCards`, else
+`ogImage`) and `og:url`, is `noindex` for search engines, and sends readers on to the record's place
+on the front page (`#XXXXX` with `threeDotAnchor`, else `#<slug>`) — by script, with a plain link
+for readers without one. The record's copy links point there: the `#` beside a single-mode title,
+the `· · ·` divider and the `permalinkButton` icon all copy `https://<site>/s/<code>/` when
+JavaScript is on. Other page modes have real record pages and write none. Set
+`sharePages: false` to keep the one-page modes to `index.html` alone.
 
 ## Time-gap labels
 
@@ -587,7 +603,8 @@ record that opens with something unpresentable gets a hand-written
 
 Change the cut length by editing `$words` at the top of the partial.
 
-Alongside it every page gets `og:title` (the same display title as `<title>`,
+Alongside it every page gets `twitter:card` (`summary_large_image` when an image is set, else
+`summary`), `og:title` (the same display title as `<title>`,
 without the site suffix), `og:type` (`website` on the front page, `article` on
 a record), `og:url`, `og:site_name`, `og:locale` and `og:description`, plus
 `article:published_time` on records.
@@ -603,12 +620,14 @@ Or let the records draw their own: set `params.ogCards: true` and
 `bin/build.sh` runs `records card` over every record after the Hugo build,
 writing a 1200x630 SVG quote card in the site's palette to
 `/cards/<slug>.svg`, and each record page's `og:image` points at its card
-(the home page keeps `params.ogImage`). Postkasse-only, skipped in the
-one-page modes (no per-record pages to carry the tag) and skipped with a note
-when python3 or recordkit is absent — the pandoc pattern. Two caveats, stated
-rather than hidden: the cards are SVG, which Slack and Discord render but many
-crawlers do not (rasterizing would be a dependency, and PNG conversion is
-explicitly not `card.py`'s job); and the tag is emitted whenever the param is
+(the home page keeps `params.ogImage`). Postkasse-only; in the one-page modes
+the share pages carry the cards, so only `sharePages: false` skips them there;
+skipped with a note
+when python3 or recordkit is absent — the pandoc pattern. When `rsvg-convert`
+is on PATH (it is in the hugo-runner image), `bin/build.sh` also writes
+`/cards/<slug>.png` and points `og:image` there, since most crawlers ignore SVG;
+without it the cards stay SVG, which Slack and Discord render but Mastodon does
+not. A leaf-bundle record's card is named after its folder. One caveat: the tag is emitted whenever the param is
 set, even if generation was skipped — the same trust the **Get PDF** link
 places in `params.pdf`.
 

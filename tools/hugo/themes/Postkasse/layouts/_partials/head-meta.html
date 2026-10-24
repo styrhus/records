@@ -1,7 +1,8 @@
 {{- /* SPDX-FileCopyrightText: 2026 tb4 */ -}}
 {{- /* SPDX-License-Identifier: AGPL-3.0-or-later */ -}}
 
-{{- /* Description + OpenGraph. Takes {page, title} — title is baseof's already
+{{- /* Description + OpenGraph. Takes {page, title, url?} — url overrides og:url
+       (the share pages' own address); title is baseof's already
        resolved display title, so the date-formatted slug rule lives in one place.
 
        The description is the search-result snippet and the link-preview line:
@@ -50,7 +51,7 @@
 {{- end }}
   <meta property="og:title" content="{{ $.title }}">
   <meta property="og:type" content="{{ cond $p.IsHome "website" "article" }}">
-  <meta property="og:url" content="{{ $p.Permalink }}">
+  <meta property="og:url" content="{{ or $.url $p.Permalink }}">
   <meta property="og:site_name" content="{{ site.Title }}">
   <meta property="og:locale" content="{{ $loc }}">
 {{- with $desc }}
@@ -62,17 +63,19 @@
 {{- /* Site-level default: a raster file — crawlers don't render SVG previews,
        so this is unset by default rather than params.logo.
        params.ogCards (Postkasse only): points at bin/build.sh's per-record
-       $OUTDIR/cards/<slug>.svg instead. Slug = File.ContentBaseName, same as
-       the card CLI's default --out and :contentbasename permalinks. SVG
-       og:image support is poor on most crawlers — a known, unfixed gap. */ -}}
+       $OUTDIR/cards/<slug>.svg instead, or .png when build.sh finds
+       rsvg-convert and sets ogCardExt (most crawlers ignore SVG).
+       Slug = File.ContentBaseName — a bundle's folder name, as build.sh uses. */ -}}
 {{- $reserved := slice "LICENSE" "forside" "side-1" "bakside" "404" -}}
 {{- $ownCard := false -}}
 {{- if and site.Params.ogCards (not $p.IsHome) (eq $p.Kind "page")
           (not (in $reserved $p.File.ContentBaseName)) -}}
   {{- $ownCard = true -}}
 {{- end -}}
-{{- if $ownCard }}
-  <meta property="og:image" content="{{ absURL (printf "cards/%s.svg" $p.File.ContentBaseName) }}">
-{{- else }}{{ with site.Params.ogImage }}
-  <meta property="og:image" content="{{ absURL (partial "static-url.html" .) }}">
-{{- end }}{{ end -}}
+{{- $img := "" -}}
+{{- if $ownCard }}{{ $img = absURL (printf "cards/%s.%s" $p.File.ContentBaseName (site.Params.ogCardExt | default "svg")) -}}
+{{- else }}{{ with site.Params.ogImage }}{{ $img = absURL (partial "static-url.html" .) }}{{ end }}{{ end -}}
+{{- with $img }}
+  <meta property="og:image" content="{{ . }}">
+{{- end }}
+  <meta name="twitter:card" content="{{ cond (ne $img "") "summary_large_image" "summary" }}">

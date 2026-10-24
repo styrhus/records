@@ -9,6 +9,7 @@ postsCount = 3       # posts mode: how many latest records to show
 singleOrder = "asc"  # single/single-flowing mode record order: "asc" (oldest→newest, top→bottom) | "desc" (newest at top)
 bookLook = false     # single-flowing: records/forside.md, side-1.md, bakside.md become front cover, page 1 and back cover
 threeDotAnchor = false  # single-flowing: the · · · separators become copy-linkable anchors (stable 5-char ids), one above every record incl. the first, none above a bookLook cover page
+sharePages = true       # single/single-flowing: each record also gets /s/<code>/, a tiny page carrying its own link preview that forwards to the record on the front page; the record's copy links point there (crawlers never see a #fragment)
 chapterState = "latest"  # chapter fold state: "latest" (open the chapter with the newest record) | "expanded" | "collapsed"
 chapterToggle = false    # single/basic: show only the newest record's chapter, untitled, behind a right-aligned chapters icon that reveals all chapters (the choice is remembered per browser)
 showToc = false      # floating table-of-contents widget (top-right, home page; all modes but posts)

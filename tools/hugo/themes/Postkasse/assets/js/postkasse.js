@@ -125,7 +125,8 @@
   }
 
   // Per-record permalink: a working anchor on its own, a copy button with JavaScript.
-  document.querySelectorAll('a.permalink[data-permalink]').forEach(function (a) {
+  // sharePages puts data-permalink on the # anchor and the · · · dinkus too.
+  document.querySelectorAll('a[data-permalink]').forEach(function (a) {
     var note = a.querySelector('.permalink-note');
     a.addEventListener('click', function (e) {
       if (!navigator.clipboard) return; // no clipboard API: let it navigate
