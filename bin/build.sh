@@ -169,7 +169,7 @@ if [ -n "$OG_CARDS" ] && [ "$OG_CARDS" != "false" ] && [ "$THEME" = "Postkasse" 
                 echo "bin/build.sh: rsvg-convert failed on $OUTDIR/cards/$base.svg" >&2
               fi
             else
-              echo "bin/build.sh: records card skipped $rec (no turns to draw from)" >&2
+              echo "bin/build.sh: records card skipped $rec (nothing to draw from)" >&2
             fi
           done < <(find "$RECORDS_DIR" -name '*.md' -print0)
           echo "bin/build.sh: wrote $CARD_COUNT OG card(s) to $OUTDIR/cards/" >&2

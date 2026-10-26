@@ -627,7 +627,8 @@ when python3 or recordkit is absent — the pandoc pattern. When `rsvg-convert`
 is on PATH (it is in the hugo-runner image), `bin/build.sh` also writes
 `/cards/<slug>.png` and points `og:image` there, since most crawlers ignore SVG;
 without it the cards stay SVG, which Slack and Discord render but Mastodon does
-not. A leaf-bundle record's card is named after its folder. One caveat: the tag is emitted whenever the param is
+not. A leaf-bundle record's card is named after its folder. A record without
+`## Human`/`## Assistant` turns gets its opening prose on the card instead. One caveat: the tag is emitted whenever the param is
 set, even if generation was skipped — the same trust the **Get PDF** link
 places in `params.pdf`.
 

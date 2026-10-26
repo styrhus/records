@@ -186,6 +186,8 @@ def display_title(stem: str, meta: dict, when: datetime | None, date_format: str
 
 def speaker(turn: dict) -> str:
     """Who said it: the /myname name or Human, and the signing model or Assistant."""
+    if turn["role"] == "prose":
+        return ""
     if turn["role"] == "user":
         return turn["name"] or "Human"
     return turn["model"] or "Assistant"
@@ -212,6 +214,16 @@ def wrap_lines(content: str, cols: int = COLS, max_lines: int = MAX_LINES) -> tu
     return lines, truncated
 
 
+def prose(text: str) -> str:
+    """A turnless record's body: frontmatter and signature dropped, paragraphs reflowed."""
+    body = _FRONTMATTER.sub("", text, count=1).strip()
+    head, _, last = body.rpartition("\n")
+    if last.startswith("— "):
+        body = head.strip()
+    paras = re.split(r"\n\s*\n", body)
+    return "\n\n".join(" ".join(p.split()) for p in paras if p.strip())
+
+
 def _text(x: int, y: int, size: int, fill: str, value: str, family: str = SANS,
           extra: str = "") -> str:
     return (f'<text x="{x}" y="{y}" font-family="{family}" font-size="{size}" '
@@ -223,9 +235,10 @@ def render(lines: list, quote_speaker: str, role: str, title: str, date: str, ur
     """The card itself: site palette, accent bar on Human turns, monospace body."""
     # The label + quote sit as one block, centred between the card top and the footer rule.
     rows = len(lines) + (1 if truncated else 0)
-    block = LABEL_GAP + rows * LINE_H
+    gap = LABEL_GAP if quote_speaker else 24  # no label on prose cards
+    block = gap + rows * LINE_H
     top = REGION_TOP + max(0, (REGION_BOTTOM - REGION_TOP - block) // 2)
-    label_y, body_top = top + 20, top + LABEL_GAP
+    label_y, body_top = top + 20, top + gap
 
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{WIDTH}" height="{HEIGHT}" '
@@ -238,8 +251,9 @@ def render(lines: list, quote_speaker: str, role: str, title: str, date: str, ur
         parts.append(f'<rect x="{BAR_X}" y="{top}" width="5" height="{block}" '
                      f'fill="{colours["accent"]}"/>')
     label_fill = colours["accent"] if role == "user" else colours["fg"]
-    parts.append(_text(TEXT_X, label_y, 17, label_fill, quote_speaker.upper(),
-                       extra=' letter-spacing="1.6" font-weight="600"'))
+    if quote_speaker:
+        parts.append(_text(TEXT_X, label_y, 17, label_fill, quote_speaker.upper(),
+                           extra=' letter-spacing="1.6" font-weight="600"'))
 
     body = [f'<text x="{TEXT_X}" y="{body_top}" font-family="{MONO}" '
             f'font-size="{BODY_SIZE}" fill="{colours["fg"]}" xml:space="preserve">']
@@ -251,7 +265,7 @@ def render(lines: list, quote_speaker: str, role: str, title: str, date: str, ur
 
     if truncated:
         parts.append(_text(TEXT_X, body_top + len(lines) * LINE_H, 16, colours["dim"],
-                           "(turn truncated)", extra=' font-style="italic"'))
+                           "(truncated)" if role == "prose" else "(turn truncated)", extra=' font-style="italic"'))
     parts.append(f'<line x1="{TEXT_X}" y1="{RULE_Y}" x2="{WIDTH - PAD}" y2="{RULE_Y}" '
                  f'stroke="{colours["surface"]}" stroke-width="2"/>')
     foot = " · ".join(p for p in (title, date) if p)
@@ -277,15 +291,20 @@ def _pick(items: list, turn: int | None) -> int:
 
 def build(record: Path, turn: int | None = None, out: Path | None = None,
           url: str | None = None, repo: Path = Path(".")) -> dict:
-    """Render one turn as an SVG card next to the site's own look."""
+    """Render one turn (or a turnless record's opening prose) as an SVG card next to the site's own look."""
     path = Path(record)
     text = path.read_text(encoding="utf-8")
     items = turns_mod.split(text)
-    if not items:
-        raise RuntimeError(f"{path} has no ## Human/## Assistant turns to card")
-
-    index = _pick(items, turn)
-    chosen = items[index]
+    if items:
+        index = _pick(items, turn)
+        chosen = items[index]
+    else:
+        if turn is not None:
+            raise RuntimeError(f"--turn {turn}: {path} has no ## Human/## Assistant turns")
+        body = prose(text)
+        if not body:
+            raise RuntimeError(f"{path} has nothing to card")
+        index, chosen = -1, {"role": "prose", "content": body}
     config_text = site_config(repo)
     meta = _meta(text)
     when = record_date(meta, path.stem)
@@ -308,6 +327,6 @@ def build(record: Path, turn: int | None = None, out: Path | None = None,
 
     out_path = Path(out) if out else Path.cwd() / f"{path.stem}-card.svg"
     out_path.write_text(svg, encoding="utf-8")
-    return {"file": str(path), "out": str(out_path), "turn": index + 1,
+    return {"file": str(path), "out": str(out_path), "turn": index + 1 or None,
             "role": chosen["role"], "speaker": speaker(chosen), "truncated": truncated,
             "width": WIDTH, "height": HEIGHT}

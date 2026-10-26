@@ -152,10 +152,25 @@ def test_build_rejects_an_out_of_range_turn(tmp_path):
         card.build(_record(tmp_path), turn=9, out=tmp_path / "c.svg", repo=tmp_path)
 
 
-def test_build_needs_turns(tmp_path):
+def test_build_turnless_record_cards_its_prose(tmp_path):
+    plain = _record(tmp_path, "---\ntitle: x\n---\n\njust a\nnote\n\n— model\n", "plain.md")
+    result = card.build(plain, out=tmp_path / "c.svg", repo=tmp_path)
+    svg = (tmp_path / "c.svg").read_text()
+    assert result["role"] == "prose" and result["turn"] is None
+    assert "just a note" in svg and "model" not in svg
+    assert "letter-spacing" not in svg  # no speaker label
+
+
+def test_build_turnless_record_rejects_turn(tmp_path):
     plain = _record(tmp_path, "---\ntitle: x\n---\n\njust a note\n", "plain.md")
     with pytest.raises(RuntimeError, match="no ## Human"):
-        card.build(plain, out=tmp_path / "c.svg", repo=tmp_path)
+        card.build(plain, turn=1, out=tmp_path / "c.svg", repo=tmp_path)
+
+
+def test_build_empty_record_has_nothing_to_card(tmp_path):
+    empty = _record(tmp_path, "---\ntitle: x\n---\n\n", "empty.md")
+    with pytest.raises(RuntimeError, match="nothing to card"):
+        card.build(empty, out=tmp_path / "c.svg", repo=tmp_path)
 
 
 def test_build_output_is_well_formed_svg(tmp_path):

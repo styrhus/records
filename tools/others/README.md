@@ -118,7 +118,7 @@ These have no slash-command counterpart — they are the CLI's, and they need no
 | `records export --out <path> [--single]` | The whole corpus as plain text that needs no tooling at all. |
 | `records attach <record> <files…>` | Copy files into a record, converting it to a Hugo leaf bundle. The URL does not change. |
 | `records pack [--out <file>]` | The built site collapsed into one offline HTML file. Post-processes `public/`; never builds. Needs `pageMode: single` or `single-flowing`. |
-| `records card <record> [--turn N]` | One turn as an SVG quote card in the site's own palette. |
+| `records card <record> [--turn N]` | One turn as an SVG quote card in the site's own palette; a turnless record's opening prose instead. |
 | `records booth` | A stdlib-curses composing screen. Writes byte-identically to `records new` + `append`. |
 | `records doctor` | Report what will fail in this checkout — reporting only, never fixing. |
 | `records watch` | Rebuild when a record changes. Never commits, never pushes, never publishes. |
