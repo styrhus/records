@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import re
 import textwrap
-from datetime import datetime
 from pathlib import Path
 from xml.sax.saxutils import escape
 
@@ -37,9 +36,6 @@ SANS = "system-ui, sans-serif"
 
 _FRONTMATTER = re.compile(r"^---\n(.*?)\n---\n", re.S)
 _STAMP = re.compile(r"^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$")
-_MONTHS = ["January", "February", "March", "April", "May", "June",
-           "July", "August", "September", "October", "November", "December"]
-_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
 # ------------------------------------------------------------------ site config
@@ -104,7 +100,7 @@ def palette(config_text: str) -> dict:
 # ------------------------------------------------------------------ record meta
 
 def _meta(text: str) -> dict:
-    """Top-level frontmatter fields as strings (title and date are all the card needs)."""
+    """Top-level frontmatter fields as strings (the title is all the card needs)."""
     m = _FRONTMATTER.match(text)
     fields: dict = {}
     if not m:
@@ -118,70 +114,10 @@ def _meta(text: str) -> dict:
     return fields
 
 
-def record_date(meta: dict, stem: str) -> datetime | None:
-    """The explicit date: field, else the filename timestamp — the site's own priority."""
-    raw = meta.get("date", "")
-    if raw:
-        try:
-            return datetime.fromisoformat(raw)
-        except ValueError:
-            pass
-    try:
-        return datetime.strptime(stem, "%Y-%m-%d_%H-%M")
-    except ValueError:
-        return None
-
-
-def go_format(layout: str, when: datetime) -> str:
-    """Go reference-date layout → string; the token subset book.lua supports."""
-    h12 = when.hour % 12 or 12
-    tokens = [
-        ("2006", "%04d" % when.year),
-        ("January", _MONTHS[when.month - 1]),
-        ("Monday", _DAYS[when.weekday()]),
-        ("Jan", _MONTHS[when.month - 1][:3]),
-        ("Mon", _DAYS[when.weekday()][:3]),
-        ("15", "%02d" % when.hour),
-        ("06", "%02d" % (when.year % 100)),
-        ("05", "%02d" % when.second),
-        ("04", "%02d" % when.minute),
-        ("03", "%02d" % h12),
-        ("02", "%02d" % when.day),
-        ("01", "%02d" % when.month),
-        ("PM", "AM" if when.hour < 12 else "PM"),
-        ("pm", "am" if when.hour < 12 else "pm"),
-        ("5", str(when.second)),
-        ("4", str(when.minute)),
-        ("3", str(h12)),
-        ("2", str(when.day)),
-        ("1", str(when.month)),
-    ]
-    out, i = [], 0
-    while i < len(layout):
-        for token, value in tokens:
-            if layout.startswith(token, i):
-                out.append(value)
-                i += len(token)
-                break
-        else:
-            out.append(layout[i])
-            i += 1
-    return "".join(out)
-
-
 def handwritten(stem: str, meta: dict) -> bool:
     """A real title, not create.py's timestamp echo — the rule record-title.html applies."""
     title = meta.get("title", "")
     return bool(title) and not (_STAMP.match(stem) and title == stem)
-
-
-def display_title(stem: str, meta: dict, when: datetime | None, date_format: str) -> str:
-    """Hand-written title:, else the date — the rule record-title.html and book.lua share."""
-    if handwritten(stem, meta):
-        return meta["title"]
-    if when:
-        return go_format(date_format, when) if date_format else when.strftime("%Y-%m-%d %H:%M")
-    return stem
 
 
 def speaker(turn: dict) -> str:
@@ -230,7 +166,7 @@ def _text(x: int, y: int, size: int, fill: str, value: str, family: str = SANS,
             f'fill="{fill}"{extra}>{escape(value)}</text>')
 
 
-def render(lines: list, quote_speaker: str, role: str, title: str, date: str, url: str,
+def render(lines: list, quote_speaker: str, role: str, title: str, url: str,
            colours: dict, truncated: bool) -> str:
     """The card itself: site palette, accent bar on Human turns, monospace body."""
     # The label + quote sit as one block, centred between the card top and the footer rule.
@@ -268,9 +204,8 @@ def render(lines: list, quote_speaker: str, role: str, title: str, date: str, ur
                            "(truncated)" if role == "prose" else "(turn truncated)", extra=' font-style="italic"'))
     parts.append(f'<line x1="{TEXT_X}" y1="{RULE_Y}" x2="{WIDTH - PAD}" y2="{RULE_Y}" '
                  f'stroke="{colours["surface"]}" stroke-width="2"/>')
-    foot = " · ".join(p for p in (title, date) if p)
-    if foot:
-        parts.append(_text(TEXT_X, RULE_Y + 36, 17, colours["dim"], textwrap.shorten(foot, 110)))
+    if title:
+        parts.append(_text(TEXT_X, RULE_Y + 36, 17, colours["dim"], textwrap.shorten(title, 110)))
     if url:
         parts.append(_text(TEXT_X, RULE_Y + 64, 17, colours["accent"],
                            textwrap.shorten(url, 110)))
@@ -307,22 +242,14 @@ def build(record: Path, turn: int | None = None, out: Path | None = None,
         index, chosen = -1, {"role": "prose", "content": body}
     config_text = site_config(repo)
     meta = _meta(text)
-    when = record_date(meta, path.stem)
-    title = display_title(path.stem, meta, when, _param(config_text, "dateTitleFormat"))
-
-    date_format = _param(config_text, "datePostFormat")
-    date = ""
-    if when:
-        date = go_format(date_format, when) if date_format else when.strftime("%Y-%m-%d %H:%M")
-    if date and not handwritten(path.stem, meta):
-        title = ""  # the title is only a formatted date; the date line says it once, better
+    title = meta["title"] if handwritten(path.stem, meta) else ""  # never the date: cards carry no date
 
     if url is None:
         base = _param(config_text, "baseURL")
         url = base.rstrip("/") + "/" + path.stem + "/" if base else ""
 
     lines, truncated = wrap_lines(chosen["content"])
-    svg = render(lines, speaker(chosen), chosen["role"], title, date, url,
+    svg = render(lines, speaker(chosen), chosen["role"], title, url,
                  palette(config_text), truncated)
 
     out_path = Path(out) if out else Path.cwd() / f"{path.stem}-card.svg"

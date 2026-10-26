@@ -375,11 +375,13 @@
 
         function readState() {
           var q = new URLSearchParams(location.search);
+          // No date inputs means the site hides dates; a hand-written from/to would hide every card.
+          var dated = !!filter.querySelector('input[name="from"]');
           return {
             tags: splitCSV(q.get('tags')),
             langs: splitCSV(q.get('language')),
-            from: q.get('from') || '',
-            to: q.get('to') || '',
+            from: dated ? q.get('from') || '' : '',
+            to: dated ? q.get('to') || '' : '',
             word: q.get('word') || ''
           };
         }

@@ -254,7 +254,11 @@
         if (ok) hits.push({ rec: rec, score: score, term: ts[0] });
       }
       // Equal scores: the newer record first — d is an ISO date, so string order is date order.
-      hits.sort(function (a, b) { return b.score - a.score || (a.rec.d < b.rec.d ? 1 : -1); });
+      // Without d (dates hidden) the stable sort keeps the index's newest-first order.
+      hits.sort(function (a, b) {
+        var ad = a.rec.d || '', bd = b.rec.d || '';
+        return b.score - a.score || (ad < bd ? 1 : ad > bd ? -1 : 0);
+      });
       return hits.slice(0, LIMIT);
     }
 
@@ -294,7 +298,7 @@
         var a = document.createElement('a');
         a.href = hits[i].rec.u;
         a.innerHTML = '<span class="search-title">' + escapeHTML(hits[i].rec.t) + '</span>' +
-          '<span class="search-date">' + escapeHTML(hits[i].rec.d) + '</span>' +
+          (hits[i].rec.d ? '<span class="search-date">' + escapeHTML(hits[i].rec.d) + '</span>' : '') +
           '<span class="search-snippet">' + snippet(hits[i].rec, ts) + '</span>';
         li.appendChild(a);
         searchResults.appendChild(li);
@@ -382,11 +386,13 @@
 
     function readState() {
       var q = new URLSearchParams(location.search);
+      // No date inputs means the site hides dates; a hand-written from/to would hide every card.
+      var dated = !!filter.querySelector('input[name="from"]');
       return {
         tags: splitCSV(q.get('tags')),
         langs: splitCSV(q.get('language')),
-        from: q.get('from') || '',
-        to: q.get('to') || '',
+        from: dated ? q.get('from') || '' : '',
+        to: dated ? q.get('to') || '' : '',
         word: q.get('word') || ''
       };
     }

@@ -162,8 +162,9 @@ honoured only in `single` mode; in every other page mode the param is ignored
 The panel offers the tags actually used across your records (a card matches if
 it carries *any* checked tag), the languages set in front matter plus a
 `(none)` bucket for records without one (the language section only appears once
-some record sets a `language:`), an inclusive from/to date range, and a **Word**
-field. The groups combine: a card must pass every active group to stay visible.
+some record sets a `language:`), an inclusive from/to date range (only when
+`datePostFormat` is set; records with `showDate: false` carry no date and fall
+outside any range), and a **Word** field. The groups combine: a card must pass every active group to stay visible.
 Chapters whose cards are all filtered away hide too; chapters holding matches
 open automatically while a filter is active and return to their `chapterState`
 fold when it clears.
@@ -449,7 +450,8 @@ Change the cut length by editing `$words` at the top of the partial.
 Alongside it every page gets `og:title` (the same display title as `<title>`,
 without the site suffix), `og:type` (`website` on the front page, `article` on
 a record), `og:url`, `og:site_name`, `og:locale` and `og:description`, plus
-`article:published_time` on records.
+`article:published_time` on records that show a date — none when `datePostFormat`
+is unset or the record sets `showDate: false`.
 
 `og:image` is the one that needs a file from you: set `params.ogImage` to
 something in `static/`, around 1200x630. It must be a raster format — the

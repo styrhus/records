@@ -244,7 +244,8 @@ pinned bottom-left (beside the Spotify logo when that is set) opening a panel ab
 default** and honoured only in `single` mode; elsewhere it warns and is ignored.
 
 The panel offers the tags actually used across your records (a card matches on *any* checked tag),
-the languages set in front matter plus a `(none)` bucket, an inclusive from/to date range, and a
+the languages set in front matter plus a `(none)` bucket, an inclusive from/to date range (only when
+`datePostFormat` is set; records with `showDate: false` carry no date and fall outside any range), and a
 **Word** field. The groups combine: a card must pass every active group. Chapters whose cards are
 all filtered away hide; chapters holding matches open automatically and return to their
 `chapterState` fold when the filter clears.
@@ -267,7 +268,8 @@ in the site config as well (below).
 
 It is a static file and a loop, not a service and not a library. At build time
 `layouts/home.json.json` writes `/index.json`: one object per record with its title, ISO date, tags,
-link and text. The browser fetches that file **on the first search**, never on page load, lowercases
+link and text. The date is left out, like the page's own date line, when `datePostFormat` is unset or
+the record sets `showDate: false`. The browser fetches that file **on the first search**, never on page load, lowercases
 it once, and answers every keystroke from memory.
 
 Words are ANDed and matched as substrings, so a partial word finds the whole one; `"quote a phrase"`
@@ -607,7 +609,8 @@ Alongside it every page gets `twitter:card` (`summary_large_image` when an image
 `summary`), `og:title` (the same display title as `<title>`,
 without the site suffix), `og:type` (`website` on the front page, `article` on
 a record), `og:url`, `og:site_name`, `og:locale` and `og:description`, plus
-`article:published_time` on records.
+`article:published_time` on records that show a date — none when `datePostFormat`
+is unset or the record sets `showDate: false`.
 
 `og:image` is the one that needs a file from you: set `params.ogImage` to
 something in `static/`, around 1200x630. It must be a raster format — the

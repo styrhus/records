@@ -24,7 +24,7 @@
          w  params.searchWords in force (0 = whole record text)
          r  the records, newest first, each:
               t  title, plain text          u  link (see below)
-              d  ISO date                   k  tags
+              d  ISO date, if shown         k  tags
               x  searchable text
        u is the record's own URL in basic/posts, and the front-page #slug
        anchor in single/single-flowing, where no record page is built — the
@@ -54,11 +54,13 @@
     {{- $ws := split $x " " -}}
     {{- if gt (len $ws) $words }}{{ $x = printf "%s…" (delimit (first $words $ws) " ") }}{{ end -}}
   {{- end -}}
-  {{- $records = $records | append (dict
+  {{- $rec := dict
         "t" (plainify $title)
         "u" (cond $onePage (printf "%s#%s" site.Home.RelPermalink (path.Base .RelPermalink)) .RelPermalink)
-        "d" (.Date.Format "2006-01-02")
         "k" (or .Params.tags slice)
-        "x" $x) -}}
+        "x" $x -}}
+  {{- /* Same gate as the visible .post-date line. */ -}}
+  {{- if and site.Params.datePostFormat (ne .Params.showDate false) }}{{ $rec = merge $rec (dict "d" (.Date.Format "2006-01-02")) }}{{ end -}}
+  {{- $records = $records | append $rec -}}
 {{- end -}}
 {{- dict "v" 1 "n" (len $records) "w" $words "r" $records | jsonify -}}

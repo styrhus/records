@@ -290,7 +290,7 @@
   {{ $id := path.Base .RelPermalink }}
   {{ $share := "" }}
   {{ if site.Params.sharePages }}{{ $share = partial "inline/share-url.html" (dict "page" . "target" $id) }}{{ end }}
-  <article class="record-page{{ if .Params.featured }} featured{{ end }}"{{ with .Params.language }} lang="{{ . }}"{{ end }}{{ with .Params.tags }} data-tags="{{ delimit . "," }}"{{ end }} data-date="{{ .Date.Format "2006-01-02" }}">
+  <article class="record-page{{ if .Params.featured }} featured{{ end }}"{{ with .Params.language }} lang="{{ . }}"{{ end }}{{ with .Params.tags }} data-tags="{{ delimit . "," }}"{{ end }} data-date="{{ if and site.Params.datePostFormat (ne .Params.showDate false) }}{{ .Date.Format "2006-01-02" }}{{ end }}">
     {{ partial "lang-badge.html" . }}
     <h2 class="record-head" id="{{ $id }}">{{ partial "inline/record-title.html" . }}{{ if site.Params.permalinkButton }}{{ partial "permalink.html" (dict "page" . "anchor" true "share" $share) }}{{ else }}<a class="anchor" href="#{{ $id }}" aria-label="Link to this record"{{ with $share }} data-permalink="{{ . }}"{{ end }}>#{{ if $share }}<span class="permalink-note" aria-live="polite"></span>{{ end }}</a>{{ end }}</h2>
     {{ partial "record.html" (dict "content" .Content "level" 3 "prefix" $id "voice" .Params.voiceRecorded "page" .) }}
@@ -355,10 +355,12 @@
         {{ if $hasNoLang }}<label><input type="checkbox" name="language" value="none"> (none)</label>{{ end }}
       </fieldset>
       {{ end }}
+      {{ if site.Params.datePostFormat }}
       <fieldset><legend>Date</legend>
         <label>From <input type="date" name="from"></label>
         <label>To <input type="date" name="to"></label>
       </fieldset>
+      {{ end }}
       <fieldset><legend>Word</legend>
         <input type="search" name="word" placeholder="text or regex">
       </fieldset>
