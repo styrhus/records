@@ -195,29 +195,23 @@ local function naiveSecs(t)
   return (era * 146097 + doe - 719468) * 86400 + t.hour * 3600 + t.min * 60 + t.sec
 end
 
--- "3 days earlier", "2 months and 4 days earlier": tiers mirror
--- inline/time-earlier.html exactly (30-day months, 12-month years) — change both together.
+-- Largest unit plus the next two, zeros dropped ("26 days, 3 hours and 46 minutes earlier"):
+-- mirrors inline/time-earlier.html exactly (30-day months, 12-month years) — change both together.
 local function plural(n, unit) return n .. " " .. unit .. (n == 1 and "" or "s") end
 local function timeEarlier(secs)
-  if secs < 3600 then
-    local n = secs // 60
-    if n < 1 then n = 1 end
-    return plural(n, "minute") .. " earlier"
-  elseif secs < 86400 then
-    return plural(secs // 3600, "hour") .. " earlier"
+  local min, h, d = secs // 60, secs // 3600, secs // 86400
+  local mo = d // 30
+  local y = mo // 12
+  local vals = { y, mo % 12, d % 30, h % 24, min % 60 }
+  local names = { "year", "month", "day", "hour", "minute" }
+  local top = y > 0 and 1 or mo > 0 and 2 or d > 0 and 3 or h > 0 and 4 or 5
+  if top == 5 and min < 1 then vals[5] = 1 end
+  local parts = {}
+  for i = top, math.min(top + 2, 5) do
+    if vals[i] > 0 then parts[#parts + 1] = plural(vals[i], names[i]) end
   end
-  local days = secs // 86400
-  if days < 30 then return plural(days, "day") .. " earlier" end
-  local months = days // 30
-  if months < 12 then
-    local s = plural(months, "month")
-    local rem = days % 30
-    if rem > 0 then s = s .. " and " .. plural(rem, "day") end
-    return s .. " earlier"
-  end
-  local s = plural(months // 12, "year")
-  local remM = months % 12
-  if remM > 0 then s = s .. " and " .. plural(remM, "month") end
+  local s = parts[1]
+  for i = 2, #parts do s = s .. (i == #parts and " and " or ", ") .. parts[i] end
   return s .. " earlier"
 end
 

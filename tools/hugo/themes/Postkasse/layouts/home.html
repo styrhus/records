@@ -377,38 +377,28 @@
   {{- if and .Title (ne .Title $key) }}{{ .Title }}{{ else }}<time datetime="{{ substr $key 0 10 }}">{{ if $fmt }}{{ time.Format $fmt .Date }}{{ else }}{{ substr $key 0 10 }} {{ replace (substr $key 11) "-" ":" }}{{ end }}</time>{{ end -}}
 {{ end }}
 
-{{/* showTimeEarlier: seconds back from the newest record → "3 days earlier",
-     "2 months and 4 days earlier" (30-day months, 12-month years — a sense of
-     distance, not a timestamp). Mirrored by timeEarlier() in
+{{/* showTimeEarlier: seconds back from the newest record → its largest unit plus
+     the next two, zeros dropped — "26 days, 3 hours and 46 minutes earlier",
+     "1 year, 2 months and 4 days earlier" (30-day months, 12-month years — a
+     sense of distance, not a timestamp). Mirrored by timeEarlier() in
      tools/pandoc/book.lua — change both together. */}}
 {{ define "_partials/inline/time-earlier.html" }}
-  {{ $s := "" }}
-  {{ if lt . 3600 }}
-    {{ $n := div . 60 }}
-    {{ if lt $n 1 }}{{ $n = 1 }}{{ end }}
-    {{ $s = printf "%d minute%s earlier" $n (cond (eq $n 1) "" "s") }}
-  {{ else if lt . 86400 }}
-    {{ $n := div . 3600 }}
-    {{ $s = printf "%d hour%s earlier" $n (cond (eq $n 1) "" "s") }}
-  {{ else }}
-    {{ $days := div . 86400 }}
-    {{ if lt $days 30 }}
-      {{ $s = printf "%d day%s earlier" $days (cond (eq $days 1) "" "s") }}
-    {{ else }}
-      {{ $months := div $days 30 }}
-      {{ if lt $months 12 }}
-        {{ $s = printf "%d month%s" $months (cond (eq $months 1) "" "s") }}
-        {{ with mod $days 30 }}{{ $s = printf "%s and %d day%s" $s . (cond (eq . 1) "" "s") }}{{ end }}
-        {{ $s = printf "%s earlier" $s }}
-      {{ else }}
-        {{ $years := div $months 12 }}
-        {{ $s = printf "%d year%s" $years (cond (eq $years 1) "" "s") }}
-        {{ with mod $months 12 }}{{ $s = printf "%s and %d month%s" $s . (cond (eq . 1) "" "s") }}{{ end }}
-        {{ $s = printf "%s earlier" $s }}
-      {{ end }}
+  {{ $min := div . 60 }}
+  {{ $h := div . 3600 }}
+  {{ $d := div . 86400 }}
+  {{ $mo := div $d 30 }}
+  {{ $y := div $mo 12 }}
+  {{ $vals := slice $y (mod $mo 12) (mod $d 30) (mod $h 24) (mod $min 60) }}
+  {{ $names := slice "year" "month" "day" "hour" "minute" }}
+  {{ $top := cond (gt $y 0) 0 (cond (gt $mo 0) 1 (cond (gt $d 0) 2 (cond (gt $h 0) 3 4))) }}
+  {{ if and (eq $top 4) (lt $min 1) }}{{ $vals = slice 0 0 0 0 1 }}{{ end }}
+  {{ $parts := slice }}
+  {{ range $i, $n := $vals }}
+    {{ if and (ge $i $top) (lt $i (add $top 3)) (gt $n 0) }}
+      {{ $parts = $parts | append (printf "%d %s%s" $n (index $names $i) (cond (eq $n 1) "" "s")) }}
     {{ end }}
   {{ end }}
-  {{ return $s }}
+  {{ return printf "%s earlier" (delimit $parts ", " " and ") }}
 {{ end }}
 
 {{/* threeDotAnchor id: 5 base-66 chars from an FNV-1a hash of the slug — stable across builds. */}}
