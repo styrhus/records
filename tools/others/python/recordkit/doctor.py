@@ -133,16 +133,19 @@ def _records_checks(records_dir: Path | None, text: str) -> list[dict]:
     if records_dir is None or not records_dir.is_dir():
         return []
     records = [f for f in sorted(records_dir.rglob("*.md")) if f.name not in _SKIP_RECORDS]
-    bad_dates, reserved = [], []
+    bad_dates, reserved, with_lang, without_lang = [], [], [], []
     for f in records:
+        keys = {}
         for line in _frontmatter(f.read_text(encoding="utf-8", errors="replace")):
             key, sep, value = line.partition(":")
-            if not sep:
-                continue
-            if key.strip() == "date" and not _parseable_date(value):
-                bad_dates.append(f.name)
-            elif key.strip() == "demo":
-                reserved.append(f.name)
+            if sep:
+                keys[key.strip()] = value.strip().strip('"').strip("'")
+        if "date" in keys and not _parseable_date(keys["date"]):
+            bad_dates.append(f.name)
+        if "demo" in keys:
+            reserved.append(f.name)
+        if keys.get("draft") != "true":
+            (with_lang if keys.get("language") else without_lang).append(f.name)
     out = []
     if bad_dates:
         out.append(_check("records", "error", "unparseable date: in " + ", ".join(bad_dates),
@@ -150,6 +153,10 @@ def _records_checks(records_dir: Path | None, text: str) -> list[dict]:
     if reserved:
         out.append(_check("records", "warn", "reserved key demo: in " + ", ".join(reserved),
                           "demo: marks theme-shipped demo content; drop it from your records"))
+    if with_lang and without_lang:
+        out.append(_check("records", "warn", "no language: in " + ", ".join(without_lang),
+                          "other records set it — add e.g. language: en, or they land in "
+                          "the filter's (none) bucket"))
     if out:
         return out
     if not records and _param(text, "demoMode").lower() != "true":

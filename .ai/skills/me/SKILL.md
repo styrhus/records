@@ -11,6 +11,7 @@ allowed-tools:
   - Bash(find *)
   - Bash(date *)
   - Bash(cat >> *)
+  - Edit
   - Write
 ---
 
@@ -61,6 +62,8 @@ The user invoked /me: create the transcript file, then stay silent. **Do not res
 ## Recording (every following turn, until /esc)
 
 From the next user message onward, transcribe the user's side of the conversation into the file. Recording is a background duty — it must not change how you otherwise behave, respond, or use tools. The /me invocation itself is NOT recorded; tool calls and tool results are NOT recorded; your responses are NOT recorded. Only record the user's messages.
+
+**First recorded turn only:** before appending, use the Edit tool to add `language: <code>` as the last frontmatter line, directly above the closing `---` — the ISO 639-1 code of the language the user writes in (`nb`, `de`, `en`, …). Unquoted, lowercase, never changed afterwards.
 
 On **each** of your turns while recording:
 

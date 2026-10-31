@@ -218,6 +218,32 @@ def test_reserved_demo_key_in_a_record_warns(tmp_path, monkeypatch):
     assert c["level"] == "warn" and "demo" in c["message"]
 
 
+
+def test_record_missing_language_warns_when_others_set_it(tmp_path, monkeypatch):
+    _healthy(monkeypatch)
+    repo = _repo(tmp_path)
+    (repo / "records" / "nb.md").write_text("---\ntitle: N\nlanguage: nb\n---\n",
+                                            encoding="utf-8")
+    c = _check(doctor.diagnose(repo, env={"BASE_URL": "https://x/"}), "records")
+    assert c["level"] == "warn" and "2026-07-06_23-22.md" in c["message"]
+    assert "nb.md" not in c["message"]
+
+
+def test_language_is_not_required_when_no_record_sets_it(tmp_path, monkeypatch):
+    _healthy(monkeypatch)
+    repo = _repo(tmp_path, records=("a.md", "b.md"))
+    assert _check(doctor.diagnose(repo, env={"BASE_URL": "https://x/"}),
+                  "records")["level"] == "ok"
+
+
+def test_draft_without_language_does_not_warn(tmp_path, monkeypatch):
+    _healthy(monkeypatch)
+    repo = _repo(tmp_path, records=())
+    (repo / "records" / "nb.md").write_text("---\nlanguage: nb\n---\n", encoding="utf-8")
+    (repo / "records" / "d.md").write_text("---\ndraft: true\n---\n", encoding="utf-8")
+    assert _check(doctor.diagnose(repo, env={"BASE_URL": "https://x/"}),
+                  "records")["level"] == "ok"
+
 # --- toolchain ----------------------------------------------------------------
 
 def test_missing_hugo_is_an_error(tmp_path, monkeypatch):
